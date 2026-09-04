@@ -1,0 +1,43 @@
+Package: insectecol
+Type: Package
+Title: Insect Ecology Data Analysis Toolkit
+Version: 1.0.0
+Authors@R: person("Wangyao", "Li", email = "1561941342@qq.com", role = c("aut", "cre", "cph"))
+Description: A collection of analytical tools for insect ecology research,
+    currently covering age-stage, two-sex life table analysis and
+    dose-response bioassays. The life table module supports fast batch
+    processing of multi-group datasets, validates raw csv data, computes
+    cohort size, mean fecundity, age-stage survival rates, age-specific
+    survival, age-specific fecundity, life expectancy, and derived
+    population parameters (net reproductive rate, intrinsic and finite
+    rates of increase, mean generation time), simultaneously generates
+    age-stage survival curves for all groups, and exports all tabular
+    results and plots to Excel in a single run. The bioassay module
+    estimates lethal concentrations by the traditional and the weighted
+    (improved) linear regression methods and by probit analysis, with
+    Abbott correction, 95% confidence intervals and chi-square
+    goodness-of-fit tests; the lethal proportion can be set freely (e.g.,
+    25%, 50%, 70% or 90%), so any LC value such as the LC25, LC70 or
+    LC90 can be computed, not only the LC50. The regression plots and
+    tables are exported to Excel. Planned extensions include more
+    insect ecology indicators, such as median lethal temperature/time
+    (LT50) and thermal constants (effective accumulated temperature).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+    dplyr,
+    ggplot2 (>= 3.5.0),
+    grid,
+    magrittr,
+    openxlsx,
+    ragg,
+    scales,
+    sysfonts,
+    readr,
+    showtext,
+    tidyr,
+    utils
+Config/roxygen2/version: 8.1.0
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

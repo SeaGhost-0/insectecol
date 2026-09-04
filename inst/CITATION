@@ -1,0 +1,8 @@
+bibentry(
+  "Manual",
+  title  = "{insectecol}: Tools for Insect Ecology Research",
+  author = person("Wangyao", "Li"),
+  year   = 2026,
+  note   = "R package version 0.1.0",
+  url    = "https://CRAN.R-project.org/package=insectecol"
+)
