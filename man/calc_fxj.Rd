@@ -32,3 +32,4 @@ head(calc_fxj(lt))
 \code{\link{calc_F}} for the overall mean fecundity,
   \code{\link{calc_mx}} for the age-specific fecundity of the cohort.
 }
+\keyword{internal}

@@ -26,3 +26,4 @@ calc_F(lt)
 \seealso{
 \code{\link{calc_fxj}} for the age-specific fecundity.
 }
+\keyword{internal}

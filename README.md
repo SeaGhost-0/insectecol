@@ -267,7 +267,25 @@ encodings are supported.
   intervals, pointwise confidence band of the fitted curve, dashed LC
   reference lines with automatic tick and label placement, and a `shape`
   argument switching between the log10 (sigmoid) and the linear
-  concentration axis.
+  concentration axis. The LC reference label now also shows the 95%
+  confidence interval of the estimate on a second line, e.g.
+  `LC50 = 1.23 mg/L` over `(0.98-1.55)`, and optionally the
+  chi-square goodness-of-fit result on a third line (`lc_ci = FALSE`
+  / `lc_p = FALSE` omit the lines; `lc_lab_gap` (left of the reference
+  line) / `lc_lab_gap_right` (right of it) / `lc_lab_dy`
+  fine-tune the label position, `lc_lab_lh` its line spacing, given in
+  multiples of the font size). Every line
+  of the label is drawn on its own so that all of them share one vertical
+  axis (grid would otherwise justify each line of a multi-line string by
+  its own width), and the label is kept inside the panel. The block is
+  placed in the diagonal quadrant around the crossing that the rising
+  fitted curve never enters - above it when the label sits left of the
+  vertical reference line, below it when it sits right - anchored by the
+  edge facing the crossing, so adding or dropping a line (or changing
+  `lc_lab_lh`) grows the block away from the crossing instead of onto
+  the dashed line or the curve. The LC
+  estimate is additionally marked by a circle where it lies on the fitted
+  curve, i.e. where the two dashed reference lines meet.
 - Customisable titles, axis titles and legend labels for the age-stage
   survival curves (`plot_sxj()` and `lifeTable_analyze()`).
 

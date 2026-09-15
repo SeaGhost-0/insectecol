@@ -35,8 +35,8 @@
 #' @param plot_method Character; which of the computed methods to plot
 #'   (default \code{NULL} = the first method that succeeded).
 #'   Ignored when \code{plot = FALSE}.
-#' @param font,unit,shape,ci,ci_level,error_bar,move_thres Plot
-#'   settings, passed to the internal plot engine exactly as in
+#' @param font,unit,shape,ci,ci_level,error_bar,move_thres,lc_ci,lc_p,lc_lab_gap,lc_lab_gap_right,lc_lab_dy,lc_lab_lh
+#'   Plot settings, passed to the internal plot engine exactly as in
 #'   \code{\link{plot_lc50}} (\code{unit = NULL} means \code{"mg/L"},
 #'   \code{unit = ""} shows no unit).
 #'
@@ -75,7 +75,9 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
                          plot_method = NULL, font = "TNM", unit = NULL,
                          shape = c("sigmoid", "linear"), ci = TRUE,
                          ci_level = 0.95, error_bar = TRUE,
-                         move_thres = 0.5) {
+                         move_thres = 0.5, lc_ci = TRUE, lc_p = TRUE,
+                         lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
+                         lc_lab_dy = 0.1, lc_lab_lh = 1.05) {
   ## ---- 1) assemble the standardised data list ----
   lcd <- lc50_build(d, concentration, tested, dead, name = name)
 
@@ -92,7 +94,11 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
       gp <- lc50_plot_one(nm, results$results[[nm]], font, unit,
                           shape = shape, ci = ci, ci_level = ci_level,
                           error_bar = error_bar, move_thres = move_thres,
-                          method = plot_method)
+                          method = plot_method, lc_ci = lc_ci,
+                          lc_p = lc_p, lc_lab_gap = lc_lab_gap,
+                          lc_lab_gap_right = lc_lab_gap_right,
+                          lc_lab_dy = lc_lab_dy,
+                          lc_lab_lh = lc_lab_lh)
       if (is.null(gp)) next
       attr(gp, "lc50_name") <-
         if (shape == "sigmoid") nm else paste0(nm, "_linear")

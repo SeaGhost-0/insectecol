@@ -46,3 +46,4 @@ Entomology} 17(1), 26-34.
 \code{\link{get_stage_names}}, \code{\link{calc_lx}},
   \code{\link{plot_sxj}}
 }
+\keyword{internal}

@@ -122,8 +122,8 @@ save_lc50_auto <- function(path = NULL, lc = 0.5, method = "traditional",
 #' @param device,width,height,dpi,units,bg Figure settings, passed on
 #'   to \code{\link{save_lc50_plot}} (defaults \code{"tiff"}, 12 x 8
 #'   cm, 600 dpi, white background).
-#' @param font,unit,shape,ci,ci_level,error_bar,move_thres Plot
-#'   settings, passed on to \code{\link{plot_lc50}} unchanged.
+#' @param font,unit,shape,ci,ci_level,error_bar,move_thres,lc_ci,lc_p,lc_lab_gap,lc_lab_gap_right,lc_lab_dy,lc_lab_lh
+#'   Plot settings, passed on to \code{\link{plot_lc50}} unchanged.
 #' @param preview Logical (default \code{FALSE}); also print every
 #'   figure on the screen.
 #'
@@ -156,7 +156,11 @@ save_lc50_plot_auto <- function(path = NULL, lc = 0.5,
                                 font = "TNM", unit = NULL,
                                 shape = c("sigmoid", "linear"), ci = TRUE,
                                 ci_level = 0.95, error_bar = TRUE,
-                                move_thres = 0.5, preview = FALSE) {
+                                move_thres = 0.5, lc_ci = TRUE,
+                                lc_p = TRUE, lc_lab_gap = 0.35,
+                                lc_lab_gap_right = 0.1,
+                                lc_lab_dy = 0.1, lc_lab_lh = 1.05,
+                                preview = FALSE) {
   shape <- match.arg(shape)
   info <- lc50_auto_files(path)
   font <- pkg_resolve_font(font)
@@ -181,7 +185,11 @@ save_lc50_plot_auto <- function(path = NULL, lc = 0.5,
     res <- lc50_calculate(lcd, lc = lc, method = method)
     gp <- lc50_plot_one(nm, res$results[[1]], font, unit, shape = shape,
                         ci = ci, ci_level = ci_level, error_bar = error_bar,
-                        move_thres = move_thres)
+                        move_thres = move_thres, lc_ci = lc_ci,
+                        lc_p = lc_p, lc_lab_gap = lc_lab_gap,
+                        lc_lab_gap_right = lc_lab_gap_right,
+                        lc_lab_dy = lc_lab_dy,
+                        lc_lab_lh = lc_lab_lh)
     if (is.null(gp)) {
       message(sprintf("  %s: computation FAILED, figure skipped", nm))
       next

@@ -20,7 +20,13 @@ lc50_analyze(
   ci = TRUE,
   ci_level = 0.95,
   error_bar = TRUE,
-  move_thres = 0.5
+  move_thres = 0.5,
+  lc_ci = TRUE,
+  lc_p = TRUE,
+  lc_lab_gap = 0.35,
+  lc_lab_gap_right = 0.1,
+  lc_lab_dy = 0.1,
+  lc_lab_lh = 1.05
 )
 }
 \arguments{
@@ -56,8 +62,7 @@ not printed, not saved.}
 (default \code{NULL} = the first method that succeeded).
 Ignored when \code{plot = FALSE}.}
 
-\item{font, unit, shape, ci, ci_level, error_bar, move_thres}{Plot
-settings, passed to the internal plot engine exactly as in
+\item{font, unit, shape, ci, ci_level, error_bar, move_thres, lc_ci, lc_p, lc_lab_gap, lc_lab_gap_right, lc_lab_dy, lc_lab_lh}{Plot settings, passed to the internal plot engine exactly as in
 \code{\link{plot_lc50}} (\code{unit = NULL} means \code{"mg/L"},
 \code{unit = ""} shows no unit).}
 }

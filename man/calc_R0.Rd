@@ -38,3 +38,4 @@ Goodman, D. (1982) Optimal life histories, optimal
 \seealso{
 \code{\link{calc_T}}, \code{\link{lifeTable_calculate_all}}
 }
+\keyword{internal}

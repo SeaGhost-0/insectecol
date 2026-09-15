@@ -36,3 +36,4 @@ Goodman, D. (1982) Optimal life histories, optimal
 \seealso{
 \code{\link{calc_R0}}, \code{\link{calc_r}}
 }
+\keyword{internal}

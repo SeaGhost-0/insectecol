@@ -17,7 +17,13 @@ plot_lc50(
   ci_level = 0.95,
   error_bar = TRUE,
   move_thres = 0.5,
-  method = NULL
+  method = NULL,
+  lc_ci = TRUE,
+  lc_p = TRUE,
+  lc_lab_gap = 0.35,
+  lc_lab_gap_right = 0.1,
+  lc_lab_dy = 0.1,
+  lc_lab_lh = 1.05
 )
 }
 \arguments{
@@ -71,6 +77,40 @@ not midway between two ticks.}
 \item{method}{Character scalar, which methods to plot: a subset of
 \code{c("traditional", "improved", "probit")}, or \code{"all"}
 (default) for every method present in the results object.}
+
+\item{lc_ci}{Logical (default \code{TRUE}): show the 95% confidence
+interval of the LC estimate as a second line of the LC reference
+label, e.g. \code{(0.98-1.55)} below \code{LC50 = 1.23 mg/L}.
+\code{FALSE} omits the line.}
+
+\item{lc_p}{Logical (default \code{TRUE}): append the chi-square
+goodness-of-fit result (\code{chi-square} statistic and \code{P}
+value) as an additional line of the LC reference label.
+\code{FALSE} omits the line.}
+
+\item{lc_lab_gap}{Clearance between the vertical reference line and
+the near edge of the LC label when the label sits LEFT of the line,
+in text widths of the label itself (default 0.35). Larger pushes
+the label further away from the line; smaller moves it towards it.}
+
+\item{lc_lab_gap_right}{The same clearance when the label sits RIGHT
+of the line (default 0.1, smaller than \code{lc_lab_gap} because
+the label then hangs below the crossing, where a smaller gap keeps
+it closer to the reference line).}
+
+\item{lc_lab_dy}{Clearance between the LC label block and the LC
+crossing, in y-axis units (default 0.1): the distance from the
+crossing to the edge of the block that faces it. The block is
+placed in the diagonal quadrant the fitted curve never enters
+(above the crossing when the label sits left of the vertical
+reference line, below it when the label sits right), anchored by
+that facing edge, so adding lines or changing \code{lc_lab_lh}
+grows the block away from the crossing and never onto the dashed
+reference line. Larger moves the whole block further from it.}
+
+\item{lc_lab_lh}{Line spacing of the LC label in multiples of its
+font size (1 = single spacing, default 1.05). The lines are spaced
+evenly whichever of them \code{lc_ci} / \code{lc_p} switches on.}
 }
 \value{
 Named list of ggplot objects (invisibly).
@@ -78,13 +118,20 @@ Named list of ggplot objects (invisibly).
 \description{
 Plots every data set: observed points, the fitted curve of the computed
 method with its pointwise confidence band, and dashed reference lines
-marking the LC estimate. By default the concentration axis is on a
+marking the LC estimate, which is itself marked by a circle where it
+lies on the fitted curve. By default the concentration axis is on a
 log10 scale, which gives the classical symmetric S-shaped curve;
 \code{shape = "linear"} restores the original linear axis.
 }
 \details{
 Replicates of the same concentration are pooled and drawn as
   the Abbott-corrected pooled mortality with Wilson score intervals.
+  The LC reference label is centred around the crossing of the two
+  dashed reference lines. Because the sigmoid only ever passes
+  through the lower-left and upper-right quadrants around that
+  crossing, the label is placed in one of the two free ones: above
+  the crossing when it sits left of the vertical reference line,
+  below it when it sits right, at a clearance of \code{lc_lab_dy}.
 }
 \examples{
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")

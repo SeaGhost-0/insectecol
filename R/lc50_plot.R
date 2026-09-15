@@ -2,7 +2,8 @@
 #'
 #' Plots every data set: observed points, the fitted curve of the computed
 #' method with its pointwise confidence band, and dashed reference lines
-#' marking the LC estimate. By default the concentration axis is on a
+#' marking the LC estimate, which is itself marked by a circle where it
+#' lies on the fitted curve. By default the concentration axis is on a
 #' log10 scale, which gives the classical symmetric S-shaped curve;
 #' \code{shape = "linear"} restores the original linear axis.
 #'
@@ -42,12 +43,46 @@
 #'   side of its dashed line when it would not fit). \code{0} disables
 #'   the move; with evenly spaced ticks 0.5 moves every value that is
 #'   not midway between two ticks.
+#' @param lc_ci Logical (default \code{TRUE}): show the 95% confidence
+#'   interval of the LC estimate as a second line of the LC reference
+#'   label, e.g. \code{(0.98-1.55)} below \code{LC50 = 1.23 mg/L}.
+#'   \code{FALSE} omits the line.
+#' @param lc_p Logical (default \code{TRUE}): append the chi-square
+#'   goodness-of-fit result (\code{chi-square} statistic and \code{P}
+#'   value) as an additional line of the LC reference label.
+#'   \code{FALSE} omits the line.
+#' @param lc_lab_gap Clearance between the vertical reference line and
+#'   the near edge of the LC label when the label sits LEFT of the line,
+#'   in text widths of the label itself (default 0.35). Larger pushes
+#'   the label further away from the line; smaller moves it towards it.
+#' @param lc_lab_gap_right The same clearance when the label sits RIGHT
+#'   of the line (default 0.1, smaller than \code{lc_lab_gap} because
+#'   the label then hangs below the crossing, where a smaller gap keeps
+#'   it closer to the reference line).
+#' @param lc_lab_dy Clearance between the LC label block and the LC
+#'   crossing, in y-axis units (default 0.1): the distance from the
+#'   crossing to the edge of the block that faces it. The block is
+#'   placed in the diagonal quadrant the fitted curve never enters
+#'   (above the crossing when the label sits left of the vertical
+#'   reference line, below it when the label sits right), anchored by
+#'   that facing edge, so adding lines or changing \code{lc_lab_lh}
+#'   grows the block away from the crossing and never onto the dashed
+#'   reference line. Larger moves the whole block further from it.
+#' @param lc_lab_lh Line spacing of the LC label in multiples of its
+#'   font size (1 = single spacing, default 1.05). The lines are spaced
+#'   evenly whichever of them \code{lc_ci} / \code{lc_p} switches on.
 #' @param method Character scalar, which methods to plot: a subset of
 #'   \code{c("traditional", "improved", "probit")}, or \code{"all"}
 #'   (default) for every method present in the results object.
 #'
 #' @details Replicates of the same concentration are pooled and drawn as
 #'   the Abbott-corrected pooled mortality with Wilson score intervals.
+#'   The LC reference label is centred around the crossing of the two
+#'   dashed reference lines. Because the sigmoid only ever passes
+#'   through the lower-left and upper-right quadrants around that
+#'   crossing, the label is placed in one of the two free ones: above
+#'   the crossing when it sits left of the vertical reference line,
+#'   below it when it sits right, at a clearance of \code{lc_lab_dy}.
 #'
 #' @return Named list of ggplot objects (invisibly).
 #' @seealso \code{\link{save_lc50}}, \code{\link{save_lc50_plot}}
@@ -63,7 +98,10 @@ plot_lc50 <- function(results, save_path = NULL, font = "TNM",
                       width = 7, height = 6, dpi = 300, unit = NULL,
                       shape = c("sigmoid", "linear"),
                       ci = TRUE, ci_level = 0.95,
-                      error_bar = TRUE, move_thres = 0.5, method = NULL) {
+                      error_bar = TRUE, move_thres = 0.5, method = NULL,
+                      lc_ci = TRUE, lc_p = TRUE,
+                      lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
+                      lc_lab_dy = 0.1, lc_lab_lh = 1.05) {
   showtext::showtext_auto(enable = TRUE)
   font <- pkg_resolve_font(font)
   shape <- match.arg(shape)
@@ -78,7 +116,11 @@ plot_lc50 <- function(results, save_path = NULL, font = "TNM",
     gp <- lc50_plot_one(nm, results$results[[nm]], font, unit,
                         shape = shape, ci = ci, ci_level = ci_level,
                         error_bar = error_bar, move_thres = move_thres,
-                        method = method)
+                        method = method, lc_ci = lc_ci, lc_p = lc_p,
+                        lc_lab_gap = lc_lab_gap,
+                        lc_lab_gap_right = lc_lab_gap_right,
+                        lc_lab_dy = lc_lab_dy, lc_lab_lh = lc_lab_lh,
+                        fig_w = width, fig_h = height)
     if (is.null(gp)) next
     attr(gp, "lc50_name") <- paste0(
       if (shape == "sigmoid") nm else paste0(nm, "_linear"), mtag)
@@ -290,13 +332,99 @@ lc50_near_tick <- function(v, ticks, thres = 0.5, rng = 1) {
   min(abs(ticks - v)) <= thres * gap
 }
 
+# Width of a label line relative to the width of the widest line of the
+# label, used to pull the widest line back to the common centre. Only
+# ratios matter and showtext draws without kerning, so a plain table of
+# character advances is accurate enough: serif = TRUE gives the Times
+# metrics (shared by the default "TNM" font and by the Liberation Serif
+# shipped with the package), serif = FALSE the Helvetica metrics used as
+# the fallback for sans fonts
+lc50_line_width <- function(txt, serif = TRUE) {
+  adv <- if (serif) {
+    c(" " = 250, "-" = 333, "." = 250, "," = 250, ":" = 278, ";" = 333,
+      "(" = 333, ")" = 333, "/" = 278, "+" = 564, "=" = 564, "<" = 564,
+      ">" = 564, "%" = 889, "'" = 180, "*" = 389,
+      "0" = 500, "1" = 500, "2" = 500, "3" = 500, "4" = 500, "5" = 500,
+      "6" = 500, "7" = 500, "8" = 500, "9" = 500,
+      "A" = 667, "B" = 667, "C" = 667, "D" = 722, "E" = 611, "F" = 611,
+      "G" = 722, "H" = 722, "I" = 278, "J" = 500, "K" = 667, "L" = 556,
+      "M" = 833, "N" = 667, "O" = 722, "P" = 556, "Q" = 722, "R" = 667,
+      "S" = 556, "T" = 611, "U" = 722, "V" = 611, "W" = 833, "X" = 611,
+      "Y" = 556, "Z" = 556,
+      "a" = 444, "b" = 500, "c" = 444, "d" = 500, "e" = 444, "f" = 278,
+      "g" = 500, "h" = 500, "i" = 278, "j" = 278, "k" = 444, "l" = 278,
+      "m" = 778, "n" = 500, "o" = 500, "p" = 500, "q" = 500, "r" = 333,
+      "s" = 389, "t" = 278, "u" = 500, "v" = 444, "w" = 667, "x" = 444,
+      "y" = 444, "z" = 389)
+  } else {
+    c(" " = 278, "-" = 333, "." = 278, "," = 278, ":" = 278, ";" = 278,
+      "(" = 333, ")" = 333, "/" = 278, "+" = 584, "=" = 584, "<" = 584,
+      ">" = 584, "%" = 889, "'" = 191, "*" = 389,
+      "0" = 556, "1" = 556, "2" = 556, "3" = 556, "4" = 556, "5" = 556,
+      "6" = 556, "7" = 556, "8" = 556, "9" = 556,
+      "A" = 667, "B" = 667, "C" = 722, "D" = 722, "E" = 667, "F" = 611,
+      "G" = 778, "H" = 722, "I" = 278, "J" = 500, "K" = 667, "L" = 556,
+      "M" = 833, "N" = 722, "O" = 778, "P" = 667, "Q" = 778, "R" = 722,
+      "S" = 667, "T" = 611, "U" = 722, "V" = 667, "W" = 944, "X" = 667,
+      "Y" = 667, "Z" = 611,
+      "a" = 556, "b" = 556, "c" = 500, "d" = 556, "e" = 556, "f" = 278,
+      "g" = 556, "h" = 556, "i" = 222, "j" = 222, "k" = 500, "l" = 222,
+      "m" = 833, "n" = 556, "o" = 556, "p" = 556, "q" = 556, "r" = 333,
+      "s" = 500, "t" = 278, "u" = 556, "v" = 500, "w" = 722, "x" = 500,
+      "y" = 500, "z" = 500)
+  }
+  ch <- strsplit(txt, "")[[1]]            # -> vector of single characters
+  if (length(ch) == 0) return(0)
+  wk <- adv[ch]
+  wk[is.na(wk)] <- if (serif) 500 else 556   # characters missing from the table
+  sum(wk) / 1000
+}
+
+# Height of the plotting panel in inches, for a figure of fig_w x fig_h
+# inches. The panel rows of the assembled gtable are labelled "panel", so
+# their height can simply be read back once the plot is built; the panel
+# is what the y range 0-1 is mapped to, which is exactly what is needed
+# to convert a length in inches into y-axis units. The dummy plot only
+# needs the same theme and axis text, and is built at the figure size the
+# real plot will be drawn at, so it measures the panel of the real plot.
+lc50_panel_size <- function(fig_w = 7, fig_h = 6) {
+  dummy <- ggplot2::ggplot(data.frame(x = 1, y = 1),
+                           ggplot2::aes(.data[["x"]], .data[["y"]])) +
+    ggplot2::geom_point() +
+    ggplot2::scale_x_continuous(labels = function(v) sprintf("%g", v)) +
+    ggplot2::scale_y_continuous(labels = function(v) sprintf("%g", v)) +
+    ggplot2::labs(x = "Concentration (mg/L, log scale)",
+                  y = "Corrected mortality") +
+    lc50_plot_theme(45, "serif")
+  gt <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(dummy))
+  rows <- gt$layout$t[gt$layout$name == "panel"]
+  cols <- gt$layout$l[gt$layout$name == "panel"]
+  h <- grid::convertHeight(gt$heights[rows[1]], "inches", valueOnly = TRUE)
+  w <- grid::convertWidth(gt$widths[cols[1]], "inches", valueOnly = TRUE)
+  if (!is.finite(h) || h <= 0) h <- fig_h * 0.7
+  if (!is.finite(w) || w <= 0) w <- fig_w * 0.8
+  c(width = w, height = h)
+}
+
+lc50_panel_height <- function(fig_w = 7, fig_h = 6) {
+  unname(lc50_panel_size(fig_w, fig_h)["height"])
+}
+
+lc50_panel_width <- function(fig_w = 7, fig_h = 6) {
+  unname(lc50_panel_size(fig_w, fig_h)["width"])
+}
+
 # Plot of a single file (the method whose computation succeeded).
 # shape = "sigmoid": log10 concentration axis (symmetric S curve);
 # shape = "linear": original linear concentration axis.
 lc50_plot_one <- function(nm, one, font, unit = NULL,
                           shape = c("sigmoid", "linear"),
                           ci = TRUE, ci_level = 0.95,
-                          error_bar = TRUE, move_thres = 0.5, method = NULL) {
+                          error_bar = TRUE, move_thres = 0.5,
+                          method = NULL, lc_ci = TRUE, lc_p = TRUE,
+                          lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
+                          lc_lab_dy = 0.1, lc_lab_lh = 1.05,
+                          fig_w = 7, fig_h = 6) {
 
   # Restrict to the requested method(s); NULL keeps everything and the
   # first method that succeeded is plotted (the previous behaviour)
@@ -355,11 +483,28 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   lc_real <- r$estimate             # LC on the concentration scale
   lc_y <- r$lc
   if (is.null(unit)) unit <- "mg/L"   # NULL -> default unit; "" -> no unit
-  lc_label <- if (nzchar(unit)) {
-    sprintf('LC[%d] == %.3g~"%s"', round(lc_y * 100), lc_real, unit)
+  # The LC label as up to three plain-text lines: line 1 the estimate,
+  # line 2 (lc_ci = TRUE) the 95% CI of the estimate, line 3
+  # (lc_p = TRUE) the chi-square goodness-of-fit result. Plain text
+  # (parse = FALSE) keeps the label narrow and ASCII-safe on every R
+  # version and platform
+  lc_lines <- if (nzchar(unit)) {
+    sprintf("LC%d = %.3g %s", round(lc_y * 100), lc_real, unit)
   } else {
-    sprintf("LC[%d] == %.3g", round(lc_y * 100), lc_real)
+    sprintf("LC%d = %.3g", round(lc_y * 100), lc_real)
   }
+  if (lc_ci && !is.null(r$lower) && !is.null(r$upper) &&
+      is.finite(r$lower) && is.finite(r$upper))
+    lc_lines <- c(lc_lines, sprintf("(%.3g-%.3g)", r$lower, r$upper))
+  if (lc_p && !is.null(r$chisq) && !is.null(r$p_chi) &&
+      is.finite(r$chisq) && is.finite(r$p_chi)) {
+    p_txt <- if (r$p_chi < 0.001) "< 0.001" else sprintf("= %.3f", r$p_chi)
+    lc_lines <- c(lc_lines, sprintf("chi-square = %.2f, P %s",
+                                    r$chisq, p_txt))
+  }
+  # The lines are drawn one by one further down, each centred on the same
+  # vertical axis (see the annotate calls), so they need no padding here
+  serif_font <- !grepl("sans|arial|helvet|calibri", font, ignore.case = TRUE)
 
   # Panel range (x extended by 5% on each side, y fixed to 0-1) and the
   # regular ticks; extra ticks are added only when the reference line's
@@ -407,16 +552,82 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   # panel midpoint -> label to the right of the line, BELOW the crossing
   # (the fitted curve is above on that side); LC right of the midpoint ->
   # label to the left of the line, ABOVE the crossing (the curve is
-  # below on that side)
-  lc_lab_dy <- 0.1       # vertical offset from the crossing (y: 0-1)
-  lc_lab_gap <- 0.35     # horizontal gap from the vertical line
+  # below on that side). lc_lab_gap / lc_lab_gap_right / lc_lab_dy
+  # fine-tune the position.
+  #
+  # Each line of the label gets its own text layer, centred on the same
+  # vertical axis x_lab: grid justifies the lines of a single multi-line
+  # string by each line's own width, which pushes lines of unequal width
+  # apart as soon as hjust leaves [0, 1] (it does here, the label being
+  # anchored beside the dashed line), and on top of that the block would
+  # cover the crossing it is meant to annotate. Drawing the block around
+  # the crossing instead costs nothing and keeps lc_lab_dy meaning "offset
+  # of the block from the crossing".
   x_mid <- (x_lo + x_hi) / 2
-  if (x_w > 0 && lc_x < x_mid) {
-    lab_hjust <- -lc_lab_gap                 # text starts right of the line
-    lc_lab_y <- max(lc_y - lc_lab_dy, 0.02)  # below, kept inside the panel
+  x_lab_w <- x_hi - x_lo
+  lc_lab_pt <- 25                    # LC label font, in points on the device
+  lc_lab_size <- lc_lab_pt / ggplot2::.pt
+  n_lab <- length(lc_lines)
+  # The block is centred on x_lab, so half of the widest line must stay
+  # inside the panel; that half width is measured in em from the advance
+  # table and converted to x-axis units with the panel width in inches
+  lab_w_em <- max(lc50_line_width(lc_lines, serif = serif_font))
+  lab_w_panel <- lab_w_em * (lc_lab_pt / 72) / lc50_panel_width(fig_w, fig_h)
+  lab_half <- lab_w_panel * x_lab_w / 2
+  x_lab <- if (lc_x < x_mid) {
+    min(lc_x + lc_lab_gap_right * 2 * lab_half + lab_half, x_hi - lab_half)
   } else {
-    lab_hjust <- 1 + lc_lab_gap              # text ends left of the line
-    lc_lab_y <- min(lc_y + lc_lab_dy, 0.98)  # above, kept inside the panel
+    max(lc_x - lc_lab_gap * 2 * lab_half - lab_half, x_lo + lab_half)
+  }
+  # The near edge of the block (the one facing the dashed line) keeps a
+  # fixed clearance from the line, in text widths of the label itself:
+  # lc_lab_gap when the label sits left of the line, lc_lab_gap_right
+  # when it sits right (smaller by default, see the roxygen comments);
+  # the panel edge clips the centre when there is no room left
+
+  # The sigmoid rises from the lower left to the upper right, so of the
+  # four quadrants around the crossing only two are ever free of it:
+  # above-left and below-right. The label is placed in whichever of the
+  # two its horizontal placement has already chosen, and anchored by
+  # the edge that faces the crossing, so that growing the block (more
+  # lines, larger lc_lab_lh) always grows it away from the crossing and
+  # never onto the dashed reference line:
+  #   label left  of the line -> block above, bottom edge anchored;
+  #   label right of the line -> block below, top edge anchored.
+  # The clearance lc_lab_dy is the distance from the crossing to that
+  # anchored edge either way. If the block does not fit on that side
+  # (the crossing sits too close to the panel edge), it falls back to
+  # the other side; if it fits nowhere, it is clamped into the panel.
+  lab_panel_in <- lc50_panel_height(fig_w, fig_h)
+  lab_pitch <- lc_lab_lh * (lc_lab_pt / 72) / lab_panel_in
+  lab_h <- (n_lab - 1) * lab_pitch   # top line to bottom line
+  lab_gap <- lc_lab_dy               # clearance to the crossing
+  lab_right <- lc_x < x_mid          # label sits right of the line
+  if (lab_right) {
+    lab_top <- lc_y - lab_gap        # below the crossing, top anchored
+    lab_bottom <- lab_top - lab_h
+    if (lab_bottom < 0.5 * lab_pitch) {
+      lab_bottom <- lc_y + lab_gap   # does not fit: above instead
+      lab_top <- lab_bottom + lab_h
+    }
+  } else {
+    lab_bottom <- lc_y + lab_gap     # above the crossing, bottom anchored
+    lab_top <- lab_bottom + lab_h
+    if (lab_top > 1 - 0.5 * lab_pitch) {
+      lab_top <- lc_y - lab_gap      # does not fit: below instead
+      lab_bottom <- lab_top - lab_h
+    }
+  }
+  # keep the block inside the panel (the crossing can sit near either
+  # edge, e.g. a very low or very high LC), shifting it by the smallest
+  # amount that brings it back in
+  if (lab_bottom < 0.5 * lab_pitch) {
+    lab_bottom <- 0.5 * lab_pitch
+    lab_top <- lab_bottom + lab_h
+  }
+  if (lab_top > 1 - 0.5 * lab_pitch) {
+    lab_top <- 1 - 0.5 * lab_pitch
+    lab_bottom <- lab_top - lab_h
   }
 
   # NEW: labels moved into the panel hug their dashed line by default
@@ -426,7 +637,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   x_val_txt <- sprintf("%.3g", lc_real)
   x_val_w <- 0.045 * nchar(x_val_txt) + 0.02
   x_val_left <- (x_hi - lc_x) < x_val_w * (x_hi - x_lo) ||
-    (lab_hjust < 0 && lc_lab_y < 0.21)
+    (lc_x < x_mid && lab_bottom < 0.21)
   y_val_below <- (1 - lc_y) < 0.16
 
   # Sizes of the hand-drawn axis elements
@@ -475,14 +686,28 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
     annotate("segment",
              x = lc_x, xend = lc_x, y = 0, yend = lc_y,
              linetype = "dashed", color = col, linewidth = 0.7) +
-    annotate("text",
-             x = lc_x, y = lc_lab_y,
-             label = lc_label, parse = TRUE,
-             hjust = lab_hjust, vjust = 0.5,
-             size = 10.5, fontface = "bold",
-             family = font, color = col) +
+    # Where both dashed reference lines meet: the LC estimate on the
+    # fitted curve. Drawn with a white fill, so the curve passes through
+    # the marker instead of vanishing behind it
+    annotate("point",
+             x = lc_x, y = lc_y,
+             shape = 21, size = 2.2, stroke = 0.9,
+             fill = "white", color = col) +
     coord_cartesian(xlim = c(x_lo, x_hi), ylim = c(0, 1),
                     expand = FALSE, clip = "off")
+
+  # LC label: one text layer per line, every line centred on the same
+  # vertical axis x_lab (all of them hjust = 0.5) and stacked at the
+  # pitch computed above, so the lines line up on one another no matter
+  # how different their widths are
+  for (i in seq_along(lc_lines)) {
+    gp <- gp + annotate("text",
+                        x = x_lab, y = lab_top - (i - 1) * lab_pitch,
+                        label = lc_lines[i],
+                        hjust = 0.5, vjust = 0.5,
+                        size = lc_lab_size, fontface = "bold",
+                        family = font, color = col)
+  }
 
   # The theme's native ticks are off; all ticks are drawn by hand, the
   # one for the reference line being shorter. The extra tick stays even
@@ -574,7 +799,14 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
       else "Concentration"
     },
     y = if (y_percent) "Corrected mortality (%)" else "Corrected mortality") +
-    theme_bw(base_size = base_size) +
+    lc50_plot_theme(base_size, font)
+  gp
+}
+
+# The theme shared by the LC plots and by the dummy plot that measures the
+# panel height, so both have exactly the same margins and axis text
+lc50_plot_theme <- function(base_size, font) {
+  theme_bw(base_size = base_size) +
     theme(
       text = element_text(family = font),
       plot.title = element_blank(),
@@ -595,5 +827,4 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
       legend.position = "none",
       panel.border       = element_blank()
     )
-  gp
 }

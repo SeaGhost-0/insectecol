@@ -145,6 +145,7 @@
 #'   \emph{Environmental Entomology} 17(1), 26-34.
 #'
 #' @seealso \code{\link{lifeTable_calculate_all}} computes all parameters at once.
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -164,6 +165,7 @@ calc_N <- function(lt) nrow(lt$data)
 #' @return A single numeric value: the mean number of eggs per female.
 #'
 #' @seealso \code{\link{calc_fxj}} for the age-specific fecundity.
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -208,6 +210,7 @@ calc_F <- function(lt) {
 #'
 #' @seealso \code{\link{get_stage_names}}, \code{\link{calc_lx}},
 #'   \code{\link{plot_sxj}}
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -245,6 +248,7 @@ calc_sxj <- function(lt) {
 #'   \emph{Environmental Entomology} 17(1), 26-34.
 #'
 #' @seealso \code{\link{calc_sxj}}, \code{\link{calc_mx}}
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -277,6 +281,7 @@ calc_lx <- function(lt, sxj = NULL) {
 #'
 #' @seealso \code{\link{calc_F}} for the overall mean fecundity,
 #'   \code{\link{calc_mx}} for the age-specific fecundity of the cohort.
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -314,6 +319,7 @@ calc_fxj <- function(lt, sxj = NULL) {
 #'   of insect population ecology. \emph{Bull. Inst. Zool. Acad. Sin} 24(2), 225-240.
 #'
 #' @seealso \code{\link{calc_fxj}}, \code{\link{calc_lx}}, \code{\link{calc_r}}
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -355,6 +361,7 @@ calc_mx <- function(lt, sxj = NULL, fxj = NULL, lx = NULL) {
 #'   Naturalist} 119(6), 803-823.
 #'
 #' @seealso \code{\link{calc_T}}, \code{\link{lifeTable_calculate_all}}
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -390,6 +397,7 @@ calc_R0 <- function(lt, sxj = NULL, fxj = NULL) {
 #'   of an insect population. \emph{Journal of Animal Ecology} 17(1), 15-26.
 #'
 #' @seealso \code{\link{calc_lambda}}, \code{\link{calc_T}}
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -421,6 +429,7 @@ calc_r <- function(lt, lx = NULL, mx = NULL) {
 #'   of an insect population. \emph{Journal of Animal Ecology} 17(1), 15-26.
 #'
 #' @seealso \code{\link{calc_r}}
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -450,6 +459,7 @@ calc_lambda <- function(lt, r = NULL) {
 #'   Naturalist} 119(6), 803-823.
 #'
 #' @seealso \code{\link{calc_R0}}, \code{\link{calc_r}}
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -481,6 +491,7 @@ calc_T <- function(lt, R0 = NULL, r = NULL) {
 #'   Zoology, Academia Sinica} 24(2), 225-240.
 #'
 #' @seealso \code{\link{calc_lx}}
+#' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")

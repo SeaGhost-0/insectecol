@@ -32,3 +32,4 @@ Chi, H. (1988) Life-table analysis incorporating both
 \seealso{
 \code{\link{lifeTable_calculate_all}} computes all parameters at once.
 }
+\keyword{internal}

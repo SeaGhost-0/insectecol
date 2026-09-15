@@ -36,3 +36,4 @@ Chi, H. and Liu, H. (1985) Two new methods for the study
 \seealso{
 \code{\link{calc_lx}}
 }
+\keyword{internal}

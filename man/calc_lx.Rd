@@ -36,3 +36,4 @@ Chi, H. (1988) Life-table analysis incorporating both
 \seealso{
 \code{\link{calc_sxj}}, \code{\link{calc_mx}}
 }
+\keyword{internal}

@@ -22,6 +22,12 @@ save_lc50_plot_auto(
   ci_level = 0.95,
   error_bar = TRUE,
   move_thres = 0.5,
+  lc_ci = TRUE,
+  lc_p = TRUE,
+  lc_lab_gap = 0.35,
+  lc_lab_gap_right = 0.1,
+  lc_lab_dy = 0.1,
+  lc_lab_lh = 1.05,
   preview = FALSE
 )
 }
@@ -32,8 +38,7 @@ save_lc50_plot_auto(
 to \code{\link{save_lc50_plot}} (defaults \code{"tiff"}, 12 x 8
 cm, 600 dpi, white background).}
 
-\item{font, unit, shape, ci, ci_level, error_bar, move_thres}{Plot
-settings, passed on to \code{\link{plot_lc50}} unchanged.}
+\item{font, unit, shape, ci, ci_level, error_bar, move_thres, lc_ci, lc_p, lc_lab_gap, lc_lab_gap_right, lc_lab_dy, lc_lab_lh}{Plot settings, passed on to \code{\link{plot_lc50}} unchanged.}
 
 \item{preview}{Logical (default \code{FALSE}); also print every
 figure on the screen.}

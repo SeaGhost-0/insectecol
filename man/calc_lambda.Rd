@@ -34,3 +34,4 @@ Birch, L. C. (1948) The intrinsic rate of natural increase
 \seealso{
 \code{\link{calc_r}}
 }
+\keyword{internal}
