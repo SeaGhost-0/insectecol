@@ -15,9 +15,9 @@ is estimated. The default 0.5 gives the LC50, 0.9 the LC90.}
 \item{method}{Character string or vector; the estimation method(s) to
 use: one or several of \code{"traditional"} (traditional linear
 regression, the default), \code{"improved"} (improved linear
-regression) and \code{"probit"} (probit analysis), case-insensitive,
-or \code{"all"} for all three in a single call. The full English
-method names are accepted as well.}
+regression) and \code{"probit"} (probit analysis),
+case-insensitive, or \code{"all"} for all three in a single call.
+The full English method names are accepted as well.}
 }
 \value{
 A list with elements

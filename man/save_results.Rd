@@ -47,7 +47,7 @@ The tiff is written through the internal \code{lt_ggsave()},
   internal dpi to the value the text sizes of \code{\link{plot_sxj}}
   are calibrated for. The exported figure therefore looks the same in
   every R session, no matter what showtext settings are left over in
-  the session.If the reproduction-related parameters were skipped
+  the session. If the reproduction-related parameters were skipped
   (\code{fecundity = FALSE} in \code{\link{lifeTable_calculate_all}}),
   the corresponding values in the Summary sheet are \code{NA} and the
   sheets "Female fecundity (F_xj)" and "Age-specific fecundity (m_x)"
