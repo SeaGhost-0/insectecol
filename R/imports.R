@@ -5,6 +5,6 @@
 #' @importFrom showtext showtext_auto
 #' @importFrom ragg agg_tiff
 #' @importFrom grid unit
-#' @importFrom utils flush.console read.csv
+#' @importFrom utils read.csv
 #'
 NULL

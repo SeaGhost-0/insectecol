@@ -55,12 +55,7 @@
 #' @seealso \code{\link{lc50_improved}} for the weighted version,
 #'   \code{\link{lc50_probit}} for the maximum-likelihood version,
 #'   \code{\link{lc50_calculate}} for the batch workflow.
-#' @export
-#' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-#' lcd <- read_lc50(f)
-#' lc50_traditional(lcd$bioassay)
-#' lc50_traditional(lcd$bioassay, lc = 0.9)  # LC90
+#' @keywords internal
 lc50_traditional <- function(d, lc = 0.5) {
   lc50_fit_ols(d, lc, weighted = FALSE)
 }
@@ -75,16 +70,18 @@ lc50_traditional <- function(d, lc = 0.5) {
 #' @param d Same as \code{\link{lc50_traditional}}.
 #' @param lc Same as \code{\link{lc50_traditional}}.
 #'
-#' @details The weights are the binomial weights
-#'   \code{w = n * p * (1 - p) / phi(z)^2}, where \code{n} is the number
-#'   of insects tested, \code{p} the corrected mortality and \code{z =
-#'   qnorm(p)} the corresponding standard normal quantile. Because the
-#'   variance of a probit is smallest at intermediate mortalities,
-#'   concentrations with mortalities near 50% and large sample sizes
-#'   dominate the fit, while near-0% and near-100% concentrations get
-#'   little weight. The LC value, its delta-method confidence interval
-#'   and the goodness-of-fit test are computed exactly as in
-#'   \code{\link{lc50_traditional}}.
+#' @details The weights are the inverse-variance (optimal) weights of
+#'   the probit transform, \code{w = n * phi(z)^2 / (p * (1 - p))},
+#'   where \code{n} is the number of insects tested, \code{p} the
+#'   corrected mortality and \code{z = qnorm(p)} the corresponding
+#'   standard normal quantile: the variance of a probit-transformed
+#'   mortality is \code{p * (1 - p) / (n * phi(z)^2)}, smallest at
+#'   intermediate mortalities and growing without bound at the
+#'   extremes. Therefore concentrations with mortalities near 50% and
+#'   large sample sizes dominate the fit, while near-0% and
+#'   near-100% concentrations get little weight. The LC value, its
+#'   delta-method confidence interval and the goodness-of-fit test are
+#'   computed exactly as in \code{\link{lc50_traditional}}.
 #'
 #' @return Same as \code{\link{lc50_traditional}}.
 #'
@@ -93,12 +90,7 @@ lc50_traditional <- function(d, lc = 0.5) {
 #' University Press, Cambridge.
 #'
 #' @seealso \code{\link{lc50_traditional}}, \code{\link{lc50_probit}}
-#' @export
-#' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-#' lcd <- read_lc50(f)
-#' lc50_improved(lcd$bioassay)
-#' lc50_improved(lcd$bioassay, lc = 0.9)  # LC90
+#' @keywords internal
 lc50_improved <- function(d, lc = 0.5) {
   lc50_fit_ols(d, lc, weighted = TRUE)
 }
@@ -112,17 +104,21 @@ lc50_improved <- function(d, lc = 0.5) {
 #' @param d Same as \code{\link{lc50_traditional}}.
 #' @param lc Same as \code{\link{lc50_traditional}}.
 #'
-#' @details Unlike the two regression methods, the model is fitted to the
-#'   raw dead/tested counts (after Abbott correction of the mortalities)
-#'   rather than to transformed points, so no information is lost and no
-#'   group needs to be excluded because of an extreme mortality. A
-#'   quasibinomial family is used, so the covariance matrix of the
-#'   coefficients incorporates the heterogeneity factor (Pearson
-#'   chi-square divided by the residual degrees of freedom): the
-#'   confidence intervals are automatically widened when the data show
-#'   more variation than the binomial assumption allows. The reported
-#'   chi-square statistic and its p value serve as a goodness-of-fit
-#'   test of the probit-log concentration line.
+#' @details Unlike the two regression methods, the line is fitted by
+#'   maximum likelihood (a quasibinomial GLM with probit link, fitted by
+#'   iteratively reweighted least squares) to the Abbott-corrected
+#'   proportions \code{p = (p_raw - p_c) / (1 - p_c)} with the numbers
+#'   tested as weights (the classic Finney effective-counts
+#'   formulation), rather than by least squares to probit-transformed
+#'   points. Groups with a corrected mortality of exactly 0% or 100%
+#'   are dropped, as in the two regression methods. A quasibinomial
+#'   family is used, so the covariance matrix of the coefficients
+#'   incorporates the heterogeneity factor (Pearson chi-square divided
+#'   by the residual degrees of freedom): the confidence intervals are
+#'   automatically widened when the data show more variation than the
+#'   binomial assumption allows. The reported chi-square statistic and
+#'   its p value serve as a goodness-of-fit test of the probit-log
+#'   concentration line.
 #'
 #' @return Same as \code{\link{lc50_traditional}} (with \code{fit} being
 #'   the fitted glm object).
@@ -132,12 +128,7 @@ lc50_improved <- function(d, lc = 0.5) {
 #' University Press, Cambridge.
 #'
 #' @seealso \code{\link{lc50_traditional}}, \code{\link{lc50_improved}}
-#' @export
-#' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-#' lcd <- read_lc50(f)
-#' lc50_probit(lcd$bioassay)
-#' lc50_probit(lcd$bioassay, lc = 0.9)  # LC90
+#' @keywords internal
 lc50_probit <- function(d, lc = 0.5) {
   prep <- lc50_prepare(d)
   dat <- data.frame(x = log10(prep[["Concentration"]]),
@@ -183,7 +174,10 @@ lc50_fit_ols <- function(d, lc, weighted) {
   y <- stats::qnorm(p) + 5
   n <- prep[["Tested"]]
   if (weighted) {
-    w <- n * p * (1 - p) / stats::dnorm(stats::qnorm(p))^2
+    # Finney probit weights: Var(probit) = p(1-p) / (n * phi(z)^2), so the
+    # inverse-variance weight is n * phi(z)^2 / (p * (1 - p)) - maximal
+    # at p = 0.5 (0.637 * n), small near 0%/100%
+    w <- n * stats::dnorm(stats::qnorm(p))^2 / (p * (1 - p))
     fit <- stats::lm(y ~ x, weights = w)
   } else {
     fit <- stats::lm(y ~ x)

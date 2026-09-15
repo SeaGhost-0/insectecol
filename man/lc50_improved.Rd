@@ -21,22 +21,18 @@ each concentration is weighted by the inverse of the variance of its
 observed mortality, which makes the regression more robust.
 }
 \details{
-The weights are the binomial weights
-  \code{w = n * p * (1 - p) / phi(z)^2}, where \code{n} is the number
-  of insects tested, \code{p} the corrected mortality and \code{z =
-  qnorm(p)} the corresponding standard normal quantile. Because the
-  variance of a probit is smallest at intermediate mortalities,
-  concentrations with mortalities near 50% and large sample sizes
-  dominate the fit, while near-0% and near-100% concentrations get
-  little weight. The LC value, its delta-method confidence interval
-  and the goodness-of-fit test are computed exactly as in
-  \code{\link{lc50_traditional}}.
-}
-\examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-lcd <- read_lc50(f)
-lc50_improved(lcd$bioassay)
-lc50_improved(lcd$bioassay, lc = 0.9)  # LC90
+The weights are the inverse-variance (optimal) weights of
+  the probit transform, \code{w = n * phi(z)^2 / (p * (1 - p))},
+  where \code{n} is the number of insects tested, \code{p} the
+  corrected mortality and \code{z = qnorm(p)} the corresponding
+  standard normal quantile: the variance of a probit-transformed
+  mortality is \code{p * (1 - p) / (n * phi(z)^2)}, smallest at
+  intermediate mortalities and growing without bound at the
+  extremes. Therefore concentrations with mortalities near 50% and
+  large sample sizes dominate the fit, while near-0% and
+  near-100% concentrations get little weight. The LC value, its
+  delta-method confidence interval and the goodness-of-fit test are
+  computed exactly as in \code{\link{lc50_traditional}}.
 }
 \references{
 Finney, D. J. (1971) \emph{Probit Analysis}, 3rd edition. Cambridge
@@ -45,3 +41,4 @@ University Press, Cambridge.
 \seealso{
 \code{\link{lc50_traditional}}, \code{\link{lc50_probit}}
 }
+\keyword{internal}

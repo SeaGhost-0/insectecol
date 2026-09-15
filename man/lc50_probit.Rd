@@ -21,23 +21,21 @@ analysis in the sense of Finney: a binomial generalized linear model
 with probit link fitted by iteratively reweighted least squares.
 }
 \details{
-Unlike the two regression methods, the model is fitted to the
-  raw dead/tested counts (after Abbott correction of the mortalities)
-  rather than to transformed points, so no information is lost and no
-  group needs to be excluded because of an extreme mortality. A
-  quasibinomial family is used, so the covariance matrix of the
-  coefficients incorporates the heterogeneity factor (Pearson
-  chi-square divided by the residual degrees of freedom): the
-  confidence intervals are automatically widened when the data show
-  more variation than the binomial assumption allows. The reported
-  chi-square statistic and its p value serve as a goodness-of-fit
-  test of the probit-log concentration line.
-}
-\examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-lcd <- read_lc50(f)
-lc50_probit(lcd$bioassay)
-lc50_probit(lcd$bioassay, lc = 0.9)  # LC90
+Unlike the two regression methods, the line is fitted by
+  maximum likelihood (a quasibinomial GLM with probit link, fitted by
+  iteratively reweighted least squares) to the Abbott-corrected
+  proportions \code{p = (p_raw - p_c) / (1 - p_c)} with the numbers
+  tested as weights (the classic Finney effective-counts
+  formulation), rather than by least squares to probit-transformed
+  points. Groups with a corrected mortality of exactly 0% or 100%
+  are dropped, as in the two regression methods. A quasibinomial
+  family is used, so the covariance matrix of the coefficients
+  incorporates the heterogeneity factor (Pearson chi-square divided
+  by the residual degrees of freedom): the confidence intervals are
+  automatically widened when the data show more variation than the
+  binomial assumption allows. The reported chi-square statistic and
+  its p value serve as a goodness-of-fit test of the probit-log
+  concentration line.
 }
 \references{
 Finney, D. J. (1971) \emph{Probit Analysis}, 3rd edition. Cambridge
@@ -46,3 +44,4 @@ University Press, Cambridge.
 \seealso{
 \code{\link{lc50_traditional}}, \code{\link{lc50_improved}}
 }
+\keyword{internal}

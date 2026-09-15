@@ -12,33 +12,34 @@ lc50_calculate(lcd, lc = 0.5, method = "traditional")
 \item{lc}{Numeric; the lethal proportion for which the concentration
 is estimated. The default 0.5 gives the LC50, 0.9 the LC90.}
 
-\item{method}{Character string; the estimation method to use:
-\code{"traditional"} (traditional linear regression, the default),
-\code{"improved"} (improved linear regression) or \code{"probit"}
-(probit analysis), case-insensitive. The full English method name
-is accepted as well. Only one method is computed per call; to use
-a different method pass it explicitly, e.g.
-\code{method = "probit"}.}
+\item{method}{Character string or vector; the estimation method(s) to
+use: one or several of \code{"traditional"} (traditional linear
+regression, the default), \code{"improved"} (improved linear
+regression) and \code{"probit"} (probit analysis), case-insensitive,
+or \code{"all"} for all three in a single call. The full English
+method names are accepted as well.}
 }
 \value{
 A list with elements
-  \item{results}{nested list: one element per file, each holding the
-    result list of the selected method (or the error message)}
-  \item{summary_df}{data frame with one row per file: estimate, 95%
-    confidence interval, regression parameters and goodness-of-fit}
+  \item{results}{nested list: one element per file, each holding one
+    element per selected method with its result list (or the error
+    message)}
+  \item{summary_df}{data frame with one row per file and method:
+    estimate, 95% confidence interval, regression parameters and
+    goodness-of-fit}
   \item{lc}{the lethal proportion used}
 }
 \description{
-Computes the LC estimate for every data set read by
-\code{\link{read_lc50}}, using the selected estimation method, and
+Computes the LC estimates for every data set read by
+\code{\link{read_lc50}}, using the selected estimation method(s), and
 returns both the detailed per-file results and a summary data frame.
 }
 \details{
-The selected method is applied to every data set. The
-  default is the traditional linear regression; use e.g.
-  \code{method = "probit"} to compute a different single method.
-  Only one method can be selected per call. A file that fails
-  (e.g. because too few valid concentrations remain after the
+The selected method(s) are applied to every data set; the
+  default is the traditional linear regression. The summary data
+  frame gets one row per file and method, and the progress log
+  reports the status of every method for every file. A file that
+  fails (e.g. because too few valid concentrations remain after the
   Abbott correction) does not interrupt the batch: the error
   message is recorded in the \code{Equation} column of the summary
   data frame instead.
@@ -47,6 +48,7 @@ The selected method is applied to every data set. The
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")
 res <- lc50_calculate(read_lc50(f), lc = 0.7)     # LC70
 res$summary_df
+lc50_calculate(read_lc50(f), method = "all")$summary_df   # all methods
 }
 \references{
 Finney, D. J. (1971) \emph{Probit Analysis}, 3rd edition. Cambridge

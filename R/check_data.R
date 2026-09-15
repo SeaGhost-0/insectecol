@@ -72,14 +72,23 @@ check_data <- function(df, n) {
     }
   }
 
-  for (o in 1:nrow(df)){                # loop over the rows: oviposition days vs adult survival days
-    if(df[o,n] == "F"){                  # is the individual a female?
-      days <- df[o,(n+1):ncol(df)]       # the oviposition records of the row
-      check_days <- sum(!is.na(days))    # number of oviposition records (non-NA entries after the sex column)
-      adult_days <- as.numeric(df[o, n-1]) # adult survival days (the number before the sex column)
-      # The number of oviposition records must equal the survival days exactly
-      if(!is.na(adult_days) && check_days != adult_days){
-        oviposition[o] <- o              # save the row index of the mismatch
+  # the oviposition check requires oviposition columns to exist.
+  # When the data end at the sex column (ncol(df) == n, e.g. data built
+  # without oviposition records by build_life_table() or a csv without
+  # oviposition columns), (n+1):ncol(df) would be a DESCENDING sequence
+  # (c(n+1, n)) and select undefined columns, causing an error. In that
+  # case there are simply no oviposition records to check, so the whole
+  # loop is skipped and oviposition stays NULL.
+  if (ncol(df) > n) {
+    for (o in 1:nrow(df)){                # loop over the rows: oviposition days vs adult survival days
+      if(df[o,n] == "F"){                  # is the individual a female?
+        days <- df[o,(n+1):ncol(df)]       # the oviposition records of the row
+        check_days <- sum(!is.na(days))    # number of oviposition records (non-NA entries after the sex column)
+        adult_days <- as.numeric(df[o, n-1]) # adult survival days (the number before the sex column)
+        # The number of oviposition records must equal the survival days exactly
+        if(!is.na(adult_days) && check_days != adult_days){
+          oviposition[o] <- o              # save the row index of the mismatch
+        }
       }
     }
   }

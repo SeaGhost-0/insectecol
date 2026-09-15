@@ -45,10 +45,6 @@ without interrupting the remaining files.
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
 lifeTable_calculate(f, output_path = file.path(tempdir(), "insectecol-demo"))
-\dontrun{
-lifeTable_calculate("D:/life_table/data")                       # whole folder
-lifeTable_calculate("D:/data", output_path = "D:/results", dpi = 600)
-}
 }
 \seealso{
 \code{\link{read_life_table}}, \code{\link{lifeTable_calculate_all}},

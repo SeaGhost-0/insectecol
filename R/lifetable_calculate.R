@@ -7,6 +7,9 @@
 #'
 #' @param lt A \code{life_table} object returned by
 #'   \code{\link{read_life_table}}.
+#' @param fecundity Logical; whether to compute the reproduction-related
+#'   parameters (F, F_xj, m_x, R0, r, lambda, T). \code{FALSE} skips them
+#'   entirely; no oviposition data are then required.
 #'
 #' @details The intermediate results are passed on internally, so nothing
 #'   is computed twice: s_xj first, then l_x, F_xj and m_x, then r and
@@ -14,27 +17,39 @@
 #'
 #' @return A named list with elements \code{N}, \code{F}, \code{sxj},
 #'   \code{lx}, \code{fxj}, \code{mx}, \code{ex}, \code{R0}, \code{r},
-#'   \code{lambda} and \code{T}.
+#'   \code{lambda} and \code{T}
+#'   With \code{fecundity = FALSE} (or when no oviposition data are
+#'   supplied), \code{fxj} and \code{mx} are \code{NULL} and \code{F},
+#'   \code{R0}, \code{r}, \code{lambda}, \code{T} are \code{NA_real_}.
 #'
 #' @seealso The individual \code{calc_*} functions;
 #'   \code{\link{lifeTable_calculate}} for the batch workflow.
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' results <- lifeTable_calculate_all(read_life_table(f))
+#' lt <- read_life_table(f)
+#' results <- lifeTable_calculate_all(lt)
 #' results$R0
-lifeTable_calculate_all <- function(lt) {
+#' lifeTable_calculate_all(lt, fecundity = FALSE)$N
+lifeTable_calculate_all <- function(lt, fecundity = TRUE) {
   sxj <- calc_sxj(lt)
   lx  <- calc_lx(lt, sxj)
+  ex  <- calc_ex(lt, lx)
+  has_ovi <- ncol(lt$data) >= lt$n_1            # oviposition columns present?
+  if (!fecundity || !has_ovi) {
+    if (fecundity && !has_ovi)
+      warning("No oviposition data supplied; reproduction-related parameters (F, F_xj, m_x, R0, r, lambda, T) were skipped")
+    return(list(N = calc_N(lt), F = NA_real_, sxj = sxj, lx = lx, fxj = NULL,
+                mx = NULL, ex = ex, R0 = NA_real_, r = NA_real_,
+                lambda = NA_real_, T = NA_real_))
+  }
   fxj <- calc_fxj(lt, sxj)
   mx  <- calc_mx(lt, sxj, fxj, lx)
   r   <- calc_r(lt, lx, mx)
   R0  <- calc_R0(lt, sxj, fxj)
   list(N = calc_N(lt), F = calc_F(lt), sxj = sxj, lx = lx, fxj = fxj,
-       mx = mx, ex = calc_ex(lt, lx), R0 = R0, r = r,
-       lambda = exp(r), T = log(R0) / r)
+       mx = mx, ex = ex, R0 = R0, r = r, lambda = exp(r), T = log(R0) / r)
 }
-
 #' Batch Analysis of Life Table Data
 #'
 #' Runs the complete workflow (reading, validation, calculation, plotting
@@ -66,12 +81,8 @@ lifeTable_calculate_all <- function(lt) {
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
 #' lifeTable_calculate(f, output_path = file.path(tempdir(), "insectecol-demo"))
-#' \dontrun{
-#' lifeTable_calculate("D:/life_table/data")                       # whole folder
-#' lifeTable_calculate("D:/data", output_path = "D:/results", dpi = 600)
-#' }
 lifeTable_calculate <- function(path, output_path = NULL, plot = TRUE,
-                      keep_tiff = FALSE, dpi = 300) {
+                                keep_tiff = FALSE, dpi = 300) {
   path_type <- check_path_type(path)
   if (path_type == "folder") {
     file_path <- list.files(path, pattern = "\\.(csv)$", full.names = TRUE,
@@ -87,8 +98,7 @@ lifeTable_calculate <- function(path, output_path = NULL, plot = TRUE,
   }
   if (!dir.exists(output_path)) dir.create(output_path, recursive = TRUE)
   summary_df <- data.frame(); error_files <- c()
-  cat("------------ Calculation started; please wait a few seconds for large data sets ------------\n")
-  flush.console()
+  message("------------ Calculation started; please wait a few seconds for large data sets ------------")
 
   for (p in 1:number) {
     tryCatch({
@@ -103,10 +113,10 @@ lifeTable_calculate <- function(path, output_path = NULL, plot = TRUE,
         Finite_rate_of_increase_lambda = results$lambda,
         Intrinsic_rate_of_increase_r = results$r,
         Mean_generation_time_T = results$T))
-      cat(sprintf("[%d/%d] File [%s] completed\n", p, number, lt$file_name))
+      message(sprintf("[%d/%d] File [%s] completed", p, number, lt$file_name))
     }, error = function(e) {
       fname <- tools::file_path_sans_ext(basename(file_path[p]))
-      cat(sprintf("File [%d/%d] [%s] failed and was skipped:\n%s\n",
+      message(sprintf("File [%d/%d] [%s] failed and was skipped:\n%s",
                   p, number, fname, conditionMessage(e)))
       error_files <<- c(error_files, fname)
     })
@@ -120,9 +130,9 @@ lifeTable_calculate <- function(path, output_path = NULL, plot = TRUE,
   writeData(all_wb, sheet = "all", x = summary_df, startRow = 1)
   saveWorkbook(all_wb, sprintf("%s/all.xlsx", output_path), overwrite = TRUE)
 
-  cat(sprintf("\nFinished: total %d | succeeded %d | failed %d\n",
+  message(sprintf("Finished: total %d | succeeded %d | failed %d",
               number, number - length(error_files), length(error_files)))
-  if (length(error_files) > 0) cat("Failed files:", paste(error_files, collapse = ", "), "\n")
+  if (length(error_files) > 0) message("Failed files: ", paste(error_files, collapse = ", "))
   attr(summary_df, "error_files") <- error_files
   summary_df
 }

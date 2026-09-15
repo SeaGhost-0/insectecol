@@ -11,7 +11,13 @@ plot_lc50(
   width = 7,
   height = 6,
   dpi = 300,
-  unit = NULL
+  unit = NULL,
+  shape = c("sigmoid", "linear"),
+  ci = TRUE,
+  ci_level = 0.95,
+  error_bar = TRUE,
+  move_thres = 0.5,
+  method = NULL
 )
 }
 \arguments{
@@ -27,23 +33,66 @@ displays the plots only.}
 \item{dpi}{Resolution of the saved files (default 300); at any dpi the
 figures keep the physical size they have at 300 dpi.}
 
-\item{unit}{Unit of the concentration (e.g. \code{"mg/L"}), appended to
-the LC label; \code{NULL} (default) shows none.}
+\item{unit}{Unit of the concentration (e.g. \code{"mg/L"}), used in
+the LC label and the x-axis title. \code{NULL} (the default) is
+treated as \code{"mg/L"}; pass \code{""} to show no unit at all.}
+
+\item{shape}{\code{"sigmoid"} (default): log10 concentration axis, the
+symmetric S-shaped dose-response curve. \code{"linear"}: the original
+linear concentration axis.}
+
+\item{ci}{Logical (default \code{TRUE}): draw the pointwise confidence
+band of the fitted curve.}
+
+\item{ci_level}{Confidence level of the curve band and of the replicate
+error bars (default 0.95).}
+
+\item{error_bar}{Logical (default \code{TRUE}): replicate rows of the
+same concentration are pooled to a single point, the Abbott-corrected
+\code{sum(Dead) / sum(Tested)} (equal to the replicate mean when the
+replicate groups are of equal size), with a Wilson score interval at
+\code{ci_level} as the error bar, clipped to [0, 1]. \code{FALSE}
+draws every raw row as a plain point (the previous behaviour).}
+
+\item{move_thres}{Numeric (default 0.5). A dashed reference line that
+does not land on a regular tick normally gets an extra tick whose
+value is labelled next to the axis like a regular tick. If the LC
+position is at most \code{move_thres} regular tick spacings away
+from the nearest tick (measured on the display axis, i.e. log10
+concentrations for \code{shape = "sigmoid"}), that label would
+overlap the neighbouring tick label, so the value is drawn inside
+the panel instead: the concentration just above the x axis to the
+right of the vertical dashed line, the mortality just right of the
+y axis above the horizontal dashed line (each flips to the other
+side of its dashed line when it would not fit). \code{0} disables
+the move; with evenly spaced ticks 0.5 moves every value that is
+not midway between two ticks.}
+
+\item{method}{Character scalar, which methods to plot: a subset of
+\code{c("traditional", "improved", "probit")}, or \code{"all"}
+(default) for every method present in the results object.}
 }
 \value{
 Named list of ggplot objects (invisibly).
 }
 \description{
-Plots every data set: observed points, the fitted line of the computed
-method and dashed reference lines marking the LC estimate. Whenever the
-lethal proportion or the LC estimate does not coincide with a regular
-tick, an extra, shorter tick labelled with that value is added, its
-label sitting closer to the axis than the regular labels.
+Plots every data set: observed points, the fitted curve of the computed
+method with its pointwise confidence band, and dashed reference lines
+marking the LC estimate. By default the concentration axis is on a
+log10 scale, which gives the classical symmetric S-shaped curve;
+\code{shape = "linear"} restores the original linear axis.
+}
+\details{
+Replicates of the same concentration are pooled and drawn as
+  the Abbott-corrected pooled mortality with Wilson score intervals.
 }
 \examples{
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")
 res <- lc50_calculate(read_lc50(f))
 plots <- plot_lc50(res, save_path = tempdir())
+plots <- plot_lc50(res, shape = "linear", save_path = tempdir())  # original axis
+plots <- plot_lc50(res, ci = FALSE, error_bar = FALSE,
+                   save_path = tempdir())                          # bare version
 }
 \seealso{
 \code{\link{save_lc50}}, \code{\link{save_lc50_plot}}

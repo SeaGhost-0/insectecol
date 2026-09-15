@@ -42,9 +42,7 @@
 #' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
 #' lcd <- read_lc50(f)
 #' lcd$bioassay
-#' \dontrun{
-#' lcd <- read_lc50()                        # interactive folder dialog
-#' }
+#' if (interactive()) lcd <- read_lc50()   # interactive folder dialog
 read_lc50 <- function(path = NULL) {
   if (is.null(path)) {
     path <- utils::choose.dir()
@@ -74,7 +72,7 @@ read_lc50 <- function(path = NULL) {
   for (f in files) {
     nm <- tools::file_path_sans_ext(basename(f))
     lcd[[nm]] <- lc50_clean(lc50_read_csv(f), nm)
-    cat(sprintf("Read: %s (%d concentration groups)\n", nm, nrow(lcd[[nm]])))
+    message(sprintf("Read: %s (%d concentration groups)", nm, nrow(lcd[[nm]])))
   }
   lcd
 }
@@ -91,7 +89,7 @@ lc50_read_csv <- function(f) {
 
 # Internal: fuzzy column-name matching + data validation
 lc50_clean <- function(raw, nm) {
-    nm_conc <- names(raw)[grepl("concentration|Concentration|Conc", names(raw))]               # anchor: csv template header
+  nm_conc <- names(raw)[grepl("concentration|Concentration|Conc", names(raw))]               # anchor: csv template header
   nm_dead <- names(raw)[grepl("death|Death|Dead|dead", names(raw))]               # anchor: csv template header
   nm_n <- setdiff(names(raw)[grepl("Number of insects|Number of heads|Tested", names(raw))], nm_dead)  # anchor: csv template header
   if (length(nm_conc) < 1 || length(nm_n) < 1 || length(nm_dead) < 1)
@@ -145,6 +143,7 @@ lc50_prepare <- function(d) {
     check.names = FALSE
   )
   attr(prep, "p") <- p
+  attr(prep, "pc") <- pc
   attr(prep, "dropped") <- dropped
   prep
 }

@@ -4,7 +4,15 @@
 \alias{plot_sxj}
 \title{Age-Stage Survival Rate Curves}
 \usage{
-plot_sxj(lt, sxj = NULL, title = NULL, dpi = 300)
+plot_sxj(
+  lt,
+  sxj = NULL,
+  title = NULL,
+  x_title = "Age(days)",
+  y_title = "Age-Stage Survival Rate(Sxj)",
+  legend_labels = NULL,
+  dpi = 300
+)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
@@ -15,6 +23,16 @@ avoids recomputing the age-stage survival rates.}
 
 \item{title}{Character; plot title. Defaults to the name of the csv
 file.}
+
+\item{x_title}{Character; x axis title (default \code{"Age(days)"}).}
+
+\item{y_title}{Character; y axis title (default
+\code{"Age-Stage Survival Rate(Sxj)"}).}
+
+\item{legend_labels}{Character vector; legend labels, one per stage
+(immature stages plus \code{Female} and \code{Male}), e.g.
+\code{c("Egg", "1st instar", "Pupa", "Female", "Male")}.
+\code{NULL} (default) uses the stage names of the data.}
 
 \item{dpi}{Numeric; resolution (default 300). Only influences the
 scaling of the graphical elements (title, axis labels, legend), so
@@ -34,7 +52,14 @@ To keep the figure clean, each stage is drawn only over the
   age window in which it actually occurs (extended by two days on both
   sides). Immature stages are drawn as coloured dots connected by a
   thin line; females are grey and males black, both with diamond
-  points. All text of the figure is in English.
+  points. By default all text of the figure is in English; title,
+  axis titles and legend labels can be customised.
+
+  The text sizes are calibrated for being drawn while showtext is
+  active at its default internal dpi (96); \code{\link{save_results}}
+  takes care of this when exporting. If you save the plot yourself,
+  switch showtext on around the \code{\link[ggplot2]{ggsave}} call,
+  otherwise the text comes out about 300/96 times too large.
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")

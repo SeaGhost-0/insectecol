@@ -32,10 +32,9 @@ Stage names are taken from the header exactly as they are
   \code{ID} (both are fixed parts of the csv template).
 }
 \examples{
-\dontrun{
-lt <- read_life_table("D:/life_table/cohort.csv")
+lt <- read_life_table(system.file("extdata", "Example.csv",
+                                  package = "insectecol"))
 get_stage_names(lt)
-}
 }
 \seealso{
 \code{\link{read_life_table}}, \code{\link{calc_sxj}},

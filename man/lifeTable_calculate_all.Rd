@@ -4,16 +4,23 @@
 \alias{lifeTable_calculate_all}
 \title{Calculate All Parameters of One Life Table}
 \usage{
-lifeTable_calculate_all(lt)
+lifeTable_calculate_all(lt, fecundity = TRUE)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
 \code{\link{read_life_table}}.}
+
+\item{fecundity}{Logical; whether to compute the reproduction-related
+parameters (F, F_xj, m_x, R0, r, lambda, T). \code{FALSE} skips them
+entirely; no oviposition data are then required.}
 }
 \value{
 A named list with elements \code{N}, \code{F}, \code{sxj},
   \code{lx}, \code{fxj}, \code{mx}, \code{ex}, \code{R0}, \code{r},
-  \code{lambda} and \code{T}.
+  \code{lambda} and \code{T}
+  With \code{fecundity = FALSE} (or when no oviposition data are
+  supplied), \code{fxj} and \code{mx} are \code{NULL} and \code{F},
+  \code{R0}, \code{r}, \code{lambda}, \code{T} are \code{NA_real_}.
 }
 \description{
 Convenience wrapper that computes all life table parameters of one
@@ -28,8 +35,10 @@ The intermediate results are passed on internally, so nothing
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-results <- lifeTable_calculate_all(read_life_table(f))
+lt <- read_life_table(f)
+results <- lifeTable_calculate_all(lt)
 results$R0
+lifeTable_calculate_all(lt, fecundity = FALSE)$N
 }
 \seealso{
 The individual \code{calc_*} functions;

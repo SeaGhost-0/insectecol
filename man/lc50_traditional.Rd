@@ -56,12 +56,6 @@ The corrected mortalities are transformed to probits
   undefined) are dropped before fitting; at least 3 valid
   concentrations are required.
 }
-\examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-lcd <- read_lc50(f)
-lc50_traditional(lcd$bioassay)
-lc50_traditional(lcd$bioassay, lc = 0.9)  # LC90
-}
 \references{
 Finney, D. J. (1971) \emph{Probit Analysis}, 3rd edition. Cambridge
 University Press, Cambridge.
@@ -74,3 +68,4 @@ insecticide. \emph{Journal of Economic Entomology} 18(2), 265-267.
   \code{\link{lc50_probit}} for the maximum-likelihood version,
   \code{\link{lc50_calculate}} for the batch workflow.
 }
+\keyword{internal}

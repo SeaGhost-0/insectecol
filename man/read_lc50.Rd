@@ -45,9 +45,7 @@ Each csv file must contain one row per concentration with
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")
 lcd <- read_lc50(f)
 lcd$bioassay
-\dontrun{
-lcd <- read_lc50()                        # interactive folder dialog
-}
+if (interactive()) lcd <- read_lc50()   # interactive folder dialog
 }
 \references{
 Abbott, W. S. (1925) A method of computing the

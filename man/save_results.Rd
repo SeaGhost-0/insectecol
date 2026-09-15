@@ -17,7 +17,8 @@ save_results(
 \item{lt}{A \code{life_table} object returned by
 \code{\link{read_life_table}}.}
 
-\item{results}{The result list returned by \code{\link{lifeTable_calculate_all}}.}
+\item{results}{The result list returned by
+\code{\link{lifeTable_calculate_all}}.}
 
 \item{output_path}{Character; folder the workbook is written to.
 Defaults to the current working directory.}
@@ -39,6 +40,18 @@ Writes all results of one data set into a multi-sheet Excel workbook
 (\code{<file name>_out.xlsx}): the population parameters, the
 age-stage survival rates, the age-specific rates and, optionally, the
 survival curve plot.
+}
+\details{
+The tiff is written through the internal \code{lt_ggsave()},
+  which enables showtext for the export device and pins showtext's
+  internal dpi to the value the text sizes of \code{\link{plot_sxj}}
+  are calibrated for. The exported figure therefore looks the same in
+  every R session, no matter what showtext settings are left over in
+  the session.If the reproduction-related parameters were skipped
+  (\code{fecundity = FALSE} in \code{\link{lifeTable_calculate_all}}),
+  the corresponding values in the Summary sheet are \code{NA} and the
+  sheets "Female fecundity (F_xj)" and "Age-specific fecundity (m_x)"
+  are omitted.
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")

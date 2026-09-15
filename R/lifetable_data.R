@@ -116,10 +116,9 @@ read_life_table <- function(path, check = TRUE) {
 #'   \code{\link{plot_sxj}}
 #' @export
 #' @examples
-#' \dontrun{
-#' lt <- read_life_table("D:/life_table/cohort.csv")
+#' lt <- read_life_table(system.file("extdata", "Example.csv",
+#'                                   package = "insectecol"))
 #' get_stage_names(lt)
-#' }
 get_stage_names <- function(lt) {
   gp_text <- lt$header
   gp_text <- gp_text[!is.na(gp_text)]           # drop NA entries
