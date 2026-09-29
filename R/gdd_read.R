@@ -156,12 +156,15 @@ gdd_detect_cols <- function(data, temp_col = NULL, duration_col = NULL) {
     hit
   }
   # English and Chinese aliases are both supported
+  # (Chinese written as \u escapes to keep this file pure ASCII)
   list(
     temp     = pick(temp_col,
-                    c("temp", "temperature", "T", "温度", "饲养温度"),
-                    "temp|温度", "temperature"),
+                    c("temp", "temperature", "T", "\u6e29\u5ea6",
+                      "\u9972\u517b\u6e29\u5ea6"),
+                    "temp|\u6e29\u5ea6", "temperature"),
     duration = pick(duration_col,
-                    c("duration", "days", "D", "历期", "发育历期", "发育天数"),
-                    "dur|days|历期|天数", "duration")
+                    c("duration", "days", "D", "\u5386\u671f",
+                      "\u53d1\u80b2\u5386\u671f", "\u53d1\u80b2\u5929\u6570"),
+                    "dur|days|\u5386\u671f|\u5929\u6570", "duration")
   )
 }

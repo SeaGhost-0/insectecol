@@ -41,9 +41,10 @@ modules:
   models (Logan-6, Lactin 1995, Briere-1/2 1999, Wang-7) and selects the
   best per group by AICc (`model = "auto"`), with a linear-range check
   that warns when the rate declines at high temperatures. Publication
-  figures use Times New Roman by default (Chinese characters fall back
-  to SimSun automatically) and can be exported at any physical size and
-  resolution. Further tools: prediction (`gdd_predict()`), pairwise
+  figures use a serif font by default (Times New Roman on Windows;
+  Chinese characters fall back to SimSun automatically) and can be
+  exported at any physical size and resolution. Further tools:
+  prediction (`gdd_predict()`), pairwise
   group comparison (`gdd_compare()`), degree-day accumulation from daily
   Tmin/Tmax (`gdd_daily()`), deriving data from a life-table csv
   (`gdd_from_lifetable()`) and csv/xlsx export (`gdd_export()`).
@@ -200,7 +201,7 @@ out2 <- gdd_analyze(temp = d$temp, duration = d$duration, group = d$stage,
 out2$fit$comparison   # full model comparison table, best flag included
 ```
 
-![Degree-day linear fits](gdd.png)
+![Degree-day linear fits](man/figures/gdd.png)
 
 Without `plot_file` the figure is drawn on the current device and stays
 fully customisable via `gdd_plot()` (custom titles/axis labels, named
@@ -359,10 +360,11 @@ files are read via `readxl`.
 - Linear-range check: warns when the developmental rate declines at high
   temperatures (strong warning for `model = "linear"`, mild for
   `"auto"`/nonlinear).
-- Publication figures: Times New Roman by default with per-glyph
-  fallback (Chinese characters render in SimSun on Chinese Windows, no
-  showtext required); custom titles/subtitles/axis labels including
-  named per-group titles; physical-size png export
+- Publication figures: serif font by default (`family = "serif"`,
+  which is Times New Roman on Windows) with per-glyph fallback (Chinese
+  characters render in SimSun on Chinese Windows, no showtext
+  required); custom titles/subtitles/axis labels including named
+  per-group titles; physical-size png export
   (`plot_units` = `"in"`/`"cm"`/`"px"`, `plot_res` dpi) where the
   resolution changes only the sharpness, never the layout.
 - Further tools: `gdd_read()` (csv/xlsx file or folder, delimiter and

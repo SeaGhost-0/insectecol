@@ -8,7 +8,7 @@
 #' Build Degree-Day Input from Raw Life-Table Files
 #'
 #' Converts individual-level life-table files (the wide layout validated
-#' by \code{\link{check_data}}) into the long-format data frame required
+#' by \code{check_data()}) into the long-format data frame required
 #' by \code{\link{gdd_calc}}: for every input file, the mean (or median)
 #' duration of each stage is computed over the individuals that entered
 #' that stage (the partial durations of individuals that died in the
@@ -29,7 +29,7 @@
 #'
 #' @param path Folder containing one file per temperature (batch mode)
 #'   or a single file.
-#' @param n Column index of the sex column, as in \code{\link{check_data}}.
+#' @param n Column index of the sex column, as in \code{check_data()}.
 #' @param stage_names Character vector of stage names for the duration
 #'   columns 2 .. n-1 (length n-2). If NULL, generic names "stage_1",
 #'   "stage_2", ... are used.
@@ -47,13 +47,13 @@
 #'   \code{duration} (and \code{source_file}), ready for
 #'   \code{gdd_calc(data, by = "stage")}.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' df <- gdd_from_lifetable("D:/exp/rearing", n = 6,
 #'        stage_names = c("egg", "larva", "pupa", "adult"),
 #'        stages = c("egg", "larva", "pupa"))
 #' fit <- gdd_calc(df, by = "stage")
 #' }
-#' @seealso \code{\link{check_data}}, \code{\link{check_path_type}},
+#' @seealso \code{check_data()}, \code{\link{check_path_type}},
 #'   \code{\link{gdd_read}}, \code{\link{gdd_calc}}
 #' @export
 gdd_from_lifetable <- function(path, n, stage_names = NULL, stages = NULL,

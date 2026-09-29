@@ -318,6 +318,7 @@
 #' @seealso \code{\link{lifeTable_boot_test}} for the paired
 #'   bootstrap test between two cohorts,
 #'   \code{\link{lifeTable_calculate_all}} for the point estimates.
+#' @importFrom stats sd quantile
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")

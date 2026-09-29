@@ -31,14 +31,19 @@
 #'   statistics caption when \code{title} is customised, otherwise
 #'   none.
 #' @param family Text font family used for the title, axis labels and
-#'   tick labels. Default \code{"Times New Roman"} (the journal
-#'   standard). Latin characters are rendered with this font; Chinese
-#'   characters are rendered through the device's font fallback, which
-#'   on Chinese Windows is SimSun (宋体), so mixed English-Chinese
-#'   titles work without extra settings. Set to \code{""} to use the
-#'   device default.
+#'   tick labels. Default \code{"serif"} --- a portable alias that maps
+#'   to Times New Roman on Windows (the journal standard) and to the
+#'   system serif font elsewhere, and is valid on every device
+#'   (including \code{pdf()}). Latin characters are rendered with this
+#'   font; Chinese characters are rendered through the device's font
+#'   fallback, which on Chinese Windows is SimSun (宋体), so mixed
+#'   English-Chinese titles work without extra settings. Set to
+#'   \code{""} to use the device default, or pass an explicit family
+#'   such as \code{"Times New Roman"} (widely available on Windows;
+#'   may be unknown to the \code{pdf()} device on other platforms).
 #' @param xlab,ylab Axis labels.
 #' @param ... Further graphical parameters passed to \code{plot}.
+#' @importFrom graphics abline lines par plot points text
 #' @examples
 #' f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
 #' fit <- gdd_calc(gdd_read(f), by = "stage")
@@ -48,7 +53,7 @@
 #'          ylab = "发育速率 (1/d)")
 #' @export
 gdd_plot <- function(x, group = NULL, show_C = TRUE, show_Topt = TRUE,
-                     title = NULL, sub = NULL, family = "Times New Roman",
+                     title = NULL, sub = NULL, family = "serif",
                      xlab = "Temperature T (deg C)",
                      ylab = "Developmental rate V (1/d)", ...) {
   if (!inherits(x, "gdd"))

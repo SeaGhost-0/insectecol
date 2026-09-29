@@ -136,5 +136,6 @@ test_that("gdd_check detects a high-temperature decline and passes clean data", 
 
 test_that("gdd_daily is unchanged", {
   expect_equal(gdd_daily(5, 25, 10, "triangle")$daily, 225 / 40)
-  expect_equal(gdd_daily(c(8, 10), c(20, 22), 11)$total, 5)
+  ## avg method: (8+20)/2 - 11 = 3 on day 1, (10+22)/2 - 11 = 5 on day 2
+  expect_equal(gdd_daily(c(8, 10), c(20, 22), 11)$total, 8)
 })

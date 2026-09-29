@@ -10,7 +10,7 @@
 #'
 #' Non-interactive, fully parameter-driven entry point for the
 #' degree-day module, in the same style as
-#' \code{\link{lifeTable_analyze}} and \code{\link{lc50_auto}}. It
+#' \code{\link{lifeTable_analyze}} and \code{\link{lc50_analyze}}. It
 #' (1) obtains the long-format data --- user-supplied column vectors
 #' (\code{temp = d$T, duration = d$days, group = d$stage}), a whole
 #' data frame, or a csv/xlsx file / folder read via
@@ -19,9 +19,10 @@
 #' (3) fits the chosen model --- or selects the best model per group
 #' by AICc with \code{model = "auto"} --- via \code{\link{gdd_calc}}
 #' and (4) optionally draws the fitted curves with
-#' \code{\link{gdd_plot}}. Nothing is written to disk unless
-#' \code{plot_file} is supplied; tabular export is handled separately
-#' by \code{\link{gdd_export}}.
+#' \code{\link{gdd_plot}} --- in the same style as the
+#' \code{\link{lc50_analyze}} entry point of the bioassay module.
+#' Nothing is written to disk unless \code{plot_file} is supplied;
+#' tabular export is handled separately by \code{\link{gdd_export}}.
 #'
 #' @param temp,duration,group User-supplied column vectors, e.g.
 #'   \code{temp = d$T, duration = d$days, group = d$stage} after
@@ -57,10 +58,12 @@
 #' @param encoding,header,temp_from_file,pattern Reading options for
 #'   \code{\link{gdd_read}} (only used when \code{path} is supplied).
 #' @param plot Logical; whether to draw the fitted curves (default
-#'   \code{FALSE}). When \code{plot_file} is \code{NULL} the plot is
-#'   drawn on the current device (fully customisable afterwards by
-#'   calling \code{\link{gdd_plot}} on the returned \code{fit});
-#'   otherwise it is written to \code{plot_file} as a png.
+#'   \code{FALSE}).
+#' @param plot_file Optional png path: when supplied together with
+#'   \code{plot = TRUE} the figure is written to this file (ragg when
+#'   available, otherwise \code{grDevices::png}); when \code{NULL} the
+#'   plot is drawn on the current device (fully customisable afterwards
+#'   by calling \code{\link{gdd_plot}} on the returned \code{fit}).
 #' @param plot_group,show_C,show_Topt Plot options, see
 #'   \code{\link{gdd_plot}}.
 #' @param plot_title Custom plot title; \code{NULL} = the automatic
@@ -71,9 +74,9 @@
 #' @param plot_xlab,plot_ylab Custom axis labels; \code{NULL} keeps
 #'   the defaults of \code{\link{gdd_plot}}.
 #' @param plot_family Text font family, see \code{\link{gdd_plot}}
-#'   (\code{NULL} keeps the default \code{"Times New Roman"}; Chinese
-#'   characters are rendered through the device's font fallback, i.e.
-#'   SimSun on Chinese Windows).
+#'   (\code{NULL} keeps the default \code{"serif"} --- Times New Roman
+#'   on Windows; Chinese characters are rendered through the device's
+#'   font fallback, i.e. SimSun on Chinese Windows).
 #' @param plot_width,plot_height Physical size of the exported figure
 #'   in \code{plot_units} (only used when \code{plot_file} is
 #'   supplied). Defaults \code{10.67} x \code{6} in reproduce the
