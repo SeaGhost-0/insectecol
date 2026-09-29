@@ -27,7 +27,13 @@
 #'   (\code{fecundity = FALSE} in \code{\link{lifeTable_calculate_all}}),
 #'   the corresponding values in the Summary sheet are \code{NA} and the
 #'   sheets "Female fecundity (F_xj)" and "Age-specific fecundity (m_x)"
-#'   are omitted.
+#'   are omitted. If bootstrap results are attached
+#'   (\code{results$boot <- lifeTable_bootstrap(lt)}; done automatically
+#'   by \code{\link{lifeTable_analyze}} and
+#'   \code{\link{lifeTable_calculate}} when \code{bootstrap = TRUE}), an
+#'   extra worksheet "Bootstrap (SE & CI)" with the parameter table
+#'   (original estimate, bootstrap mean, standard error, percentile
+#'   confidence interval) is written.
 #'
 #' @return The path of the exported xlsx file (invisibly).
 #'
@@ -71,6 +77,12 @@ save_results <- function(lt, results, output_path = getwd(), plot = NULL,
     writeData(wb, sheet = "Female fecundity (F_xj)", x = results$fxj,
               startRow = 1, startCol = 1)
     writeData(wb, sheet = "Age-specific fecundity (m_x)", x = results$mx,
+              startRow = 1, startCol = 1)
+  }
+
+  if (!is.null(results$boot)) {                 # bootstrap SE & CI attached
+    addWorksheet(wb, sheetName = "Bootstrap (SE & CI)")
+    writeData(wb, sheet = "Bootstrap (SE & CI)", x = results$boot$summary,
               startRow = 1, startCol = 1)
   }
 

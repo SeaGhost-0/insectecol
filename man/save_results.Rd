@@ -51,7 +51,13 @@ The tiff is written through the internal \code{lt_ggsave()},
   (\code{fecundity = FALSE} in \code{\link{lifeTable_calculate_all}}),
   the corresponding values in the Summary sheet are \code{NA} and the
   sheets "Female fecundity (F_xj)" and "Age-specific fecundity (m_x)"
-  are omitted.
+  are omitted. If bootstrap results are attached
+  (\code{results$boot <- lifeTable_bootstrap(lt)}; done automatically
+  by \code{\link{lifeTable_analyze}} and
+  \code{\link{lifeTable_calculate}} when \code{bootstrap = TRUE}), an
+  extra worksheet "Bootstrap (SE & CI)" with the parameter table
+  (original estimate, bootstrap mean, standard error, percentile
+  confidence interval) is written.
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")

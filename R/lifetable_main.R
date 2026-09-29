@@ -214,6 +214,18 @@ build_life_table <- function(stages, adult_days, sex, oviposition = NULL,
 #'   parameters (F, F_xj, m_x, R0, r, lambda, T). \code{FALSE} skips them
 #'   entirely - \code{oviposition} is then not required at all and may
 #'   be left \code{NULL}.
+#' @param bootstrap Logical; whether to estimate the standard errors and
+#'   percentile confidence intervals of all scalar parameters with the
+#'   bootstrap technique of TWOSEX-MSChart via
+#'   \code{\link{lifeTable_bootstrap}} (default \code{FALSE}). The
+#'   result is attached as \code{results$boot} and is exported by
+#'   \code{\link{save_results}} as an extra worksheet.
+#' @param B Integer; number of bootstrap replicates (only used when
+#'   \code{bootstrap = TRUE}). The TWOSEX-MSChart standard is
+#'   \code{100000} (the default).
+#' @param seed Integer; seed of the bootstrap random number generator
+#'   (only used when \code{bootstrap = TRUE}); \code{NULL} uses the
+#'   current R session state.
 #' @param plot Logical; whether to draw the age-stage survival curves
 #'   (default \code{FALSE}). The returned ggplot object can be printed,
 #'   customised further or passed to \code{\link{save_results}}.
@@ -230,12 +242,14 @@ build_life_table <- function(stages, adult_days, sex, oviposition = NULL,
 #'
 #' @return A list with components \code{lt} (the \code{life_table}
 #'   object), \code{results} (the list returned by
-#'   \code{\link{lifeTable_calculate_all}}) and \code{plot} (the ggplot
-#'   object when \code{plot = TRUE}, otherwise \code{NULL}).
+#'   \code{\link{lifeTable_calculate_all}}; additionally containing
+#'   \code{boot}, the \code{\link{lifeTable_bootstrap}} result, when
+#'   \code{bootstrap = TRUE}) and \code{plot} (the ggplot object when
+#'   \code{plot = TRUE}, otherwise \code{NULL}).
 #'
 #' @seealso \code{\link{build_life_table}},
-#'   \code{\link{lifeTable_calculate_all}}, \code{\link{plot_sxj}},
-#'   \code{\link{save_results}}
+#'   \code{\link{lifeTable_calculate_all}}, \code{\link{lifeTable_bootstrap}},
+#'   \code{\link{plot_sxj}}, \code{\link{save_results}}
 #' @export
 #' @examples
 #' ## The example raw data shipped with the package (the same layout as
@@ -254,7 +268,15 @@ build_life_table <- function(stages, adult_days, sex, oviposition = NULL,
 #'                           sex = d$gender, oviposition = d[, 11:17],
 #'                           file_name = "Example - way 1")
 #' out1$results$N          # number of individuals
-#' out1$results$Summary   # all life table parameters
+#' out1$results$R0         # net reproductive rate
+#'
+#' ## --- with bootstrap standard errors (small B for a fast example;
+#' ## use the default B = 100000 for publications)
+#' out1b <- lifeTable_analyze(stages = d[2:8], adult_days = d$Adult,
+#'                            sex = d$gender, oviposition = d[, 11:17],
+#'                            file_name = "Example - way 1",
+#'                            bootstrap = TRUE, B = 2000, seed = 1)
+#' out1b$results$boot$summary
 #'
 #' ## --- way 2: pass a named list of single columns
 #' ## (the list names become the stage names in plots and results)
@@ -285,7 +307,8 @@ build_life_table <- function(stages, adult_days, sex, oviposition = NULL,
 lifeTable_analyze <- function(lt = NULL, stages = NULL, adult_days = NULL,
                               sex = NULL, oviposition = NULL, stage_names = NULL,
                               file_name = "life_table", check = TRUE,
-                              fecundity = TRUE, plot = FALSE, title = NULL,
+                              fecundity = TRUE, bootstrap = FALSE,
+                              B = 100000, seed = NULL, plot = FALSE, title = NULL,
                               x_title = "Age(days)",
                               y_title = "Age-Stage Survival Rate(Sxj)",
                               legend_labels = NULL, dpi = 300) {
@@ -298,7 +321,10 @@ lifeTable_analyze <- function(lt = NULL, stages = NULL, adult_days = NULL,
   ## ---- 2) compute all parameters (fecundity-related skippable) ----
   results <- lifeTable_calculate_all(lt, fecundity = fecundity)
 
-  ## ---- 3) optional plot (no device interaction, no file output) ----
+  ## ---- 3) optional bootstrap standard errors ----
+  if (bootstrap) results$boot <- lifeTable_bootstrap(lt, B = B, seed = seed)
+
+  ## ---- 4) optional plot (no device interaction, no file output) ----
   p <- if (plot) plot_sxj(lt, results$sxj, title = title, x_title = x_title,
                           y_title = y_title, legend_labels = legend_labels,
                           dpi = dpi) else NULL

@@ -8,7 +8,7 @@
 ## Introduction
 
 **insectecol** (Insect Ecology Data Analysis Toolkit) is a collection of
-analytical tools for insect ecology research. It currently ships two
+analytical tools for insect ecology research. It currently ships three
 modules:
 
 - **Age-stage, two-sex life table** - main function
@@ -32,6 +32,21 @@ modules:
   50%, 70%, 90%, ...), so any LC value such as the LC25, LC70 or LC90
   can be computed - not only the LC50. Regression plots and tables are
   exported to Excel.
+- **Degree-day / thermal constants** - main function `gdd_analyze()` for
+  data already loaded in R (column vectors, a data frame, or csv/xlsx
+  file(s)). Estimates the developmental threshold temperature C and the
+  effective accumulated temperature K by the linear degree-day law
+  (T = C + K·V, fitted with the exact standard errors of the linear
+  model), fits six common nonlinear temperature-dependent development
+  models (Logan-6, Lactin 1995, Briere-1/2 1999, Wang-7) and selects the
+  best per group by AICc (`model = "auto"`), with a linear-range check
+  that warns when the rate declines at high temperatures. Publication
+  figures use Times New Roman by default (Chinese characters fall back
+  to SimSun automatically) and can be exported at any physical size and
+  resolution. Further tools: prediction (`gdd_predict()`), pairwise
+  group comparison (`gdd_compare()`), degree-day accumulation from daily
+  Tmin/Tmax (`gdd_daily()`), deriving data from a life-table csv
+  (`gdd_from_lifetable()`) and csv/xlsx export (`gdd_export()`).
 
 ### Which main function should I use?
 
@@ -43,6 +58,7 @@ function** for processing csv files on disk:
 |---|---|---|
 | Life table | `lifeTable_analyze()` | `lifeTable_calculate()` |
 | Bioassay | `lc50_analyze()` | `save_lc50_auto()` (tables), `save_lc50_plot_auto()` (figures) |
+| Degree-day | `gdd_analyze()` | `gdd_analyze(path = ...)` also reads files/folders, `gdd_export()` writes the tables |
 
 The main functions assemble the data, compute everything and optionally
 build the plots, but never write to disk - export is handled separately by
@@ -55,8 +71,7 @@ For full control, every module can also be driven step by step
 -> `save_lc50()` / `save_lc50_plot()`); see the function reference below.
 
 Planned extensions include more insect ecology indicators, such as the
-median lethal temperature/time (LT50) and thermal constants (effective
-accumulated temperature).
+median lethal temperature/time (LT50).
 
 ## Installation
 
@@ -158,14 +173,59 @@ save_lc50_auto("path/to/bioassay_data", method = "probit")
 save_lc50_plot_auto("path/to/bioassay_data", method = "probit")
 ```
 
+## Quick start: degree-day (thermal constants)
+
+```r
+library(insectecol)
+
+# example data shipped with the package
+f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
+d <- read.csv(f)
+
+# analyse straight from the columns of the loaded data frame
+out <- gdd_analyze(
+  temp     = d$temp,      # temperature (deg C)
+  duration = d$duration,  # mean developmental duration (days)
+  group    = d$stage      # optional grouping column (e.g. life stage)
+)
+
+out$fit$results    # C, K, SE and 95% CI per group (linear degree-day law)
+summary(out$fit)   # detailed coefficient tables
+
+# nonlinear models with AICc selection and a publication png
+out2 <- gdd_analyze(temp = d$temp, duration = d$duration, group = d$stage,
+                    model = "auto",          # best of six models per group
+                    plot = TRUE, plot_file = "gdd.png",
+                    plot_units = "cm", plot_width = 16, plot_res = 300)
+out2$fit$comparison   # full model comparison table, best flag included
+```
+
+![Degree-day linear fits](gdd.png)
+
+Without `plot_file` the figure is drawn on the current device and stays
+fully customisable via `gdd_plot()` (custom titles/axis labels, named
+per-group titles, `family` font). The exported png size is physical
+(`plot_units` = `"in"`/`"cm"`/`"px"`) so `plot_res` only changes the
+sharpness and the recorded dpi, never the layout.
+
+For batch csv processing, `gdd_analyze(path = "folder")` reads every
+csv/xlsx in a folder (combined with a `source_file` column), and
+`gdd_export()` writes the result tables:
+
+```r
+out3 <- gdd_analyze(path = "path/to/gdd_data", model = "auto")
+gdd_export(out3$fit, file = "gdd_results.csv")
+```
+
 ## Example data
 
 Two example csv files ship with the package in `inst/extdata/`; the
 examples in this README and in the help pages are built on them:
 
 ```r
-system.file("extdata", "Example.csv", package = "insectecol")   # life table
-system.file("extdata", "bioassay.csv", package = "insectecol")  # bioassay
+system.file("extdata", "Example.csv", package = "insectecol")      # life table
+system.file("extdata", "bioassay.csv", package = "insectecol")     # bioassay
+system.file("extdata", "gdd_example.csv", package = "insectecol")  # degree-day
 ```
 
 - `Example.csv` - life table data in the csv template: one row per
@@ -176,6 +236,10 @@ system.file("extdata", "bioassay.csv", package = "insectecol")  # bioassay
 - `bioassay.csv` - bioassay data: one row per concentration group with
   the columns `Concentration` (0 = control group for the Abbott
   correction), `Tested` and `Dead`.
+- `gdd_example.csv` - degree-day data: one row per temperature with the
+  columns `temp` (deg C), `duration` (mean developmental duration in
+  days) and `stage` (the grouping column). `inst/extdata/gdd_batch/`
+  additionally ships one file per temperature for the batch mode.
 
 The file layouts are described in detail under
 [Data formats](#data-formats).
@@ -213,6 +277,22 @@ Headers are matched loosely, so a header like
 `Concentration (mg/L)` is recognised as well. UTF-8 (with BOM) and GBK
 encodings are supported.
 
+### Degree-day csv
+
+One row per temperature (long format):
+
+| Column | Content |
+|---|---|
+| temperature | rearing temperature in deg C (e.g. `temp`, `temperature`, `T`, `温度`) |
+| duration | mean developmental duration in days (e.g. `duration`, `days`, `D`, `发育天数`, `历期`) |
+| group (optional) | grouping variable, e.g. the life `stage` |
+
+The temperature and duration columns are auto-detected (English and
+Chinese headers are recognised); ambiguous files accept explicit
+`temp_col` / `duration_col`. UTF-8 (with BOM) and GBK encodings are
+supported; the csv delimiter (`,` `;` tab) is auto-detected, and xlsx
+files are read via `readxl`.
+
 ## Function reference
 
 ### Life table module
@@ -243,7 +323,72 @@ encodings are supported.
 | `save_lc50_plot_auto()` | one-step batch: csv file(s) -> tiff figure(s) |
 | `check_path_type()` | path helper (folder / csv file) |
 
+### Degree-day module
+
+| Function | Purpose |
+|---|---|
+| `gdd_analyze()` | **main function** - read/check/fit/plot in one call (column vectors, data frame, or path) |
+| `gdd_read()` | read a gdd csv/xlsx file or a folder of them (batch) |
+| `gdd_check()` | validate the data; linear-range check (rate decline warning) |
+| `gdd_calc()` | fit one model per group, or `model = "auto"` (AICc selection) |
+| `gdd_compare()` | pairwise comparison of the groups |
+| `gdd_plot()` | fitted line/curve per group (custom titles, font family, size/dpi) |
+| `gdd_predict()` | predicted developmental duration at given temperatures |
+| `gdd_daily()` | degree-day accumulation from daily Tmin/Tmax (avg / triangle method) |
+| `gdd_from_lifetable()` | derive temperature/duration data from a life-table csv |
+| `gdd_export()` | export the result tables to csv/xlsx |
+
 ## Updates
+
+### 1.0.2 (development)
+
+**New module: degree-day / thermal constants**
+
+- New main function `gdd_analyze()`: one call from column vectors
+  (`temp = d$temp, duration = d$days, group = d$stage`), a data frame,
+  or csv/xlsx file(s)/folder - with optional data validation
+  (`gdd_check()`), model fitting and png export. Nothing is written to
+  disk unless `plot_file` is supplied.
+- Linear degree-day law fitted as T = C + K·V, so the threshold
+  temperature C and the effective accumulated temperature K carry the
+  exact standard errors and confidence intervals of the linear model
+  (verified to match SPSS to every digit).
+- Six nonlinear temperature-dependent development models (Logan-6,
+  Lactin 1995, Briere-1/2 1999, Wang-7) with a robust restart strategy
+  and `model = "auto"` selecting the best model per group by AICc.
+- Linear-range check: warns when the developmental rate declines at high
+  temperatures (strong warning for `model = "linear"`, mild for
+  `"auto"`/nonlinear).
+- Publication figures: Times New Roman by default with per-glyph
+  fallback (Chinese characters render in SimSun on Chinese Windows, no
+  showtext required); custom titles/subtitles/axis labels including
+  named per-group titles; physical-size png export
+  (`plot_units` = `"in"`/`"cm"`/`"px"`, `plot_res` dpi) where the
+  resolution changes only the sharpness, never the layout.
+- Further tools: `gdd_read()` (csv/xlsx file or folder, delimiter and
+  column auto-detection, English/Chinese headers), `gdd_compare()`
+  (pairwise group comparison), `gdd_predict()`, `gdd_daily()` (avg and
+  triangle methods), `gdd_from_lifetable()` (bridges from raw life-table
+  files) and `gdd_export()` (csv/xlsx).
+- Example data: `inst/extdata/gdd_example.csv` and the per-temperature
+  files in `inst/extdata/gdd_batch/`.
+
+**New: bootstrap for the life table**
+
+- New `lifeTable_bootstrap()`: nonparametric individual-level bootstrap
+  of the life table (default B = 100000) with percentile confidence
+  intervals for the population parameters, using a fully vectorised
+  Euler-Lotka solver. The result is attached as `results$boot` when
+  `lifeTable_analyze(bootstrap = TRUE)` is called (arguments `B`,
+  `seed`), following the TWOSEX-MSChart technique.
+- New `lifeTable_boot_test()`: paired two-cohort bootstrap comparison.
+
+**Internal changes**
+
+- Regenerated the roxygen documentation and NAMESPACE for all new
+  functions and S3 methods (`print`/`summary`/`plot`/`predict` methods
+  for the `gdd` object, `print` for the bootstrap object).
+- Bumped the version to 1.0.2.
 
 ### 1.0.1 (CRAN submission round)
 

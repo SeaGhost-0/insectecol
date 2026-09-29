@@ -9,7 +9,10 @@ lifeTable_calculate(
   output_path = NULL,
   plot = TRUE,
   keep_tiff = FALSE,
-  dpi = 300
+  dpi = 300,
+  bootstrap = FALSE,
+  B = 1e+05,
+  seed = NULL
 )
 }
 \arguments{
@@ -28,11 +31,29 @@ generated and embedded into the workbooks (default \code{TRUE}).}
 (default \code{FALSE}).}
 
 \item{dpi}{Numeric; resolution of the exported images (default 300).}
+
+\item{bootstrap}{Logical; whether to estimate the standard errors
+and percentile confidence intervals of all scalar parameters of
+every file with \code{\link{lifeTable_bootstrap}} (default
+\code{FALSE}). Each workbook then contains an extra worksheet
+with the bootstrap results and the summary workbook \code{all.xlsx}
+gains one \code{_SE} column per population parameter.}
+
+\item{B}{Integer; number of bootstrap replicates per file (only
+used when \code{bootstrap = TRUE}). The TWOSEX-MSChart standard
+is \code{100000} (the default).}
+
+\item{seed}{Integer; base seed of the bootstrap random number
+generator (only used when \code{bootstrap = TRUE}); file
+\code{p} is analysed with seed \code{seed + p}. \code{NULL} uses
+the current R session state.}
 }
 \value{
 A summary data frame with one row per successfully analysed
-  file (population parameters as columns); the attribute
-  \code{error_files} contains the names of the files that failed.
+  file (population parameters as columns, plus their bootstrap
+  standard errors as \code{_SE} columns when \code{bootstrap =
+  TRUE}); the attribute \code{error_files} contains the names of
+  the files that failed.
 }
 \description{
 Runs the complete workflow (reading, validation, calculation, plotting
@@ -48,5 +69,6 @@ lifeTable_calculate(f, output_path = file.path(tempdir(), "insectecol-demo"))
 }
 \seealso{
 \code{\link{read_life_table}}, \code{\link{lifeTable_calculate_all}},
-  \code{\link{plot_sxj}}, \code{\link{save_results}}
+  \code{\link{lifeTable_bootstrap}}, \code{\link{plot_sxj}},
+  \code{\link{save_results}}
 }

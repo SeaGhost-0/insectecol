@@ -14,6 +14,9 @@ lifeTable_analyze(
   file_name = "life_table",
   check = TRUE,
   fecundity = TRUE,
+  bootstrap = FALSE,
+  B = 1e+05,
+  seed = NULL,
   plot = FALSE,
   title = NULL,
   x_title = "Age(days)",
@@ -36,6 +39,21 @@ parameters (F, F_xj, m_x, R0, r, lambda, T). \code{FALSE} skips them
 entirely - \code{oviposition} is then not required at all and may
 be left \code{NULL}.}
 
+\item{bootstrap}{Logical; whether to estimate the standard errors and
+percentile confidence intervals of all scalar parameters with the
+bootstrap technique of TWOSEX-MSChart via
+\code{\link{lifeTable_bootstrap}} (default \code{FALSE}). The
+result is attached as \code{results$boot} and is exported by
+\code{\link{save_results}} as an extra worksheet.}
+
+\item{B}{Integer; number of bootstrap replicates (only used when
+\code{bootstrap = TRUE}). The TWOSEX-MSChart standard is
+\code{100000} (the default).}
+
+\item{seed}{Integer; seed of the bootstrap random number generator
+(only used when \code{bootstrap = TRUE}); \code{NULL} uses the
+current R session state.}
+
 \item{plot}{Logical; whether to draw the age-stage survival curves
 (default \code{FALSE}). The returned ggplot object can be printed,
 customised further or passed to \code{\link{save_results}}.}
@@ -57,8 +75,10 @@ customised further or passed to \code{\link{save_results}}.}
 \value{
 A list with components \code{lt} (the \code{life_table}
   object), \code{results} (the list returned by
-  \code{\link{lifeTable_calculate_all}}) and \code{plot} (the ggplot
-  object when \code{plot = TRUE}, otherwise \code{NULL}).
+  \code{\link{lifeTable_calculate_all}}; additionally containing
+  \code{boot}, the \code{\link{lifeTable_bootstrap}} result, when
+  \code{bootstrap = TRUE}) and \code{plot} (the ggplot object when
+  \code{plot = TRUE}, otherwise \code{NULL}).
 }
 \description{
 Non-interactive, fully parameter-driven entry point for the
@@ -88,7 +108,15 @@ out1 <- lifeTable_analyze(stages = d[2:8], adult_days = d$Adult,
                           sex = d$gender, oviposition = d[, 11:17],
                           file_name = "Example - way 1")
 out1$results$N          # number of individuals
-out1$results$Summary   # all life table parameters
+out1$results$R0         # net reproductive rate
+
+## --- with bootstrap standard errors (small B for a fast example;
+## use the default B = 100000 for publications)
+out1b <- lifeTable_analyze(stages = d[2:8], adult_days = d$Adult,
+                           sex = d$gender, oviposition = d[, 11:17],
+                           file_name = "Example - way 1",
+                           bootstrap = TRUE, B = 2000, seed = 1)
+out1b$results$boot$summary
 
 ## --- way 2: pass a named list of single columns
 ## (the list names become the stage names in plots and results)
@@ -119,6 +147,6 @@ out3$plot               # print or further customise the ggplot object
 }
 \seealso{
 \code{\link{build_life_table}},
-  \code{\link{lifeTable_calculate_all}}, \code{\link{plot_sxj}},
-  \code{\link{save_results}}
+  \code{\link{lifeTable_calculate_all}}, \code{\link{lifeTable_bootstrap}},
+  \code{\link{plot_sxj}}, \code{\link{save_results}}
 }
