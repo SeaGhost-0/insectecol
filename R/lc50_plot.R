@@ -86,7 +86,20 @@
 #'   If a replicate error bar reaches into the label block, the block is
 #'   shifted vertically by the smallest amount that restores a clearance
 #'   of about one line height from the bar end, preferring the direction
-#'   that keeps it on its own side of the crossing.
+#'   that keeps it on its own side of the crossing. When the extra x-axis
+#'   value is drawn inside the panel, its strip next to the dashed line
+#'   is protected as well: the block climbs back over the bar rather than
+#'   landing on the number, and only when no such position exists does
+#'   the number flip to the left of the dashed line.
+#'
+#' @section File names:
+#' Saved files are named after the data set plus suffixes for every
+#' non-default setting that changes the look (\code{_linear} for
+#' \code{shape = "linear"}, \code{_noband} for \code{ci = FALSE},
+#' \code{_nobar} for \code{error_bar = FALSE}, \code{_nolcCI} for
+#' \code{lc_ci = FALSE}, \code{_nochi} for \code{lc_p = FALSE}, and the
+#' selected method names), so plots saved to one folder can never
+#' overwrite each other.
 #'
 #' @return Named list of ggplot objects (invisibly).
 #' @seealso \code{\link{save_lc50}}, \code{\link{save_lc50_plot}}
@@ -113,6 +126,12 @@ plot_lc50 <- function(results, save_path = NULL, font = "TNM",
 
   plot_list <- list()
 
+  # suffixes for non-default display options: without them the files of
+  # different option settings would share one name and overwrite each
+  # other (shape gets its own "_linear" tag further down)
+  otag <- paste0(if (!ci) "_noband", if (!error_bar) "_nobar",
+                 if (!lc_ci) "_nolcCI", if (!lc_p) "_nochi")
+
   for (nm in names(results$results)) {
     # when several methods are stored, the file names get a method suffix
     mtag <- if (!is.null(method) && length(results$results[[nm]]) > 1)
@@ -127,7 +146,7 @@ plot_lc50 <- function(results, save_path = NULL, font = "TNM",
                         fig_w = width, fig_h = height)
     if (is.null(gp)) next
     attr(gp, "lc50_name") <- paste0(
-      if (shape == "sigmoid") nm else paste0(nm, "_linear"), mtag)
+      if (shape == "sigmoid") nm else paste0(nm, "_linear"), otag, mtag)
     plot_list[[nm]] <- gp
     if (!is.null(save_path)) {
       lc50_ggsave(file.path(save_path,
@@ -635,6 +654,11 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
     lab_bottom <- lab_top - lab_h
   }
 
+  # Text of the extra x tick value; its width is also needed by the
+  # obstacle logic right below (the estimate is one digit per character)
+  x_val_txt <- sprintf("%.3g", lc_real)
+  x_val_w <- 0.045 * nchar(x_val_txt) + 0.02
+
   # NEW: with large error bars one can reach into the label block. Every
   # bar whose horizontal extent (cap width included) overlaps the block's
   # x range forbids a vertical band around [lo, hi], widened by half the
@@ -655,14 +679,33 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
     if (nrow(hit) > 0) {
       band_lo <- hit[["lo"]] - pad
       band_hi <- hit[["hi"]] + pad
-      collide <- function(b) any(band_hi > b & band_lo < b + lab_h)
-      if (collide(lab_bottom)) {
+      # The inside x value label owns the bottom strip right of the
+      # dashed line (top edge ~0.21). Treat it as one more obstacle, so
+      # a block pushed away from a bar climbs back over the bar instead
+      # of landing on the number; the number then only flips to the left
+      # of the dashed line as a last resort (see x_val_left below)
+      val_obs <- x_lab_inside && bx_hi > lc_x &&
+        bx_lo < lc_x + x_val_w * (x_hi - x_lo)
+      if (val_obs) {
+        band_lo <- c(band_lo, 0)
+        band_hi <- c(band_hi, 0.21)
+      }
+      collide <- function(b, lo, hi) any(hi > b & lo < b + lab_h)
+      if (collide(lab_bottom, band_lo, band_hi)) {
         prefer_up <- lab_bottom >= lc_y
-        cand_b <- c(band_hi, band_lo - lab_h)  # on top of / under every band
-        keep <- cand_b >= 0.5 * lab_pitch &
-          cand_b + lab_h <= 1 - 0.5 * lab_pitch
-        cand_b <- cand_b[keep]
-        cand_b <- cand_b[!vapply(cand_b, collide, logical(1))]
+        cands <- function(lo, hi) {
+          cb <- c(hi, lo - lab_h)  # on top of / under every band
+          keep <- cb >= 0.5 * lab_pitch & cb + lab_h <= 1 - 0.5 * lab_pitch
+          cb <- cb[keep]
+          cb[!vapply(cb, collide, logical(1), lo, hi)]
+        }
+        cand_b <- cands(band_lo, band_hi)
+        if (length(cand_b) == 0 && val_obs) {
+          # last resort: give up the value strip (the number will flip
+          # to the left of the dashed line) and clear the bars instead
+          cand_b <- cands(band_lo[-length(band_lo)],
+                          band_hi[-length(band_hi)])
+        }
         if (length(cand_b) > 0) {
           d <- abs(cand_b - lab_bottom)
           # equal distances: keep the move along the block's own side
@@ -675,12 +718,10 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
     }
   }
 
-  # NEW: labels moved into the panel hug their dashed line by default
-  # and flip to the other side only when they would not fit between the
-  # line and the panel edge, or (x) when the LC label already occupies
-  # that corner; the width estimate is one digit per character
-  x_val_txt <- sprintf("%.3g", lc_real)
-  x_val_w <- 0.045 * nchar(x_val_txt) + 0.02
+  # Labels moved into the panel hug their dashed line by default and
+  # flip to the other side only when they would not fit between the line
+  # and the panel edge, or (x) when the LC label already occupies that
+  # corner (its bottom edge dipped below the value strip; see above)
   x_val_left <- (x_hi - lc_x) < x_val_w * (x_hi - x_lo) ||
     (lc_x < x_mid && lab_bottom < 0.21)
   y_val_below <- (1 - lc_y) < 0.16

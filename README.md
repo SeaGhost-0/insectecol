@@ -392,6 +392,9 @@ files are read via `readxl`.
   the smallest amount that restores a clearance of about one line height
   from the bar end (preferring its own side of the LC crossing) instead
   of staying at its fixed height and colliding.
+- Plots saved with non-default display options now get a suffix in the
+  file name (`_linear`, `_noband`, `_nobar`, `_nolcCI`, `_nochi`), so
+  different settings saved to one folder never overwrite each other.
 
 **Internal changes**
 

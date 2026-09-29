@@ -135,8 +135,23 @@ Replicates of the same concentration are pooled and drawn as
   If a replicate error bar reaches into the label block, the block is
   shifted vertically by the smallest amount that restores a clearance
   of about one line height from the bar end, preferring the direction
-  that keeps it on its own side of the crossing.
+  that keeps it on its own side of the crossing. When the extra x-axis
+  value is drawn inside the panel, its strip next to the dashed line
+  is protected as well: the block climbs back over the bar rather than
+  landing on the number, and only when no such position exists does
+  the number flip to the left of the dashed line.
 }
+\section{File names}{
+
+Saved files are named after the data set plus suffixes for every
+non-default setting that changes the look (\code{_linear} for
+\code{shape = "linear"}, \code{_noband} for \code{ci = FALSE},
+\code{_nobar} for \code{error_bar = FALSE}, \code{_nolcCI} for
+\code{lc_ci = FALSE}, \code{_nochi} for \code{lc_p = FALSE}, and the
+selected method names), so plots saved to one folder can never
+overwrite each other.
+}
+
 \examples{
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")
 res <- lc50_calculate(read_lc50(f))
