@@ -132,6 +132,10 @@ Replicates of the same concentration are pooled and drawn as
   crossing, the label is placed in one of the two free ones: above
   the crossing when it sits left of the vertical reference line,
   below it when it sits right, at a clearance of \code{lc_lab_dy}.
+  If a replicate error bar reaches into the label block, the block is
+  shifted vertically by the smallest amount that restores a clearance
+  of about one line height from the bar end, preferring the direction
+  that keeps it on its own side of the crossing.
 }
 \examples{
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")

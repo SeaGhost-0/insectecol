@@ -385,6 +385,14 @@ files are read via `readxl`.
   `seed`), following the TWOSEX-MSChart technique.
 - New `lifeTable_boot_test()`: paired two-cohort bootstrap comparison.
 
+**Improved**
+
+- LC50 regression plots: when a replicate error bar is wide enough to
+  reach into the LC reference label, the label now shifts vertically by
+  the smallest amount that restores a clearance of about one line height
+  from the bar end (preferring its own side of the LC crossing) instead
+  of staying at its fixed height and colliding.
+
 **Internal changes**
 
 - Regenerated the roxygen documentation and NAMESPACE for all new

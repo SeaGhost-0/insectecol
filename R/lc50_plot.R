@@ -83,6 +83,10 @@
 #'   crossing, the label is placed in one of the two free ones: above
 #'   the crossing when it sits left of the vertical reference line,
 #'   below it when it sits right, at a clearance of \code{lc_lab_dy}.
+#'   If a replicate error bar reaches into the label block, the block is
+#'   shifted vertically by the smallest amount that restores a clearance
+#'   of about one line height from the bar end, preferring the direction
+#'   that keeps it on its own side of the crossing.
 #'
 #' @return Named list of ggplot objects (invisibly).
 #' @seealso \code{\link{save_lc50}}, \code{\link{save_lc50_plot}}
@@ -565,6 +569,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   # of the block from the crossing".
   x_mid <- (x_lo + x_hi) / 2
   x_lab_w <- x_hi - x_lo
+  bar_w <- 0.018 * (x_hi - x_lo)   # cap width of the error bars
   lc_lab_pt <- 25                    # LC label font, in points on the device
   lc_lab_size <- lc_lab_pt / ggplot2::.pt
   n_lab <- length(lc_lines)
@@ -630,6 +635,46 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
     lab_bottom <- lab_top - lab_h
   }
 
+  # NEW: with large error bars one can reach into the label block. Every
+  # bar whose horizontal extent (cap width included) overlaps the block's
+  # x range forbids a vertical band around [lo, hi], widened by half the
+  # visual height of the text block plus the wanted air (one line pitch
+  # in total). If the block intersects such a band, it is shifted
+  # vertically by the smallest amount that lands it in a free gap,
+  # preferring the direction that keeps it on its own side of the
+  # crossing (above the crossing when it sits left of the line, below it
+  # when it sits right). When no free gap exists (the block is squeezed
+  # between two bars), the original position is kept.
+  eb_ok <- pts[is.finite(pts[["lo"]]), , drop = FALSE]  # none w/o error bars
+  if (nrow(eb_ok) > 0) {
+    pad <- 0.9 * lab_pitch  # half text height + wanted air, in y units
+    bx_lo <- x_lab - lab_half
+    bx_hi <- x_lab + lab_half
+    hit <- eb_ok[eb_ok[["Conc"]] + bar_w / 2 >= bx_lo &
+                 eb_ok[["Conc"]] - bar_w / 2 <= bx_hi, , drop = FALSE]
+    if (nrow(hit) > 0) {
+      band_lo <- hit[["lo"]] - pad
+      band_hi <- hit[["hi"]] + pad
+      collide <- function(b) any(band_hi > b & band_lo < b + lab_h)
+      if (collide(lab_bottom)) {
+        prefer_up <- lab_bottom >= lc_y
+        cand_b <- c(band_hi, band_lo - lab_h)  # on top of / under every band
+        keep <- cand_b >= 0.5 * lab_pitch &
+          cand_b + lab_h <= 1 - 0.5 * lab_pitch
+        cand_b <- cand_b[keep]
+        cand_b <- cand_b[!vapply(cand_b, collide, logical(1))]
+        if (length(cand_b) > 0) {
+          d <- abs(cand_b - lab_bottom)
+          # equal distances: keep the move along the block's own side
+          if (prefer_up) d[cand_b < lab_bottom] <- d[cand_b < lab_bottom] + 1e-9
+          else d[cand_b >= lab_bottom] <- d[cand_b >= lab_bottom] + 1e-9
+          lab_bottom <- cand_b[which.min(d)]
+          lab_top <- lab_bottom + lab_h
+        }
+      }
+    }
+  }
+
   # NEW: labels moved into the panel hug their dashed line by default
   # and flip to the other side only when they would not fit between the
   # line and the panel edge, or (x) when the LC label already occupies
@@ -648,7 +693,6 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   tick_lab_gap <- 0.15
   axis_text_col <- "grey10"
   axis_lab_size <- 0.8 * base_size / ggplot2::.pt
-  bar_w <- 0.018 * (x_hi - x_lo)   # cap width of the error bars
 
   # ggplot2 draws layers in the order they are added (later = on top), so
   # the confidence band goes in first and the observed error bars and
