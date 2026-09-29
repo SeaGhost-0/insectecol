@@ -70,7 +70,19 @@ threshold are marked where defined.
 f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
 fit <- gdd_calc(gdd_read(f), by = "stage")
 gdd_plot(fit, group = "Egg")
+
+## Custom title, subtitle and axis labels (portable English example):
+gdd_plot(fit, group = "Egg",
+         title = "Developmental rate vs temperature",
+         sub = "Constant-temperature rearing experiment, 2026")
+
+## Chinese titles work on the interactive Windows and ragg devices
+## (the Chinese characters fall back to SimSun); the plain pdf()
+## device cannot render CJK glyphs on many platforms, so this part
+## is not run automatically:
+\dontrun{
 gdd_plot(fit, group = "Egg", title = "卵的发育速率",
          sub = "2026 年饲养实验", xlab = "温度 (°C)",
          ylab = "发育速率 (1/d)")
+}
 }
