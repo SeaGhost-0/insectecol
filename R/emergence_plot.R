@@ -28,6 +28,13 @@
 #'   the system serif font elsewhere; Chinese characters are
 #'   rendered through the device's font fallback (SimSun on Chinese
 #'   Windows). Set to \code{""} for the device default.
+#' @param cex Overall text-size multiplier. Default \code{2}: the
+#'   exported figure is meant to be placed at half the text width of
+#'   a manuscript, where the labels, ticks and title then appear at
+#'   about the size of the body text (12 pt). Set to \code{1} for
+#'   full-screen viewing; the margins scale with \code{cex}
+#'   automatically.
+#' @param lwd Overall line-width multiplier. Default \code{2}.
 #' @param xlab,ylab Axis labels.
 #' @param ... Further graphical parameters passed to \code{plot}.
 #' @importFrom graphics abline arrows axis box legend lines mtext par
@@ -51,11 +58,14 @@
 #' }
 plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
                            sub = NULL, family = "serif",
+                           cex = 2, lwd = 2,
                            xlab = "Projected eclosion date",
                            ylab = "Cumulative development (%)", ...) {
   if (!inherits(x, "emergence"))
     stop("x must be an 'emergence' object returned by ",
          "emergence_calc().", call. = FALSE)
+  cex <- max(cex, 0.2)
+  lwd <- max(lwd, 0.2)
 
   ## font handling: identical to gdd_plot --- showtext off (it
   ## renders whole strings in one font, losing the per-glyph CJK
@@ -66,7 +76,9 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
     grDevices::windowsFonts(`Times New Roman` =
                               grDevices::windowsFont("Times New Roman")),
     error = function(e) NULL)
-  op <- par(mar = c(4.5, 4.5, 3, 1), family = family)
+  ## margins grow with the text size so that the axis titles fit
+  op <- par(mar = c(4.2, 4.2, 3, 1) + (cex - 1) * c(2.6, 2.6, 2, 0),
+            family = family)
   on.exit(par(op), add = TRUE)
 
   d <- x$table
@@ -83,26 +95,28 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   xr <- c(xr[1] - pad, xr[2] + pad)
 
   plot(NA, xlim = xr, ylim = c(0, 106), type = "n", axes = FALSE,
-       xlab = xlab, ylab = ylab, ...)
+       xlab = xlab, ylab = ylab, cex.lab = cex, ...)
   ats <- pretty(xs)
-  axis(1, at = ats, labels = format(ats, "%m-%d"))
-  axis(2, at = seq(0, 100, 20), las = 1)
-  box()
+  axis(1, at = ats, labels = format(ats, "%m-%d"), cex.axis = 0.85 * cex)
+  axis(2, at = seq(0, 100, 20), las = 1, cex.axis = 0.85 * cex)
+  box(lwd = lwd * 0.8)
 
-  ## survey date reference line
-  abline(v = x$survey_date, col = "grey60", lty = 3)
-  text(x$survey_date, 103, "survey", cex = 0.7, col = "grey40")
+  ## survey date reference line; the label sits just above the x axis
+  ## so that it cannot collide with the legend block in the corner
+  abline(v = x$survey_date, col = "grey60", lty = 3, lwd = lwd * 0.8)
+  text(x$survey_date, 3.5, "survey", cex = 0.7 * cex, col = "grey40",
+       pos = 4, offset = 0.3, xpd = TRUE)
 
   ## cumulative development curve
-  lines(xs, ys, col = "grey20", lwd = 1.4)
-  points(xs, ys, pch = 19, cex = 0.8, col = "grey20")
+  lines(xs, ys, col = "grey20", lwd = lwd)
+  points(xs, ys, pch = 19, cex = 0.8 * cex * 0.6, col = "grey20")
 
   ## quantile crossings
   for (i in seq_len(nrow(pr))) {
-    abline(h = pr$p[i] * 100, col = col_acc, lty = 2, lwd = 0.7)
-    abline(v = pr$date[i], col = col_acc, lty = 2, lwd = 0.7)
+    abline(h = pr$p[i] * 100, col = col_acc, lty = 2, lwd = lwd * 0.6)
+    abline(v = pr$date[i], col = col_acc, lty = 2, lwd = lwd * 0.6)
     points(pr$date[i], pr$p[i] * 100, pch = 21, bg = "white",
-           col = col_acc, cex = 1.2, lwd = 1.2)
+           col = col_acc, cex = 1.2 * cex * 0.6, lwd = lwd)
   }
 
   ## hatch arrows and markers
@@ -110,19 +124,21 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
     for (i in seq_len(nrow(pr)))
       arrows(pr$date[i], pr$p[i] * 100, pr$hatch_date[i],
              pr$p[i] * 100, length = 0.08, col = "grey45",
-             lwd = 0.7, lty = 1)
+             lwd = lwd * 0.7, lty = 1)
     points(pr$hatch_date, pr$p * 100, pch = 24, bg = "white",
-           col = "grey30", cex = 0.95, lwd = 1)
+           col = "grey30", cex = 0.95 * cex * 0.6, lwd = lwd * 0.8)
   }
 
-  ## legend block: quantile dates (and hatch dates)
+  ## legend block: quantile dates (and hatch dates); the opaque white
+  ## background keeps the reference lines from running through the text
   leg <- if (use_hatch)
     sprintf("%-18s %s  ->  %s", pr$label, format(pr$date, "%m-%d"),
             format(pr$hatch_date, "%m-%d"))
   else
     sprintf("%-18s %s", pr$label, format(pr$date, "%m-%d"))
-  legend("topleft", legend = leg, bty = "n", cex = 0.85,
-         text.col = col_acc, inset = c(0.01, 0.01))
+  legend("topleft", legend = leg, bty = "o", cex = 0.85 * cex,
+         text.col = col_acc, box.col = "grey75", box.lwd = lwd * 0.5,
+         bg = "white", inset = c(0.01, 0.01))
 
   ## title / subtitle resolution
   auto_main <- if (is.finite(x$n))
@@ -137,6 +153,7 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   else NULL
   main <- if (is.null(title)) auto_main else title
   sub_ <- if (!is.null(sub)) sub else auto_sub
-  title(main = main, sub = sub_, cex.main = 1.05)
+  title(main = main, sub = sub_,
+        cex.main = 0.95 * cex, cex.sub = 0.7 * cex)
   invisible(NULL)
 }
