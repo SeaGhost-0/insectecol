@@ -433,7 +433,12 @@ and xlsx files are read via `readxl`.
 
 ## Updates
 
-### 1.0.2 (development)
+### 1.1.0 (development)
+
+Version 1.1.0 adds the emergence-period module, standardises the
+function naming across all modules (`<module>_<verb>` with the same
+verbs everywhere, see below) and removes the no-longer-needed
+`gdd_from_lifetable()` bridge.
 
 **Function naming unified across modules**
 
@@ -554,10 +559,11 @@ and xlsx files are read via `readxl`.
 
 **Internal changes**
 
-- Regenerated the roxygen documentation and NAMESPACE for all new
-  functions and S3 methods (`print`/`summary`/`plot`/`predict` methods
-  for the `gdd` object, `print` for the bootstrap object).
-- Bumped the version to 1.0.2.
+- Regenerated the roxygen documentation and NAMESPACE for all new and
+  renamed functions and S3 methods (`print`/`summary`/`plot`/`predict`
+  methods for the `gdd` and `emergence` objects, `print` for the
+  bootstrap object).
+- Bumped the version to 1.1.0.
 
 ### 1.0.1 (CRAN submission round)
 
