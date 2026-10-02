@@ -8,7 +8,7 @@ calc_T(lt, R0 = NULL, r = NULL)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 
 \item{R0}{Optional; the result of \code{\link{calc_R0}}.}
 
@@ -25,7 +25,7 @@ current size when increasing at the constant rate \code{r}.
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 calc_T(lt)
 }
 \references{

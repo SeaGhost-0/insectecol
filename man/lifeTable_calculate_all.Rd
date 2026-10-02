@@ -8,7 +8,7 @@ lifeTable_calculate_all(lt, fecundity = TRUE)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 
 \item{fecundity}{Logical; whether to compute the reproduction-related
 parameters (F, F_xj, m_x, R0, r, lambda, T). \code{FALSE} skips them
@@ -35,7 +35,7 @@ The intermediate results are passed on internally, so nothing
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 results <- lifeTable_calculate_all(lt)
 results$R0
 lifeTable_calculate_all(lt, fecundity = FALSE)$N

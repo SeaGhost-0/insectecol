@@ -102,16 +102,16 @@
 #' overwrite each other.
 #'
 #' @return Named list of ggplot objects (invisibly).
-#' @seealso \code{\link{save_lc50}}, \code{\link{save_lc50_plot}}
+#' @seealso \code{\link{lc50_export}}, \code{\link{lc50_export_plot}}
 #' @export
 #' @examples
 #' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-#' res <- lc50_calculate(read_lc50(f))
-#' plots <- plot_lc50(res, save_path = tempdir())
-#' plots <- plot_lc50(res, shape = "linear", save_path = tempdir())  # original axis
-#' plots <- plot_lc50(res, ci = FALSE, error_bar = FALSE,
+#' res <- lc50_calculate(lc50_read(f))
+#' plots <- lc50_plot(res, save_path = tempdir())
+#' plots <- lc50_plot(res, shape = "linear", save_path = tempdir())  # original axis
+#' plots <- lc50_plot(res, ci = FALSE, error_bar = FALSE,
 #'                    save_path = tempdir())                          # bare version
-plot_lc50 <- function(results, save_path = NULL, font = "TNM",
+lc50_plot <- function(results, save_path = NULL, font = "TNM",
                       width = 7, height = 6, dpi = 300, unit = NULL,
                       shape = c("sigmoid", "linear"),
                       ci = TRUE, ci_level = 0.95,
@@ -162,10 +162,10 @@ plot_lc50 <- function(results, save_path = NULL, font = "TNM",
 
 #' Save LC50 Plots
 #'
-#' Saves one plot or a list of plots from \code{\link{plot_lc50}}, like
+#' Saves one plot or a list of plots from \code{\link{lc50_plot}}, like
 #' \code{ggsave(path, plot, device = "tiff", width = 12, height = 8,
 #' dpi = 300, units = "cm", bg = "white")} but with the dpi handling of
-#' \code{plot_lc50} applied. The same plot object can be written at any
+#' \code{lc50_plot} applied. The same plot object can be written at any
 #' dpi without being re-created.
 #'
 #' @param plot A ggplot or a (named) list of ggplots.
@@ -178,13 +178,13 @@ plot_lc50 <- function(results, save_path = NULL, font = "TNM",
 #' @param ... Further arguments passed on to \code{ggsave}.
 #'
 #' @return Path(s) of the written file(s), invisibly.
-#' @seealso \code{\link{plot_lc50}}, \code{\link{save_lc50}}
+#' @seealso \code{\link{lc50_plot}}, \code{\link{lc50_export}}
 #' @export
 #' @examples
 #' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-#' plots <- plot_lc50(lc50_calculate(read_lc50(f)))
-#' save_lc50_plot(plots$bioassay, file.path(tempdir(), "LC50_demo.tiff"))
-save_lc50_plot <- function(plot, path = NULL, device = "tiff",
+#' plots <- lc50_plot(lc50_calculate(lc50_read(f)))
+#' lc50_export_plot(plots$bioassay, file.path(tempdir(), "LC50_demo.tiff"))
+lc50_export_plot <- function(plot, path = NULL, device = "tiff",
                            width = 12, height = 8, dpi = 300,
                            units = "cm", bg = "white", ...) {
   if (is.null(path)) {
@@ -201,7 +201,7 @@ save_lc50_plot <- function(plot, path = NULL, device = "tiff",
     if (is.null(nms) || any(!nzchar(nms)))
       nms <- paste0("Plot", seq_along(plot))
     out <- vapply(seq_along(plot), function(i) {
-      save_lc50_plot(plot[[i]],
+      lc50_export_plot(plot[[i]],
                      file.path(path, paste0("LC50_", nms[i], ".", ext)),
                      device = device, width = width, height = height,
                      dpi = dpi, units = units, bg = bg, ...)

@@ -68,7 +68,7 @@ f <- system.file("extdata", "Example.csv", package = "insectecol")
 lifeTable_calculate(f, output_path = file.path(tempdir(), "insectecol-demo"))
 }
 \seealso{
-\code{\link{read_life_table}}, \code{\link{lifeTable_calculate_all}},
-  \code{\link{lifeTable_bootstrap}}, \code{\link{plot_sxj}},
-  \code{\link{save_results}}
+\code{\link{lifeTable_read}}, \code{\link{lifeTable_calculate_all}},
+  \code{\link{lifeTable_bootstrap}}, \code{\link{lifeTable_plot}},
+  \code{\link{lifeTable_export}}
 }

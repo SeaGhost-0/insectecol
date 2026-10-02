@@ -8,7 +8,7 @@ lifeTable_bootstrap(lt, B = 1e+05, seed = NULL, conf.level = 0.95)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}} or \code{\link{build_life_table}}.}
+\code{\link{lifeTable_read}} or \code{\link{lifeTable_build}}.}
 
 \item{B}{Integer; number of bootstrap replicates. The published
 TWOSEX-MSChart standard is \code{100000} (the default); smaller
@@ -60,12 +60,12 @@ The parameters covered are the mean developmental time of
   bootstrapped.
 
   Attach the result to an analysis to have it exported by
-  \code{\link{save_results}}:
+  \code{\link{lifeTable_export}}:
   \code{results$boot <- lifeTable_bootstrap(lt)}.
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 
 ## B = 100000 is the recommended setting for publications; a smaller
 ## B is used here so that the example runs fast

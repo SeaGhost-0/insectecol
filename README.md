@@ -23,8 +23,8 @@ modules:
   to Excel in a single run. Fast batch processing of multi-group
   datasets is supported.
 - **Dose-response bioassay** - main function `lc50_analyze()` for data
-  already loaded in R, one-step batch functions `save_lc50_auto()`
-  (Excel tables) and `save_lc50_plot_auto()` (figures) for csv files
+  already loaded in R, one-step batch functions `lc50_export_auto()`
+  (Excel tables) and `lc50_export_plot_auto()` (figures) for csv files
   on disk. Estimates lethal concentrations by the traditional and the
   weighted (improved) linear regression methods and by probit analysis,
   with Abbott correction, 95% confidence intervals and chi-square
@@ -47,7 +47,7 @@ modules:
   prediction (`gdd_predict()`), pairwise
   group comparison (`gdd_compare()`), degree-day accumulation from daily
   Tmin/Tmax (`gdd_daily()`), deriving data from a life-table csv
-  (`gdd_from_lifetable()`) and csv/xlsx export (`gdd_export()`).
+  csv/xlsx export (`gdd_export()`) and png export (`gdd_export_plot()`).
 - **Emergence-period projection (stage-grading method)** - main function
   `emergence_analyze()` for data already loaded in R (column vectors, a
   data frame, or csv/xlsx file(s)). Turns one field survey of the
@@ -59,8 +59,9 @@ modules:
   period and the egg duration. Quantiles outside the surveyed range are
   extrapolated with an explicit warning, English and Chinese column
   headers are auto-detected, publication figures follow the same
-  serif-font conventions as the degree-day module, and tables are
-  exported with `emergence_export()`.
+  serif-font conventions as the degree-day module, and tables and
+  figures are exported with `emergence_export()` /
+  `emergence_export_plot()`.
 
 ### Which main function should I use?
 
@@ -71,19 +72,19 @@ function** for processing csv files on disk:
 | Module | Main function (data in R) | One-step batch (csv on disk) |
 |---|---|---|
 | Life table | `lifeTable_analyze()` | `lifeTable_calculate()` |
-| Bioassay | `lc50_analyze()` | `save_lc50_auto()` (tables), `save_lc50_plot_auto()` (figures) |
-| Degree-day | `gdd_analyze()` | `gdd_analyze(path = ...)` also reads files/folders, `gdd_export()` writes the tables |
-| Emergence period | `emergence_analyze()` | `emergence_analyze(path = ...)` also reads files/folders, `emergence_export()` writes the tables |
+| Bioassay | `lc50_analyze()` | `lc50_export_auto()` (tables), `lc50_export_plot_auto()` (figures) |
+| Degree-day | `gdd_analyze()` | `gdd_analyze(path = ...)` also reads files/folders, `gdd_export()` writes the tables, `gdd_export_plot()` the figure |
+| Emergence period | `emergence_analyze()` | `emergence_analyze(path = ...)` also reads files/folders, `emergence_export()` writes the tables, `emergence_export_plot()` the figure |
 
 The main functions assemble the data, compute everything and optionally
 build the plots, but never write to disk - export is handled separately by
-`save_results()`, `save_lc50()` and `save_lc50_plot()`, so the results stay
+`lifeTable_export()`, `lc50_export()` and `lc50_export_plot()`, so the results stay
 fully customisable inside R.
 
 For full control, every module can also be driven step by step
-(`read_life_table()` -> `lifeTable_calculate_all()` -> `plot_sxj()` ->
-`save_results()`, and `read_lc50()` -> `lc50_calculate()` -> `plot_lc50()`
--> `save_lc50()` / `save_lc50_plot()`); see the function reference below.
+(`lifeTable_read()` -> `lifeTable_calculate_all()` -> `lifeTable_plot()` ->
+`lifeTable_export()`, and `lc50_read()` -> `lc50_calculate()` -> `lc50_plot()`
+-> `lc50_export()` / `lc50_export_plot()`); see the function reference below.
 
 Planned extensions include more insect ecology indicators, such as the
 median lethal temperature/time (LT50).
@@ -168,7 +169,7 @@ out$results$summary_df       # estimate, 95% CI, slope, chi-square, ...
 
 # ... or straight from the example csv shipped with the package
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-out_csv <- lc50_analyze(read_lc50(f), method = "all")
+out_csv <- lc50_analyze(lc50_read(f), method = "all")
 out_csv$results$summary_df
 
 # with the regression plot (a named list of ggplot objects)
@@ -184,8 +185,8 @@ written next to the raw data; non-default settings are appended to the
 file names, e.g. `LB_48_LC90_probit.xlsx`):
 
 ```r
-save_lc50_auto("path/to/bioassay_data", method = "probit")
-save_lc50_plot_auto("path/to/bioassay_data", method = "probit")
+lc50_export_auto("path/to/bioassay_data", method = "probit")
+lc50_export_plot_auto("path/to/bioassay_data", method = "probit")
 ```
 
 ## Quick start: degree-day (thermal constants)
@@ -225,11 +226,13 @@ sharpness and the recorded dpi, never the layout.
 
 For batch csv processing, `gdd_analyze(path = "folder")` reads every
 csv/xlsx in a folder (combined with a `source_file` column), and
-`gdd_export()` writes the result tables:
+`gdd_export()` writes the result tables (`gdd_export_plot()` the
+figure):
 
 ```r
 out3 <- gdd_analyze(path = "path/to/gdd_data", model = "auto")
 gdd_export(out3$fit, file = "gdd_results.csv")
+gdd_export_plot(out3$fit, file = "gdd.png")
 ```
 
 ## Quick start: emergence period (stage-grading method)
@@ -269,7 +272,8 @@ development curve built from the survey; a survey that misses stages
 simply renormalises the shares, while a quantile below the share of
 the most developed stage (partly eclosed before the survey) is
 extrapolated backwards with an explicit warning. Tables are exported
-with `emergence_export(fit, file = "emergence_results.csv")`.
+with `emergence_export(fit, file = "emergence_results.csv")`, the
+figure with `emergence_export_plot(fit, file = "emergence.png")`.
 
 ## Example data
 
@@ -378,27 +382,27 @@ and xlsx files are read via `readxl`.
 | Function | Purpose |
 |---|---|
 | `lifeTable_analyze()` | **main function** - analyse data in R (build + compute + optional plot) |
-| `build_life_table()` | build a `life_table` object from user-supplied columns |
-| `read_life_table()` | read and validate a life table csv file |
+| `lifeTable_build()` | build a `life_table` object from user-supplied columns |
+| `lifeTable_read()` | read and validate a life table csv file |
 | `lifeTable_calculate()` | batch: analyse every csv in a folder and export to Excel |
 | `lifeTable_calculate_all()` | all parameters of one `life_table` object |
 | `calc_N()`, `calc_F()`, `calc_sxj()`, `calc_lx()`, `calc_fxj()`, `calc_mx()`, `calc_ex()`, `calc_R0()`, `calc_r()`, `calc_lambda()`, `calc_T()` | individual indicators |
-| `plot_sxj()` | age-stage survival rate curves |
-| `save_results()` | export one analysis to Excel |
-| `check_life_table()`, `get_stage_names()`, `default_stage_names()` | helpers |
+| `lifeTable_plot()` | age-stage survival rate curves |
+| `lifeTable_export()` | export one analysis to Excel |
+| `lifeTable_check()`, `get_stage_names()`, `default_stage_names()` | helpers |
 
 ### Bioassay module
 
 | Function | Purpose |
 |---|---|
 | `lc50_analyze()` | **main function** - analyse data in R (build + compute + optional plots) |
-| `read_lc50()` | read bioassay csv file(s) |
+| `lc50_read()` | read bioassay csv file(s) |
 | `lc50_calculate()` | compute the LC values; several methods (or `"all"`) in one call |
-| `plot_lc50()` | regression plots |
-| `save_lc50()` | export results to Excel |
-| `save_lc50_plot()` | export figures |
-| `save_lc50_auto()` | one-step batch: csv file(s) -> Excel workbook(s) |
-| `save_lc50_plot_auto()` | one-step batch: csv file(s) -> tiff figure(s) |
+| `lc50_plot()` | regression plots |
+| `lc50_export()` | export results to Excel |
+| `lc50_export_plot()` | export figures |
+| `lc50_export_auto()` | one-step batch: csv file(s) -> Excel workbook(s) |
+| `lc50_export_plot_auto()` | one-step batch: csv file(s) -> tiff figure(s) |
 | `check_path_type()` | path helper (folder / csv file) |
 
 ### Degree-day module
@@ -413,8 +417,8 @@ and xlsx files are read via `readxl`.
 | `gdd_plot()` | fitted line/curve per group (custom titles, font family, size/dpi) |
 | `gdd_predict()` | predicted developmental duration at given temperatures |
 | `gdd_daily()` | degree-day accumulation from daily Tmin/Tmax (avg / triangle method) |
-| `gdd_from_lifetable()` | derive temperature/duration data from a life-table csv |
 | `gdd_export()` | export the result tables to csv/xlsx |
+| `gdd_export_plot()` | export the fitted line/curve figure as png |
 
 ### Emergence module
 
@@ -424,11 +428,40 @@ and xlsx files are read via `readxl`.
 | `emergence_read()` | read an emergence csv/xlsx file or a folder of them (batch) |
 | `emergence_calc()` | cumulative development + quantile dates from a survey table |
 | `emergence_export()` | export the prediction and stage tables to csv/xlsx |
+| `emergence_export_plot()` | export the projection figure as png |
 | `print()` / `summary()` / `predict()` / `plot()` | S3 methods for the `emergence` object (`predict(fit, p)` interpolates arbitrary quantiles) |
 
 ## Updates
 
 ### 1.0.2 (development)
+
+**Function naming unified across modules**
+
+- Every pipeline function now follows the `<module>_<verb>` scheme of
+  the newer modules, and every module uses the same word for the same
+  action - `*_analyze()` (main entry), `*_read()` (file intake),
+  `*_plot()` (figures), `*_export()` (tables to csv/xlsx),
+  `*_export_plot()` (figures to png/tiff). Renamed:
+  `read_life_table()` -> `lifeTable_read()`,
+  `build_life_table()` -> `lifeTable_build()`,
+  `plot_sxj()` -> `lifeTable_plot()`,
+  `check_life_table()` -> `lifeTable_check()`,
+  `save_results()` -> `lifeTable_export()`,
+  `read_lc50()` -> `lc50_read()`,
+  `plot_lc50()` -> `lc50_plot()`,
+  `save_lc50()` -> `lc50_export()`,
+  `save_lc50_plot()` -> `lc50_export_plot()`,
+  `save_lc50_auto()` -> `lc50_export_auto()` and
+  `save_lc50_plot_auto()` -> `lc50_export_plot_auto()`.
+  The old names are removed (the previous release had essentially no
+  users); the low-level indicator helpers (`calc_N()`, `calc_R0()`,
+  ...) keep their short names.
+- New `gdd_export_plot()` and `emergence_export_plot()`: export the
+  figure of an existing fit as png at any time (the standalone
+  counterpart of `plot_file =` in the two `*_analyze()` functions,
+  which now reuse them internally).
+- Removed `gdd_from_lifetable()`: the raw-life-table bridge is not
+  needed any more.
 
 **New module: emergence-period projection (stage-grading method)**
 
@@ -456,7 +489,8 @@ and xlsx files are read via `readxl`.
 - `predict(fit, p)` interpolates arbitrary quantiles; the
   `fit$interpolate` closure supports further programming.
 - Publication figures with the same serif-font conventions and
-  physical-size png export as the degree-day module; `emergence_export()`
+  physical-size png export as the degree-day module;
+  `emergence_export_plot()` writes the figure, `emergence_export()`
   writes the prediction and stage tables to csv/xlsx.
 - Example data: `inst/extdata/emergence_example.csv` (Tianyang
   overwintering-generation survey, 40 individuals, 10 stages).
@@ -488,8 +522,8 @@ and xlsx files are read via `readxl`.
 - Further tools: `gdd_read()` (csv/xlsx file or folder, delimiter and
   column auto-detection, English/Chinese headers), `gdd_compare()`
   (pairwise group comparison), `gdd_predict()`, `gdd_daily()` (avg and
-  triangle methods), `gdd_from_lifetable()` (bridges from raw life-table
-  files) and `gdd_export()` (csv/xlsx).
+  triangle methods), `gdd_export()` (csv/xlsx) and `gdd_export_plot()`
+  (png figure).
 - Example data: `inst/extdata/gdd_example.csv` and the per-temperature
   files in `inst/extdata/gdd_batch/`.
 
@@ -624,6 +658,6 @@ citation("insectecol")
 
 If you use the life table module in a publication, please also cite the
 method papers behind the age-stage, two-sex theory (Chi & Liu 1985; Chi
-1988 - see the references of `read_life_table()`), and for probit
+1988 - see the references of `lifeTable_read()`), and for probit
 analysis Finney (1971) together with Abbott (1925) for the correction of
 natural mortality.

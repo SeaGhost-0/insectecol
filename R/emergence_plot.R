@@ -30,7 +30,7 @@
 #'   Windows). Set to \code{""} for the device default.
 #' @param xlab,ylab Axis labels.
 #' @param ... Further graphical parameters passed to \code{plot}.
-#' @importFrom graphics abline arrows axis box lines mtext par
+#' @importFrom graphics abline arrows axis box legend lines mtext par
 #'   plot points text
 #' @method plot emergence
 #' @export

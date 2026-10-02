@@ -8,7 +8,7 @@ calc_lambda(lt, r = NULL)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 
 \item{r}{Optional; the result of \code{\link{calc_r}}. Supplying it
 avoids recomputing.}
@@ -24,7 +24,7 @@ declines when \code{lambda < 1}.
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 calc_lambda(lt)
 }
 \references{

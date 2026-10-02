@@ -9,7 +9,7 @@ lc50_traditional(d, lc = 0.5)
 \arguments{
 \item{d}{A data frame with the columns \code{Concentration},
 \code{Tested} and \code{Dead}, as returned by
-\code{\link{read_lc50}}; rows with \code{Concentration = 0} are
+\code{\link{lc50_read}}; rows with \code{Concentration = 0} are
 treated as the control group.}
 
 \item{lc}{Numeric; the lethal proportion for which the concentration

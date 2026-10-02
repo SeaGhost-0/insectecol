@@ -139,3 +139,12 @@ test_that("the plot method draws without error", {
   expect_error(plot(fit), NA)
   expect_error(plot(fit, show_hatch = FALSE), NA)
 })
+
+test_that("emergence_export_plot writes a png", {
+  fit <- emergence_calc(ty, survey_date = SD, pre_ovip = 3, egg_days = 10)
+  f <- tempfile(fileext = ".png")
+  out <- suppressMessages(emergence_export_plot(fit, f))
+  expect_equal(out, f)
+  expect_true(file.exists(f))
+  expect_true(file.size(f) > 0)
+})

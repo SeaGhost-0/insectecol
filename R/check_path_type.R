@@ -24,7 +24,7 @@
 #'   \item{"other file"}{the path exists and is a file with another extension}
 #'   \item{"invalid path"}{the path does not exist or is not a valid path string}
 #'
-#' @seealso \code{\link{read_lc50}}
+#' @seealso \code{\link{lc50_read}}
 #' @export
 #' @examples
 #' check_path_type(tempdir())

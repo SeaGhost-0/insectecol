@@ -33,6 +33,11 @@ string (\code{"2026-03-20"}, \code{"2026/3/20"}).}
 \item{p}{Numeric vector of emergence quantiles, default
 \code{c(0.16, 0.5, 0.84)}.}
 
+\item{labels}{Optional labels of the quantiles (same length as
+\code{p}); \code{NULL} (default) uses \samp{Beginning (16\%)}
+etc. for the default \code{p}, or \samp{16\%}-style labels
+otherwise.}
+
 \item{pre_ovip}{Pre-oviposition period in days (default 0 = not
 used).}
 

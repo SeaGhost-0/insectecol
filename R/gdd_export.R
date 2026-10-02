@@ -75,3 +75,62 @@ gdd_export <- function(x, file = "gdd_results.csv",
   message("Results saved to: ", normalizePath(file))
   invisible(file)
 }
+
+#' Export the Degree-Day Plot as PNG
+#'
+#' Draws the degree-day figure of a \code{"gdd"} object on a png
+#' device (ragg when available, otherwise \code{\link[grDevices]{png}})
+#' and writes it to disk - the standalone counterpart of
+#' \code{plot_file =} in \code{\link{gdd_analyze}}, usable on an
+#' existing fit at any time. All plot options of \code{\link{gdd_plot}}
+#' are supported.
+#'
+#' @param x A \code{"gdd"} object returned by [gdd_calc()] or
+#'   [gdd_analyze()].
+#' @param file Output png path.
+#' @param group,show_C,show_Topt,title,sub,xlab,ylab,family Plot
+#'   options, see \code{\link{gdd_plot}}; \code{NULL} (default) keeps
+#'   the function defaults.
+#' @param width,height,units,res Physical size and resolution of the
+#'   png; the composition is identical at every resolution,
+#'   \code{res} only adds pixels (same semantics as in
+#'   \code{\link{gdd_analyze}}).
+#' @param ... Further arguments passed to \code{\link{gdd_plot}}.
+#' @return Invisibly, \code{file}.
+#' @examples
+#' \donttest{
+#' f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
+#' fit <- gdd_calc(gdd_read(f), by = "stage")
+#' gdd_export_plot(fit, tempfile(fileext = ".png"),
+#'                 title = "发育速率与温度的关系")
+#' }
+#' @export
+gdd_export_plot <- function(x, file = "gdd_plot.png", group = NULL,
+                            show_C = TRUE, show_Topt = TRUE,
+                            title = NULL, sub = NULL,
+                            xlab = NULL, ylab = NULL, family = NULL,
+                            width = 10.67, height = 6,
+                            units = c("in", "cm", "px"), res = 150, ...) {
+  if (!inherits(x, "gdd"))
+    stop("x must be a 'gdd' object returned by gdd_calc().", call. = FALSE)
+  units <- match.arg(units)
+  pargs <- list(x = x, group = group, show_C = show_C,
+                show_Topt = show_Topt, title = title, sub = sub, ...)
+  if (!is.null(xlab))   pargs$xlab   <- xlab
+  if (!is.null(ylab))   pargs$ylab   <- ylab
+  if (!is.null(family)) pargs$family <- family
+  ## text sizes scale with res on a fixed-pixel canvas; compensate for
+  ## units = "px" so that res keeps the 150-dpi composition
+  pps <- if (units == "px") 12 * 150 / res else 12
+  if (requireNamespace("ragg", quietly = TRUE))
+    ragg::agg_png(file, width = width, height = height, units = units,
+                  res = res, pointsize = pps)
+  else
+    grDevices::png(file, width = width, height = height, units = units,
+                   res = res, pointsize = pps)
+  tryCatch(do.call(gdd_plot, pargs),
+           finally = while (!is.null(grDevices::dev.list()))
+             grDevices::dev.off())
+  message("Plot saved to: ", normalizePath(file))
+  invisible(file)
+}

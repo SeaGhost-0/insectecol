@@ -85,8 +85,8 @@ supplied).}
 \code{FALSE}).}
 
 \item{plot_file}{Optional png path: when supplied together with
-\code{plot = TRUE} the figure is written to this file (ragg
-when available, otherwise \code{grDevices::png}); when
+\code{plot = TRUE} the figure is written to this file (same
+machinery as \code{\link{emergence_export_plot}}); when
 \code{NULL} the plot is drawn on the current device (fully
 customisable afterwards by calling \code{plot()} on the
 returned \code{fit}).}
@@ -175,5 +175,6 @@ out4$fit$predictions
 }
 \seealso{
 \code{\link{emergence_read}},
-  \code{\link{emergence_calc}}, \code{\link{emergence_export}}
+  \code{\link{emergence_calc}}, \code{\link{emergence_export}},
+  \code{\link{emergence_export_plot}}
 }

@@ -39,5 +39,5 @@ check_path_type(tempdir())
 check_path_type(system.file("extdata", "bioassay.csv", package = "insectecol"))
 }
 \seealso{
-\code{\link{read_lc50}}
+\code{\link{lc50_read}}
 }

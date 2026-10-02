@@ -37,7 +37,7 @@ lc50_auto_stem <- function(nm, lc, method, suffix) {
 #'
 #' Reads the csv file(s) at \code{path}, computes the LC values with
 #' \code{\link{lc50_calculate}} and writes one Excel workbook per csv
-#' file with \code{\link{save_lc50}} - named after the data file and
+#' file with \code{\link{lc50_export}} - named after the data file and
 #' placed next to the raw data.
 #'
 #' @param path Character string; a csv file or a folder with csv files,
@@ -64,15 +64,15 @@ lc50_auto_stem <- function(nm, lc, method, suffix) {
 #'   \code{LB_48_probit.xlsx}.
 #'
 #' @return The paths of the written xlsx files, invisibly.
-#' @seealso \code{\link{save_lc50_plot_auto}} for the matching figure
-#'   export, \code{\link{save_lc50}} for a custom output location
+#' @seealso \code{\link{lc50_export_plot_auto}} for the matching figure
+#'   export, \code{\link{lc50_export}} for a custom output location
 #' @export
 #' @examples
 #' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
 #' tmp <- file.path(tempdir(), "bioassay.csv")
 #' file.copy(f, tmp, overwrite = TRUE)
-#' save_lc50_auto(tmp)                    # -> <tempdir>/bioassay.xlsx
-save_lc50_auto <- function(path = NULL, lc = 0.5, method = "traditional",
+#' lc50_export_auto(tmp)                    # -> <tempdir>/bioassay.xlsx
+lc50_export_auto <- function(path = NULL, lc = 0.5, method = "traditional",
                           suffix = NULL) {
   info <- lc50_auto_files(path)
   message(sprintf("Input: %s (%s, %d csv file(s))", info$path,
@@ -81,7 +81,7 @@ save_lc50_auto <- function(path = NULL, lc = 0.5, method = "traditional",
   skipped <- 0L
   for (f in info$files) {
     nm <- tools::file_path_sans_ext(basename(f))
-    lcd <- tryCatch(read_lc50(f), error = function(e) e)
+    lcd <- tryCatch(lc50_read(f), error = function(e) e)
     if (inherits(lcd, "error")) {
       if (!info$folder)
         stop("The input file could not be read: ", conditionMessage(lcd))
@@ -91,7 +91,7 @@ save_lc50_auto <- function(path = NULL, lc = 0.5, method = "traditional",
     }
     # 每个文件独立完成 读取 -> 计算 -> 导出，输出之间不可能串
     res <- lc50_calculate(lcd, lc = lc, method = method)
-    out <- save_lc50(res, output_dir = dirname(f),
+    out <- lc50_export(res, output_dir = dirname(f),
                      filename = paste0(lc50_auto_stem(nm, lc, method, suffix),
                                        ".xlsx"))
     est <- res$summary_df[["Estimate"]]
@@ -114,21 +114,21 @@ save_lc50_auto <- function(path = NULL, lc = 0.5, method = "traditional",
 #' Save the LC Figure of Every Data File (One image per csv)
 #'
 #' Reads the csv file(s) at \code{path}, computes the LC values, draws
-#' the regression plot of \code{\link{plot_lc50}} for every file and
-#' saves it with \code{\link{save_lc50_plot}} - named after the data
+#' the regression plot of \code{\link{lc50_plot}} for every file and
+#' saves it with \code{\link{lc50_export_plot}} - named after the data
 #' file and placed next to the raw data.
 #'
-#' @param path,lc,method,suffix Same as \code{\link{save_lc50_auto}}.
+#' @param path,lc,method,suffix Same as \code{\link{lc50_export_auto}}.
 #' @param device,width,height,dpi,units,bg Figure settings, passed on
-#'   to \code{\link{save_lc50_plot}} (defaults \code{"tiff"}, 12 x 8
+#'   to \code{\link{lc50_export_plot}} (defaults \code{"tiff"}, 12 x 8
 #'   cm, 600 dpi, white background).
 #' @param font,unit,shape,ci,ci_level,error_bar,move_thres,lc_ci,lc_p,lc_lab_gap,lc_lab_gap_right,lc_lab_dy,lc_lab_lh
-#'   Plot settings, passed on to \code{\link{plot_lc50}} unchanged.
+#'   Plot settings, passed on to \code{\link{lc50_plot}} unchanged.
 #' @param preview Logical (default \code{FALSE}); also print every
 #'   figure on the screen.
 #'
 #' @details The pipeline and the file-naming rules are the same as in
-#'   \code{\link{save_lc50_auto}}, plus \code{_linear} for
+#'   \code{\link{lc50_export_auto}}, plus \code{_linear} for
 #'   \code{shape = "linear"}: \code{LB_48.csv} gives \code{LB_48.tiff},
 #'   \code{lc = 0.9, method = "probit"} gives
 #'   \code{LB_48_LC90_probit.tiff}. The two functions are fully
@@ -139,17 +139,17 @@ save_lc50_auto <- function(path = NULL, lc = 0.5, method = "traditional",
 #'
 #' @return Invisibly a list with elements \code{plots} (named list of
 #'   the ggplot objects, e.g. for \code{print()} or
-#'   \code{save_lc50_plot(plots, ...)}) and \code{files} (paths of the
+#'   \code{lc50_export_plot(plots, ...)}) and \code{files} (paths of the
 #'   written images).
-#' @seealso \code{\link{save_lc50_auto}}, \code{\link{plot_lc50}},
-#'   \code{\link{save_lc50_plot}}
+#' @seealso \code{\link{lc50_export_auto}}, \code{\link{lc50_plot}},
+#'   \code{\link{lc50_export_plot}}
 #' @export
 #' @examples
 #' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
 #' tmp <- file.path(tempdir(), "bioassay.csv")
 #' file.copy(f, tmp, overwrite = TRUE)
-#' save_lc50_plot_auto(tmp)               # -> <tempdir>/bioassay.tiff
-save_lc50_plot_auto <- function(path = NULL, lc = 0.5,
+#' lc50_export_plot_auto(tmp)               # -> <tempdir>/bioassay.tiff
+lc50_export_plot_auto <- function(path = NULL, lc = 0.5,
                                 method = "traditional", suffix = NULL,
                                 device = "tiff", dpi = 600, width = 12,
                                 height = 8, units = "cm", bg = "white",
@@ -174,7 +174,7 @@ save_lc50_plot_auto <- function(path = NULL, lc = 0.5,
   skipped <- 0L
   for (f in info$files) {
     nm <- tools::file_path_sans_ext(basename(f))
-    lcd <- tryCatch(read_lc50(f), error = function(e) e)
+    lcd <- tryCatch(lc50_read(f), error = function(e) e)
     if (inherits(lcd, "error")) {
       if (!info$folder)
         stop("The input file could not be read: ", conditionMessage(lcd))
@@ -196,7 +196,7 @@ save_lc50_plot_auto <- function(path = NULL, lc = 0.5,
     }
     stem <- lc50_auto_stem(nm, lc, method, suffix)
     attr(gp, "lc50_name") <- paste0(stem, img_tag)
-    out <- save_lc50_plot(
+    out <- lc50_export_plot(
       gp, file.path(dirname(f), paste0(stem, img_tag, ".", ext)),
       device = device, width = width, height = height, dpi = dpi,
       units = units, bg = bg)

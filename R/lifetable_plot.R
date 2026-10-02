@@ -5,7 +5,7 @@
 #' style of the classical TWOSEX-MSChart plots.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param sxj Optional; the result of \code{\link{calc_sxj}}. Supplying it
 #'   avoids recomputing the age-stage survival rates.
 #' @param title Character; plot title. Defaults to the name of the csv
@@ -29,7 +29,7 @@
 #'   axis titles and legend labels can be customised.
 #'
 #'   The text sizes are calibrated for being drawn while showtext is
-#'   active at its default internal dpi (96); \code{\link{save_results}}
+#'   active at its default internal dpi (96); \code{\link{lifeTable_export}}
 #'   takes care of this when exporting. If you save the plot yourself,
 #'   switch showtext on around the \code{\link[ggplot2]{ggsave}} call,
 #'   otherwise the text comes out about 300/96 times too large.
@@ -37,12 +37,12 @@
 #' @return A ggplot object that can be customised further or saved with
 #'   \code{\link[ggplot2]{ggsave}}.
 #'
-#' @seealso \code{\link{calc_sxj}}, \code{\link{save_results}}
+#' @seealso \code{\link{calc_sxj}}, \code{\link{lifeTable_export}}
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' p <- plot_sxj(read_life_table(f))
-plot_sxj <- function(lt, sxj = NULL, title = NULL,
+#' p <- lifeTable_plot(lifeTable_read(f))
+lifeTable_plot <- function(lt, sxj = NULL, title = NULL,
                      x_title = "Age(days)",
                      y_title = "Age-Stage Survival Rate(Sxj)",
                      legend_labels = NULL, dpi = 300) {

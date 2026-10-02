@@ -6,12 +6,12 @@
 #' survival curve plot.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param results The result list returned by
 #'   \code{\link{lifeTable_calculate_all}}.
 #' @param output_path Character; folder the workbook is written to.
 #'   Defaults to the current working directory.
-#' @param plot A ggplot object (usually from \code{\link{plot_sxj}}); if
+#' @param plot A ggplot object (usually from \code{\link{lifeTable_plot}}); if
 #'   \code{NULL} (default) no image is exported.
 #' @param keep_tiff Logical; whether to keep the standalone tiff file
 #'   next to the workbook in addition to the copy embedded in it. Default
@@ -20,7 +20,7 @@
 #'
 #' @details The tiff is written through the internal \code{lt_ggsave()},
 #'   which enables showtext for the export device and pins showtext's
-#'   internal dpi to the value the text sizes of \code{\link{plot_sxj}}
+#'   internal dpi to the value the text sizes of \code{\link{lifeTable_plot}}
 #'   are calibrated for. The exported figure therefore looks the same in
 #'   every R session, no matter what showtext settings are left over in
 #'   the session. If the reproduction-related parameters were skipped
@@ -37,14 +37,14 @@
 #'
 #' @return The path of the exported xlsx file (invisibly).
 #'
-#' @seealso \code{\link{lifeTable_calculate}}, \code{\link{plot_sxj}}
+#' @seealso \code{\link{lifeTable_calculate}}, \code{\link{lifeTable_plot}}
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' results <- lifeTable_calculate_all(lt)
-#' save_results(lt, results, tempdir())
-save_results <- function(lt, results, output_path = getwd(), plot = NULL,
+#' lifeTable_export(lt, results, tempdir())
+lifeTable_export <- function(lt, results, output_path = getwd(), plot = NULL,
                          keep_tiff = FALSE, dpi = 300) {
   if (!dir.exists(output_path)) dir.create(output_path, recursive = TRUE)
   output_xlsx_path <- sprintf("%s/%s_out.xlsx", output_path, lt$file_name)
@@ -111,7 +111,7 @@ lt_showtext_dpi <- function() {
 # showtext enabled for the export device.
 #
 # showtext renders/measures text only at its own fixed internal resolution
-# (default 96), ignoring the device dpi. plot_sxj() is calibrated for this:
+# (default 96), ignoring the device dpi. lifeTable_plot() is calibrated for this:
 # its text sizes grow with dpi/300, and the showtext shrink factor of
 # 96/dpi cancels that growth, so the exported text keeps the physical size
 # it has at 300 dpi - at every dpi and for every device type (vector
@@ -121,7 +121,7 @@ lt_showtext_dpi <- function() {
 # whatever value happens to be active in the session, so the export is
 # identical in every new R session (this differs from lc50_ggsave(),
 # whose formula is ref * eff / 300, because lc50 plots use fixed font
-# sizes while plot_sxj() already scales its fonts with dpi/300; for a
+# sizes while lifeTable_plot() already scales its fonts with dpi/300; for a
 # 300 dpi tiff both formulas give 96). The previous session setting is
 # restored on exit (also when ggsave() fails), and showtext is switched
 # on only while the file is being written.

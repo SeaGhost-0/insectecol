@@ -62,8 +62,8 @@
 #' @param plot Logical; whether to draw the projection (default
 #'   \code{FALSE}).
 #' @param plot_file Optional png path: when supplied together with
-#'   \code{plot = TRUE} the figure is written to this file (ragg
-#'   when available, otherwise \code{grDevices::png}); when
+#'   \code{plot = TRUE} the figure is written to this file (same
+#'   machinery as \code{\link{emergence_export_plot}}); when
 #'   \code{NULL} the plot is drawn on the current device (fully
 #'   customisable afterwards by calling \code{plot()} on the
 #'   returned \code{fit}).
@@ -95,7 +95,8 @@
 #'   \item{plot_file}{the png path when \code{plot_file} was
 #'     supplied, otherwise \code{NULL}}
 #' @seealso \code{\link{emergence_read}},
-#'   \code{\link{emergence_calc}}, \code{\link{emergence_export}}
+#'   \code{\link{emergence_calc}}, \code{\link{emergence_export}},
+#'   \code{\link{emergence_export_plot}}
 #' @examples
 #' f <- system.file("extdata", "emergence_example.csv",
 #'                  package = "insectecol")
@@ -215,23 +216,12 @@ emergence_analyze <- function(stage = NULL, count = NULL,
     if (is.null(plot_file)) {
       do.call(plot, pargs)
     } else {
-      has_ragg <- requireNamespace("ragg", quietly = TRUE)
-      ## text sizes scale with res on a fixed-pixel canvas; compensate
-      ## for units = "px" so that plot_res keeps the 150-dpi composition
-      pps <- if (plot_units == "px") 12 * 150 / plot_res else 12
-      if (has_ragg)
-        ragg::agg_png(plot_file, width = plot_width,
-                      height = plot_height, units = plot_units,
-                      res = plot_res, pointsize = pps)
-      else
-        grDevices::png(plot_file, width = plot_width,
-                       height = plot_height, units = plot_units,
-                       res = plot_res, pointsize = pps)
-      tryCatch(do.call(plot, pargs),
-               finally = while (!is.null(grDevices::dev.list()))
-                 grDevices::dev.off())
-      plot_file_out <- plot_file
-      message("Plot saved to: ", normalizePath(plot_file))
+      plot_file_out <- emergence_export_plot(
+        fit, file = plot_file, show_hatch = show_hatch,
+        title = plot_title, sub = plot_sub, xlab = plot_xlab,
+        ylab = plot_ylab, family = plot_family,
+        width = plot_width, height = plot_height, units = plot_units,
+        res = plot_res)
     }
   }
 

@@ -8,7 +8,7 @@ calc_N(lt)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 }
 \value{
 A single numeric value: the number of data rows.
@@ -21,7 +21,7 @@ this cohort size.
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 calc_N(lt)
 }
 \references{

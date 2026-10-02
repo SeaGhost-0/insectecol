@@ -117,7 +117,7 @@
 
 # Returns the raw B x p replicate matrix plus the summary. Parameter
 # names deliberately match the column names used by
-# lifeTable_calculate_all() / save_results() so that standard errors
+# lifeTable_calculate_all() / lifeTable_export() so that standard errors
 # can be attached to the summary tables with a simple _SE suffix.
 .boot_run <- function(ext, B, conf.level) {
   N <- ext$N
@@ -262,7 +262,7 @@
 #' fecundity into the replicates.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}} or \code{\link{build_life_table}}.
+#'   \code{\link{lifeTable_read}} or \code{\link{lifeTable_build}}.
 #' @param B Integer; number of bootstrap replicates. The published
 #'   TWOSEX-MSChart standard is \code{100000} (the default); smaller
 #'   values run faster but give rougher standard errors.
@@ -292,7 +292,7 @@
 #'   bootstrapped.
 #'
 #'   Attach the result to an analysis to have it exported by
-#'   \code{\link{save_results}}:
+#'   \code{\link{lifeTable_export}}:
 #'   \code{results$boot <- lifeTable_bootstrap(lt)}.
 #'
 #' @return An object of class \code{life_table_boot}: a list with
@@ -322,7 +322,7 @@
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #'
 #' ## B = 100000 is the recommended setting for publications; a smaller
 #' ## B is used here so that the example runs fast
@@ -336,7 +336,7 @@ lifeTable_bootstrap <- function(lt, B = 100000, seed = NULL,
       conf.level <= 0 || conf.level >= 1)
     stop("conf.level must be a single number in (0, 1)")
   if (!inherits(lt, "life_table"))
-    stop("lt must be a life_table object, as returned by read_life_table() or build_life_table()")
+    stop("lt must be a life_table object, as returned by lifeTable_read() or lifeTable_build()")
 
   if (!is.null(seed)) {
     had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
@@ -370,8 +370,8 @@ lifeTable_bootstrap <- function(lt, B = 100000, seed = NULL,
 #' zero.
 #'
 #' @param lt1,lt2 \code{life_table} objects (e.g. two treatments or
-#'   two host plants) returned by \code{\link{read_life_table}} or
-#'   \code{\link{build_life_table}}.
+#'   two host plants) returned by \code{\link{lifeTable_read}} or
+#'   \code{\link{lifeTable_build}}.
 #' @param B Integer; number of bootstrap replicates per group
 #'   (default \code{100000}, the TWOSEX-MSChart standard).
 #' @param seed Integer; seed for the random number generator; the
@@ -418,7 +418,7 @@ lifeTable_bootstrap <- function(lt, B = 100000, seed = NULL,
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt1 <- read_life_table(f)
+#' lt1 <- lifeTable_read(f)
 #'
 #' ## compare the full cohort with its first half (demo only - a real
 #' ## comparison would use two different treatments)
@@ -439,7 +439,7 @@ lifeTable_boot_test <- function(lt1, lt2, B = 100000, seed = NULL,
     stop("conf.level must be a single number in (0, 1)")
   for (lt in list(lt1, lt2))
     if (!inherits(lt, "life_table"))
-      stop("lt1 and lt2 must be life_table objects, as returned by read_life_table() or build_life_table()")
+      stop("lt1 and lt2 must be life_table objects, as returned by lifeTable_read() or lifeTable_build()")
 
   if (!is.null(seed)) {
     had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)

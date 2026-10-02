@@ -7,7 +7,7 @@
 #'
 #' @param path Character string; path to the csv file.
 #' @param check Logical; if \code{TRUE} (the default) the data are
-#'   validated by \code{\link{check_life_table}} immediately after
+#'   validated by \code{\link{lifeTable_check}} immediately after
 #'   reading. Set to \code{FALSE} to skip validation.
 #'
 #' @details The csv file contains one row per individual. If the sex
@@ -47,14 +47,14 @@
 #' variable development rates among individuals. \emph{Environmental
 #' Entomology} 17(1), 26-34.
 #'
-#' @seealso \code{\link{check_life_table}} for data validation,
+#' @seealso \code{\link{lifeTable_check}} for data validation,
 #'   \code{\link{lifeTable_calculate}} for the complete analysis workflow.
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' head(lt$data[, 1:5])
-read_life_table <- function(path, check = TRUE) {
+lifeTable_read <- function(path, check = TRUE) {
   if (!file.exists(path)) stop("File does not exist: ", path)
 
   # Detect the file encoding
@@ -85,7 +85,7 @@ read_life_table <- function(path, check = TRUE) {
     header = header, encoding = encoding_type, path = path
   )
   class(lt) <- "life_table"
-  if (check) check_life_table(lt)
+  if (check) lifeTable_check(lt)
   lt
 }
 
@@ -97,7 +97,7 @@ read_life_table <- function(path, check = TRUE) {
 #' sex column are replaced by \code{"Female"} and \code{"Male"}.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #'
 #' @details Stage names are taken from the header exactly as they are
 #'   spelled in the csv file, so English headers produce English stage
@@ -110,13 +110,13 @@ read_life_table <- function(path, check = TRUE) {
 #' @return A character vector of stage names, e.g.
 #'   \code{c("Egg", "Larva", "Pupa", "Female", "Male")}; used as column
 #'   names by \code{\link{calc_sxj}} and as legend labels by
-#'   \code{\link{plot_sxj}}.
+#'   \code{\link{lifeTable_plot}}.
 #'
-#' @seealso \code{\link{read_life_table}}, \code{\link{calc_sxj}},
-#'   \code{\link{plot_sxj}}
+#' @seealso \code{\link{lifeTable_read}}, \code{\link{calc_sxj}},
+#'   \code{\link{lifeTable_plot}}
 #' @export
 #' @examples
-#' lt <- read_life_table(system.file("extdata", "Example.csv",
+#' lt <- lifeTable_read(system.file("extdata", "Example.csv",
 #'                                   package = "insectecol"))
 #' get_stage_names(lt)
 get_stage_names <- function(lt) {
@@ -139,7 +139,7 @@ get_stage_names <- function(lt) {
 #' offending cells.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #'
 #' @details Two kinds of problems are detected:
 #' \itemize{
@@ -150,15 +150,15 @@ get_stage_names <- function(lt) {
 #'     of non-empty daily fecundity cells must equal the adult survival
 #'     days recorded in column \code{n - 1}.
 #' }
-#' The check runs automatically inside \code{\link{read_life_table}}
+#' The check runs automatically inside \code{\link{lifeTable_read}}
 #' unless \code{check = FALSE} is used there.
 #'
 #' @return \code{invisible(TRUE)} if no error is found; otherwise the
 #'   function stops with a detailed error message.
 #'
-#' @seealso \code{\link{read_life_table}}
+#' @seealso \code{\link{lifeTable_read}}
 #' @export
-check_life_table <- function(lt) {
+lifeTable_check <- function(lt) {
   check <- check_data(lt$data, lt$n)
   if (is.null(check$positions) == FALSE || !is.null(check$oviposition)) {
     err_msg <- ""

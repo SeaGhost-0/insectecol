@@ -8,7 +8,7 @@ calc_r(lt, lx = NULL, mx = NULL)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 
 \item{lx}{Optional; the result of \code{\link{calc_lx}}.}
 
@@ -29,7 +29,7 @@ iterations).
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 calc_r(lt)
 }
 \references{

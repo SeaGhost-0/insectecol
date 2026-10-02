@@ -8,7 +8,7 @@ calc_sxj(lt)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 }
 \value{
 A data frame of age-stage survival rates (values in [0, 1]):
@@ -31,7 +31,7 @@ The returned data frame has one row per age class (day) and
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 head(calc_sxj(lt))
 }
 \references{
@@ -44,6 +44,6 @@ Entomology} 17(1), 26-34.
 }
 \seealso{
 \code{\link{get_stage_names}}, \code{\link{calc_lx}},
-  \code{\link{plot_sxj}}
+  \code{\link{lifeTable_plot}}
 }
 \keyword{internal}

@@ -32,9 +32,9 @@ lc50_analyze(
 \arguments{
 \item{d}{Optional; the bioassay data: a data frame with the columns
 \code{Concentration}, \code{Tested} and \code{Dead} (headers are
-matched loosely, as in \code{\link{read_lc50}}, so a header like
+matched loosely, as in \code{\link{lc50_read}}, so a header like
 \code{"Concentration (mg/L)"} works), a named list of such data
-frames (e.g. the return value of \code{\link{read_lc50}}), or
+frames (e.g. the return value of \code{\link{lc50_read}}), or
 \code{NULL} to build the data from the three vectors below.}
 
 \item{concentration, tested, dead}{Numeric vectors; the concentration,
@@ -63,7 +63,7 @@ not printed, not saved.}
 Ignored when \code{plot = FALSE}.}
 
 \item{font, unit, shape, ci, ci_level, error_bar, move_thres, lc_ci, lc_p, lc_lab_gap, lc_lab_gap_right, lc_lab_dy, lc_lab_lh}{Plot settings, passed to the internal plot engine exactly as in
-\code{\link{plot_lc50}} (\code{unit = NULL} means \code{"mg/L"},
+\code{\link{lc50_plot}} (\code{unit = NULL} means \code{"mg/L"},
 \code{unit = ""} shows no unit).}
 }
 \value{
@@ -79,15 +79,15 @@ Non-interactive, fully parameter-driven entry point for the LC
 data list from a data frame, a named list of data frames or three
 parallel vectors, (2) computes the LC estimates with the selected
 method(s) via \code{\link{lc50_calculate}} and (3) optionally builds
-the regression plot(s) in the style of \code{\link{plot_lc50}}.
+the regression plot(s) in the style of \code{\link{lc50_plot}}.
 Nothing is written to disk and no dialog is opened; export is
-handled separately by \code{\link{save_lc50}} /
-\code{\link{save_lc50_plot}}.
+handled separately by \code{\link{lc50_export}} /
+\code{\link{lc50_export_plot}}.
 }
 \examples{
 ## way 1: data frame straight from the package example csv
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-out1 <- lc50_analyze(read_lc50(f), method = "probit")
+out1 <- lc50_analyze(lc50_read(f), method = "probit")
 out1$results$summary_df
 
 ## way 2: three parallel vectors, no csv involved; all three methods
@@ -106,6 +106,6 @@ out3 <- lc50_analyze(concentration = conc, tested = n, dead = dead,
 out3$plot$trial1        # ggplot object: print(), customise or export
 }
 \seealso{
-\code{\link{read_lc50}}, \code{\link{lc50_calculate}},
-  \code{\link{plot_lc50}}, \code{\link{save_lc50}}
+\code{\link{lc50_read}}, \code{\link{lc50_calculate}},
+  \code{\link{lc50_plot}}, \code{\link{lc50_export}}
 }

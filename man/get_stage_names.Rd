@@ -8,13 +8,13 @@ get_stage_names(lt)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 }
 \value{
 A character vector of stage names, e.g.
   \code{c("Egg", "Larva", "Pupa", "Female", "Male")}; used as column
   names by \code{\link{calc_sxj}} and as legend labels by
-  \code{\link{plot_sxj}}.
+  \code{\link{lifeTable_plot}}.
 }
 \description{
 Extracts the names of the developmental stages from the header (first
@@ -32,11 +32,11 @@ Stage names are taken from the header exactly as they are
   \code{ID} (both are fixed parts of the csv template).
 }
 \examples{
-lt <- read_life_table(system.file("extdata", "Example.csv",
+lt <- lifeTable_read(system.file("extdata", "Example.csv",
                                   package = "insectecol"))
 get_stage_names(lt)
 }
 \seealso{
-\code{\link{read_life_table}}, \code{\link{calc_sxj}},
-  \code{\link{plot_sxj}}
+\code{\link{lifeTable_read}}, \code{\link{calc_sxj}},
+  \code{\link{lifeTable_plot}}
 }

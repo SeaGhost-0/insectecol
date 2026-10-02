@@ -60,8 +60,8 @@
 #' @param plot Logical; whether to draw the fitted curves (default
 #'   \code{FALSE}).
 #' @param plot_file Optional png path: when supplied together with
-#'   \code{plot = TRUE} the figure is written to this file (ragg when
-#'   available, otherwise \code{grDevices::png}); when \code{NULL} the
+#'   \code{plot = TRUE} the figure is written to this file (same
+#'   machinery as \code{\link{gdd_export_plot}}); when \code{NULL} the
 #'   plot is drawn on the current device (fully customisable afterwards
 #'   by calling \code{\link{gdd_plot}} on the returned \code{fit}).
 #' @param plot_group,show_C,show_Topt Plot options, see
@@ -112,8 +112,8 @@
 #' @seealso \code{\link{gdd_read}}, \code{\link{gdd_check}},
 #'   \code{\link{gdd_calc}}, \code{\link{gdd_plot}},
 #'   \code{\link{gdd_predict}}, \code{\link{gdd_compare}},
-#'   \code{\link{gdd_export}}, \code{\link{gdd_daily}},
-#'   \code{\link{gdd_from_lifetable}}
+#'   \code{\link{gdd_export}}, \code{\link{gdd_export_plot}},
+#'   \code{\link{gdd_daily}}
 #' @export
 #' @examples
 #' f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
@@ -255,23 +255,12 @@ gdd_analyze <- function(temp = NULL, duration = NULL, group = NULL,
     if (is.null(plot_file)) {
       do.call(gdd_plot, pargs)
     } else {
-      has_ragg <- requireNamespace("ragg", quietly = TRUE)
-      ## text sizes scale with res on a fixed-pixel canvas; compensate
-      ## for units = "px" so that plot_res keeps the 150-dpi composition
-      pps <- if (plot_units == "px") 12 * 150 / plot_res else 12
-      if (has_ragg)
-        ragg::agg_png(plot_file, width = plot_width,
-                      height = plot_height, units = plot_units,
-                      res = plot_res, pointsize = pps)
-      else
-        grDevices::png(plot_file, width = plot_width,
-                       height = plot_height, units = plot_units,
-                       res = plot_res, pointsize = pps)
-      tryCatch(do.call(gdd_plot, pargs),
-               finally = while (!is.null(grDevices::dev.list()))
-                 grDevices::dev.off())
-      plot_file_out <- plot_file
-      message("Plot saved to: ", normalizePath(plot_file))
+      plot_file_out <- gdd_export_plot(
+        fit, file = plot_file, group = plot_group, show_C = show_C,
+        show_Topt = show_Topt, title = plot_title, sub = plot_sub,
+        xlab = plot_xlab, ylab = plot_ylab, family = plot_family,
+        width = plot_width, height = plot_height, units = plot_units,
+        res = plot_res)
     }
   }
 

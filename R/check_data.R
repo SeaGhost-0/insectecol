@@ -74,7 +74,7 @@ check_data <- function(df, n) {
 
   # the oviposition check requires oviposition columns to exist.
   # When the data end at the sex column (ncol(df) == n, e.g. data built
-  # without oviposition records by build_life_table() or a csv without
+  # without oviposition records by lifeTable_build() or a csv without
   # oviposition columns), (n+1):ncol(df) would be a DESCENDING sequence
   # (c(n+1, n)) and select undefined columns, causing an error. In that
   # case there are simply no oviposition records to check, so the whole

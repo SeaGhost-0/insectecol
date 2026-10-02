@@ -8,7 +8,7 @@ calc_F(lt)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 }
 \value{
 A single numeric value: the mean number of eggs per female.
@@ -20,7 +20,7 @@ eggs laid by all females divided by the number of females,
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 calc_F(lt)
 }
 \seealso{

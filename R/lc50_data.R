@@ -40,10 +40,10 @@
 #' @export
 #' @examples
 #' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-#' lcd <- read_lc50(f)
+#' lcd <- lc50_read(f)
 #' lcd$bioassay
-#' if (interactive()) lcd <- read_lc50()   # interactive folder dialog
-read_lc50 <- function(path = NULL) {
+#' if (interactive()) lcd <- lc50_read()   # interactive folder dialog
+lc50_read <- function(path = NULL) {
   if (is.null(path)) {
     path <- utils::choose.dir()
     if (is.na(path)) stop("No folder selected")

@@ -6,7 +6,7 @@
 #' parameters (R0, r, lambda, T).
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param fecundity Logical; whether to compute the reproduction-related
 #'   parameters (F, F_xj, m_x, R0, r, lambda, T). \code{FALSE} skips them
 #'   entirely; no oviposition data are then required.
@@ -27,7 +27,7 @@
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' results <- lifeTable_calculate_all(lt)
 #' results$R0
 #' lifeTable_calculate_all(lt, fecundity = FALSE)$N
@@ -90,9 +90,9 @@ lifeTable_calculate_all <- function(lt, fecundity = TRUE) {
 #'   TRUE}); the attribute \code{error_files} contains the names of
 #'   the files that failed.
 #'
-#' @seealso \code{\link{read_life_table}}, \code{\link{lifeTable_calculate_all}},
-#'   \code{\link{lifeTable_bootstrap}}, \code{\link{plot_sxj}},
-#'   \code{\link{save_results}}
+#' @seealso \code{\link{lifeTable_read}}, \code{\link{lifeTable_calculate_all}},
+#'   \code{\link{lifeTable_bootstrap}}, \code{\link{lifeTable_plot}},
+#'   \code{\link{lifeTable_export}}
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
@@ -119,13 +119,13 @@ lifeTable_calculate <- function(path, output_path = NULL, plot = TRUE,
 
   for (p in 1:number) {
     tryCatch({
-      lt <- read_life_table(file_path[p])                 # read and validate
+      lt <- lifeTable_read(file_path[p])                 # read and validate
       results <- lifeTable_calculate_all(lt)                        # all indicators
       if (bootstrap)
         results$boot <- lifeTable_bootstrap(
           lt, B = B, seed = if (is.null(seed)) NULL else seed + p)
-      plt <- if (plot) plot_sxj(lt, results$sxj, dpi = dpi) else NULL
-      save_results(lt, results, output_path, plot = plt,
+      plt <- if (plot) lifeTable_plot(lt, results$sxj, dpi = dpi) else NULL
+      lifeTable_export(lt, results, output_path, plot = plt,
                    keep_tiff = keep_tiff, dpi = dpi)
       row <- data.frame(
         File = lt$file_name, Cohort_size_N = results$N,

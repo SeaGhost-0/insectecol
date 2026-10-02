@@ -8,7 +8,7 @@ calc_fxj(lt, sxj = NULL)
 }
 \arguments{
 \item{lt}{A \code{life_table} object returned by
-\code{\link{read_life_table}}.}
+\code{\link{lifeTable_read}}.}
 
 \item{sxj}{Optional; the result of \code{\link{calc_sxj}}. Supplying it
 avoids recomputing the age-stage survival rates.}
@@ -25,7 +25,7 @@ over the females still alive at each age.
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt <- read_life_table(f)
+lt <- lifeTable_read(f)
 head(calc_fxj(lt))
 }
 \seealso{

@@ -7,7 +7,7 @@
 lc50_calculate(lcd, lc = 0.5, method = "traditional")
 }
 \arguments{
-\item{lcd}{The named list returned by \code{\link{read_lc50}}.}
+\item{lcd}{The named list returned by \code{\link{lc50_read}}.}
 
 \item{lc}{Numeric; the lethal proportion for which the concentration
 is estimated. The default 0.5 gives the LC50, 0.9 the LC90.}
@@ -31,7 +31,7 @@ A list with elements
 }
 \description{
 Computes the LC estimates for every data set read by
-\code{\link{read_lc50}}, using the selected estimation method(s), and
+\code{\link{lc50_read}}, using the selected estimation method(s), and
 returns both the detailed per-file results and a summary data frame.
 }
 \details{
@@ -46,16 +46,16 @@ The selected method(s) are applied to every data set; the
 }
 \examples{
 f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-res <- lc50_calculate(read_lc50(f), lc = 0.7)     # LC70
+res <- lc50_calculate(lc50_read(f), lc = 0.7)     # LC70
 res$summary_df
-lc50_calculate(read_lc50(f), method = "all")$summary_df   # all methods
+lc50_calculate(lc50_read(f), method = "all")$summary_df   # all methods
 }
 \references{
 Finney, D. J. (1971) \emph{Probit Analysis}, 3rd edition. Cambridge
 University Press, Cambridge.
 }
 \seealso{
-\code{\link{read_lc50}}, \code{\link{lc50_traditional}},
+\code{\link{lc50_read}}, \code{\link{lc50_traditional}},
   \code{\link{lc50_improved}}, \code{\link{lc50_probit}},
-  \code{\link{plot_lc50}}, \code{\link{save_lc50}}
+  \code{\link{lc50_plot}}, \code{\link{lc50_export}}
 }

@@ -23,9 +23,8 @@ Description: A collection of analytical tools for insect ecology research,
     developmental threshold temperature and the effective accumulated
     temperature with the linear degree-day law, fits common nonlinear
     temperature-dependent development models (Logan-6, Lactin, Briere,
-    Wang-7), selects the best model by AICc, predicts durations,
-    accumulates field degree-days and bridges from raw life-table files.
-    The emergence module projects the beginning, peak and end of the
+    Wang-7), selects the best model by AICc, predicts durations and
+    accumulates field degree-days. The emergence module projects the beginning, peak and end of the
     adult emergence period (the 16%, 50% and 84% quantiles) from a
     single survey of the population stage structure by the stage-grading
     method, optionally shifting the eclosion dates by the

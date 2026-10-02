@@ -35,8 +35,8 @@
 #' @param p Numeric vector of emergence quantiles, default
 #'   \code{c(0.16, 0.5, 0.84)}.
 #' @param labels Optional labels of the quantiles (same length as
-#'   \code{p}); \code{NULL} (default) uses \code{"Beginning (16%)"}
-#'   etc. for the default \code{p}, or \code{"16%"}-style labels
+#'   \code{p}); \code{NULL} (default) uses \samp{Beginning (16\%)}
+#'   etc. for the default \code{p}, or \samp{16\%}-style labels
 #'   otherwise.
 #' @param pre_ovip Pre-oviposition period in days (default 0 = not
 #'   used).

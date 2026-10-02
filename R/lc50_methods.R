@@ -5,7 +5,7 @@
 #'
 #' @param d A data frame with the columns \code{Concentration},
 #'   \code{Tested} and \code{Dead}, as returned by
-#'   \code{\link{read_lc50}}; rows with \code{Concentration = 0} are
+#'   \code{\link{lc50_read}}; rows with \code{Concentration = 0} are
 #'   treated as the control group.
 #' @param lc Numeric; the lethal proportion for which the concentration
 #'   is estimated. The default 0.5 gives the LC50, 0.9 the LC90.

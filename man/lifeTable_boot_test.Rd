@@ -8,8 +8,8 @@ lifeTable_boot_test(lt1, lt2, B = 1e+05, seed = NULL, conf.level = 0.95)
 }
 \arguments{
 \item{lt1, lt2}{\code{life_table} objects (e.g. two treatments or
-two host plants) returned by \code{\link{read_life_table}} or
-\code{\link{build_life_table}}.}
+two host plants) returned by \code{\link{lifeTable_read}} or
+\code{\link{lifeTable_build}}.}
 
 \item{B}{Integer; number of bootstrap replicates per group
 (default \code{100000}, the TWOSEX-MSChart standard).}
@@ -59,7 +59,7 @@ The two cohorts are resampled independently, so they do
 }
 \examples{
 f <- system.file("extdata", "Example.csv", package = "insectecol")
-lt1 <- read_life_table(f)
+lt1 <- lifeTable_read(f)
 
 ## compare the full cohort with its first half (demo only - a real
 ## comparison would use two different treatments)

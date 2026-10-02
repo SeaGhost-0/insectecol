@@ -27,11 +27,11 @@ lifeTable_analyze(
 }
 \arguments{
 \item{lt}{Optional; an existing \code{life_table} object (from
-\code{\link{read_life_table}} or \code{\link{build_life_table}}).
+\code{\link{lifeTable_read}} or \code{\link{lifeTable_build}}).
 If \code{NULL} (default), the object is built from \code{stages},
 \code{adult_days}, \code{sex} and \code{oviposition}.}
 
-\item{stages, adult_days, sex, oviposition, stage_names, file_name, check}{Passed to \code{\link{build_life_table}} (ignored when \code{lt} is
+\item{stages, adult_days, sex, oviposition, stage_names, file_name, check}{Passed to \code{\link{lifeTable_build}} (ignored when \code{lt} is
 supplied).}
 
 \item{fecundity}{Logical; whether to compute the reproduction-related
@@ -44,7 +44,7 @@ percentile confidence intervals of all scalar parameters with the
 bootstrap technique of TWOSEX-MSChart via
 \code{\link{lifeTable_bootstrap}} (default \code{FALSE}). The
 result is attached as \code{results$boot} and is exported by
-\code{\link{save_results}} as an extra worksheet.}
+\code{\link{lifeTable_export}} as an extra worksheet.}
 
 \item{B}{Integer; number of bootstrap replicates (only used when
 \code{bootstrap = TRUE}). The TWOSEX-MSChart standard is
@@ -56,7 +56,7 @@ current R session state.}
 
 \item{plot}{Logical; whether to draw the age-stage survival curves
 (default \code{FALSE}). The returned ggplot object can be printed,
-customised further or passed to \code{\link{save_results}}.}
+customised further or passed to \code{\link{lifeTable_export}}.}
 
 \item{title}{Character; plot title. \code{NULL} = \code{file_name}.}
 
@@ -89,7 +89,7 @@ a ready \code{life_table} object), (2) computes the life table
 parameters and (3) optionally draws the age-stage survival curves
 with customisable title, axis titles and legend labels. Nothing is
 written to disk; export is handled separately by
-\code{\link{save_results}}.
+\code{\link{lifeTable_export}}.
 }
 \examples{
 ## The example raw data shipped with the package (the same layout as
@@ -146,7 +146,7 @@ out3 <- lifeTable_analyze(stages = d3[, c("Egg", "1st instar", "2nd instar",
 out3$plot               # print or further customise the ggplot object
 }
 \seealso{
-\code{\link{build_life_table}},
+\code{\link{lifeTable_build}},
   \code{\link{lifeTable_calculate_all}}, \code{\link{lifeTable_bootstrap}},
-  \code{\link{plot_sxj}}, \code{\link{save_results}}
+  \code{\link{lifeTable_plot}}, \code{\link{lifeTable_export}}
 }

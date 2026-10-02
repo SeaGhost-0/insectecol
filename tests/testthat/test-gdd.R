@@ -139,3 +139,15 @@ test_that("gdd_daily is unchanged", {
   ## avg method: (8+20)/2 - 11 = 3 on day 1, (10+22)/2 - 11 = 5 on day 2
   expect_equal(gdd_daily(c(8, 10), c(20, 22), 11)$total, 8)
 })
+test_that("gdd_export_plot writes a png", {
+  res <- gdd_calc(df_ex, by = "stage")
+  f <- tempfile(fileext = ".png")
+  out <- suppressMessages(gdd_export_plot(res, f))
+  expect_equal(out, f)
+  expect_true(file.exists(f))
+  expect_true(file.size(f) > 0)
+})
+
+test_that("gdd_export_plot validates its input", {
+  expect_error(gdd_export_plot(list()), "'gdd'")
+})

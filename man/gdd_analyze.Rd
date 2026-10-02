@@ -90,8 +90,8 @@ temperature triggers a targeted warning.}
 \code{FALSE}).}
 
 \item{plot_file}{Optional png path: when supplied together with
-\code{plot = TRUE} the figure is written to this file (ragg when
-available, otherwise \code{grDevices::png}); when \code{NULL} the
+\code{plot = TRUE} the figure is written to this file (same
+machinery as \code{\link{gdd_export_plot}}); when \code{NULL} the
 plot is drawn on the current device (fully customisable afterwards
 by calling \code{\link{gdd_plot}} on the returned \code{fit}).}
 
@@ -202,6 +202,6 @@ out4$fit$comparison       # full comparison table, best flag included
 \code{\link{gdd_read}}, \code{\link{gdd_check}},
   \code{\link{gdd_calc}}, \code{\link{gdd_plot}},
   \code{\link{gdd_predict}}, \code{\link{gdd_compare}},
-  \code{\link{gdd_export}}, \code{\link{gdd_daily}},
-  \code{\link{gdd_from_lifetable}}
+  \code{\link{gdd_export}}, \code{\link{gdd_export_plot}},
+  \code{\link{gdd_daily}}
 }

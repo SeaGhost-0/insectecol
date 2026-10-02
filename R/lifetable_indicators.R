@@ -136,7 +136,7 @@
 #' this cohort size.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #'
 #' @return A single numeric value: the number of data rows.
 #'
@@ -149,7 +149,7 @@
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' calc_N(lt)
 calc_N <- function(lt) nrow(lt$data)
 
@@ -160,7 +160,7 @@ calc_N <- function(lt) nrow(lt$data)
 #' \code{F = (total number of eggs) / (number of females)}.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #'
 #' @return A single numeric value: the mean number of eggs per female.
 #'
@@ -169,7 +169,7 @@ calc_N <- function(lt) nrow(lt$data)
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' calc_F(lt)
 calc_F <- function(lt) {
   egg_number <- sum(apply(lt$data[, lt$n_1:ncol(lt$data)], 2,
@@ -190,7 +190,7 @@ calc_F <- function(lt) {
 #' single l_x curve.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #'
 #' @details The returned data frame has one row per age class (day) and
 #'   one column per stage, in the order of the stage names returned by
@@ -209,12 +209,12 @@ calc_F <- function(lt) {
 #' Entomology} 17(1), 26-34.
 #'
 #' @seealso \code{\link{get_stage_names}}, \code{\link{calc_lx}},
-#'   \code{\link{plot_sxj}}
+#'   \code{\link{lifeTable_plot}}
 #' @keywords internal
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' head(calc_sxj(lt))
 calc_sxj <- function(lt) {
   sc <- .calc_survival_counts(lt$data, lt$n)
@@ -235,7 +235,7 @@ calc_sxj <- function(lt) {
 #' \code{l_x = sum over j of s_xj}.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param sxj Optional; the result of \code{\link{calc_sxj}}. Supplying it
 #'   avoids recomputing the age-stage survival rates.
 #'
@@ -252,7 +252,7 @@ calc_sxj <- function(lt) {
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' head(calc_lx(lt))
 calc_lx <- function(lt, sxj = NULL) {
   if (is.null(sxj)) sxj <- calc_sxj(lt)
@@ -272,7 +272,7 @@ calc_lx <- function(lt, sxj = NULL) {
 #' over the females still alive at each age.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param sxj Optional; the result of \code{\link{calc_sxj}}. Supplying it
 #'   avoids recomputing the age-stage survival rates.
 #'
@@ -285,7 +285,7 @@ calc_lx <- function(lt, sxj = NULL) {
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' head(calc_fxj(lt))
 calc_fxj <- function(lt, sxj = NULL) {
   F_r <- .fxj_values(lt, sxj)
@@ -306,7 +306,7 @@ calc_fxj <- function(lt, sxj = NULL) {
 #' \code{\link{calc_r}} is consistent.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param sxj Optional; the result of \code{\link{calc_sxj}}.
 #' @param fxj Optional; the result of \code{\link{calc_fxj}}.
 #' @param lx Optional; the result of \code{\link{calc_lx}}. Supplying any
@@ -323,7 +323,7 @@ calc_fxj <- function(lt, sxj = NULL) {
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' head(calc_mx(lt))
 calc_mx <- function(lt, sxj = NULL, fxj = NULL, lx = NULL) {
   if (is.null(sxj)) sxj <- calc_sxj(lt)
@@ -349,7 +349,7 @@ calc_mx <- function(lt, sxj = NULL, fxj = NULL, lx = NULL) {
 #' and \code{R0 < 1} decline.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param sxj Optional; the result of \code{\link{calc_sxj}}.
 #' @param fxj Optional; the result of \code{\link{calc_fxj}}. Supplying
 #'   them avoids recomputing.
@@ -365,7 +365,7 @@ calc_mx <- function(lt, sxj = NULL, fxj = NULL, lx = NULL) {
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' calc_R0(lt)
 calc_R0 <- function(lt, sxj = NULL, fxj = NULL) {
   if (is.null(sxj)) sxj <- calc_sxj(lt)
@@ -385,7 +385,7 @@ calc_R0 <- function(lt, sxj = NULL, fxj = NULL) {
 #' iterations).
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param lx Optional; the result of \code{\link{calc_lx}}.
 #' @param mx Optional; the result of \code{\link{calc_mx}}. Supplying them
 #'   avoids recomputing.
@@ -401,7 +401,7 @@ calc_R0 <- function(lt, sxj = NULL, fxj = NULL) {
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' calc_r(lt)
 calc_r <- function(lt, lx = NULL, mx = NULL) {
   if (is.null(lx)) lx <- calc_lx(lt)
@@ -419,7 +419,7 @@ calc_r <- function(lt, lx = NULL, mx = NULL) {
 #' declines when \code{lambda < 1}.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param r Optional; the result of \code{\link{calc_r}}. Supplying it
 #'   avoids recomputing.
 #'
@@ -433,7 +433,7 @@ calc_r <- function(lt, lx = NULL, mx = NULL) {
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' calc_lambda(lt)
 calc_lambda <- function(lt, r = NULL) {
   if (is.null(r)) r <- calc_r(lt)
@@ -447,7 +447,7 @@ calc_lambda <- function(lt, r = NULL) {
 #' current size when increasing at the constant rate \code{r}.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param R0 Optional; the result of \code{\link{calc_R0}}.
 #' @param r Optional; the result of \code{\link{calc_r}}. Supplying them
 #'   avoids recomputing.
@@ -463,7 +463,7 @@ calc_lambda <- function(lt, r = NULL) {
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' calc_T(lt)
 calc_T <- function(lt, R0 = NULL, r = NULL) {
   if (is.null(R0)) R0 <- calc_R0(lt)
@@ -479,7 +479,7 @@ calc_T <- function(lt, R0 = NULL, r = NULL) {
 #' \code{e_x = sum over y >= x of l_y}.
 #'
 #' @param lt A \code{life_table} object returned by
-#'   \code{\link{read_life_table}}.
+#'   \code{\link{lifeTable_read}}.
 #' @param lx Optional; the result of \code{\link{calc_lx}}. Supplying it
 #'   avoids recomputing.
 #'
@@ -495,7 +495,7 @@ calc_T <- function(lt, R0 = NULL, r = NULL) {
 #' @export
 #' @examples
 #' f <- system.file("extdata", "Example.csv", package = "insectecol")
-#' lt <- read_life_table(f)
+#' lt <- lifeTable_read(f)
 #' head(calc_ex(lt))
 calc_ex <- function(lt, lx = NULL) {
   if (is.null(lx)) lx <- calc_lx(lt)
