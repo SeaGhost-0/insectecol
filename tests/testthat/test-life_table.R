@@ -59,3 +59,14 @@ test_that("lifeTable_calculate() 单文件模式完整跑通", {
   expect_equal(nrow(df), 1)
   expect_true(file.exists(file.path(out, "all.xlsx")))
 })
+
+test_that("lifeTable_analyze() 的 plot_file 参数导出 png", {
+  d <- read.csv(example_csv)
+  f <- tempfile(fileext = ".png")
+  out <- suppressMessages(lifeTable_analyze(
+    stages = d[2:8], adult_days = d$Adult, sex = d$gender,
+    oviposition = d[, 11:17], plot = TRUE, plot_file = f))
+  expect_true(file.exists(f))
+  expect_true(file.size(f) > 0)
+  expect_equal(out$plot_file, f)
+})

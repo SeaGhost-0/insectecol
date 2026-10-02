@@ -10,6 +10,9 @@
   title = NULL,
   sub = NULL,
   family = "serif",
+  cex = 2,
+  lwd = 2,
+  legend_right = TRUE,
   xlab = "Projected eclosion date",
   ylab = "Cumulative development (\%)",
   ...
@@ -26,14 +29,29 @@ hatch arrows when a hatch projection exists.}
 caption (survey date and sample size). Use \code{""} to drop
 the title.}
 
-\item{sub}{Plot subtitle; \code{NULL} (default) shows the hatch
-parameters when \code{show_hatch} is active.}
+\item{sub}{Plot footnote; \code{NULL} (default) shows the hatch
+parameters when \code{show_hatch} is active (drawn below the
+x-axis title). Use \code{""} to drop it.}
 
 \item{family}{Text font family. Default \code{"serif"} --- a
 portable alias that maps to Times New Roman on Windows and to
 the system serif font elsewhere; Chinese characters are
 rendered through the device's font fallback (SimSun on Chinese
 Windows). Set to \code{""} for the device default.}
+
+\item{cex}{Overall text-size multiplier. Default \code{2}: the
+exported figure is meant to be placed at half the text width of
+a manuscript, where the labels, ticks and title then appear at
+about the size of the body text (12 pt). Set to \code{1} for
+full-screen viewing; the margins scale with \code{cex}
+automatically.}
+
+\item{lwd}{Overall line-width multiplier. Default \code{2}.}
+
+\item{legend_right}{Logical (default TRUE); whether the quantile
+legend is placed outside the panel on the right-hand side
+(\code{TRUE}) or in the top-left corner of the panel
+(\code{FALSE}).}
 
 \item{xlab, ylab}{Axis labels.}
 
@@ -45,7 +63,10 @@ shares accumulated from the most developed stage downwards)
 against the projected eclosion dates, marks the quantile
 crossings (16% / 50% / 84% by default) and, when a hatch
 projection exists, arrows from each eclosion date to the
-corresponding hatch date.
+corresponding hatch date. The quantile dates are listed in a
+legend box on the right-hand side of the figure (one row per
+quantile, with a true arrow glyph instead of the character
+combination "->").
 }
 \examples{
 f <- system.file("extdata", "emergence_example.csv",

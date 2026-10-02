@@ -22,7 +22,12 @@ lifeTable_analyze(
   x_title = "Age(days)",
   y_title = "Age-Stage Survival Rate(Sxj)",
   legend_labels = NULL,
-  dpi = 300
+  dpi = 300,
+  plot_file = NULL,
+  plot_width = 12,
+  plot_height = 8,
+  plot_units = "cm",
+  plot_res = 300
 )
 }
 \arguments{
@@ -71,14 +76,25 @@ customised further or passed to \code{\link{lifeTable_export}}.}
 
 \item{dpi}{Numeric; resolution used for scaling the text of the plot
 (default 300).}
+
+\item{plot_file}{Optional png path: when supplied together with
+\code{plot = TRUE} the figure is written to this file (via
+\code{\link[ggplot2]{ggsave}}); when \code{NULL} the plot is only
+returned.}
+
+\item{plot_width, plot_height, plot_units, plot_res}{Physical size and
+resolution of the exported png (only used when \code{plot_file} is
+supplied); defaults 12 x 8 cm at 300 dpi.}
 }
 \value{
 A list with components \code{lt} (the \code{life_table}
   object), \code{results} (the list returned by
   \code{\link{lifeTable_calculate_all}}; additionally containing
   \code{boot}, the \code{\link{lifeTable_bootstrap}} result, when
-  \code{bootstrap = TRUE}) and \code{plot} (the ggplot object when
-  \code{plot = TRUE}, otherwise \code{NULL}).
+  \code{bootstrap = TRUE}), \code{plot} (the ggplot object when
+  \code{plot = TRUE}, otherwise \code{NULL}) and \code{plot_file}
+  (the png path when \code{plot_file} was supplied, otherwise
+  \code{NULL}).
 }
 \description{
 Non-interactive, fully parameter-driven entry point for the
@@ -87,9 +103,9 @@ age-stage, two-sex life table analysis. It (1) builds a
 data frame (e.g. after \code{data <- read.csv("XXX.csv")}, or accepts
 a ready \code{life_table} object), (2) computes the life table
 parameters and (3) optionally draws the age-stage survival curves
-with customisable title, axis titles and legend labels. Nothing is
-written to disk; export is handled separately by
-\code{\link{lifeTable_export}}.
+with customisable title, axis titles and legend labels, optionally
+written to disk as png when \code{plot_file} is supplied. Tabular
+export is handled separately by \code{\link{lifeTable_export}}.
 }
 \examples{
 ## The example raw data shipped with the package (the same layout as

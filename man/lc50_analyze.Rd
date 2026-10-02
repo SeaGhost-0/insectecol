@@ -13,6 +13,11 @@ lc50_analyze(
   lc = 0.5,
   method = "traditional",
   plot = FALSE,
+  plot_file = NULL,
+  plot_width = 12,
+  plot_height = 8,
+  plot_units = "cm",
+  plot_res = 300,
   plot_method = NULL,
   font = "TNM",
   unit = NULL,
@@ -56,7 +61,17 @@ e.g. 0.9 = LC90), passed to \code{\link{lc50_calculate}}.}
 
 \item{plot}{Logical; whether to build the regression plot(s)
 (default \code{FALSE}). The ggplot objects are only returned -
-not printed, not saved.}
+not printed, not saved unless \code{plot_file} is supplied.}
+
+\item{plot_file}{Optional png path: when supplied together with
+\code{plot = TRUE} the figure(s) are written as png via
+\code{\link{lc50_export_plot}} - one data set gives exactly this
+file, several data sets write \code{LC50_<name>.png} files into
+this folder. When \code{NULL} nothing is written.}
+
+\item{plot_width, plot_height, plot_units, plot_res}{Physical size and
+resolution of the exported png (only used when \code{plot_file} is
+supplied); defaults 12 x 8 cm at 300 dpi.}
 
 \item{plot_method}{Character; which of the computed methods to plot
 (default \code{NULL} = the first method that succeeded).
@@ -70,8 +85,10 @@ Ignored when \code{plot = FALSE}.}
 A list with elements \code{data} (the standardised data
   list, one data frame per data set), \code{results} (the list
   returned by \code{\link{lc50_calculate}}: \code{results},
-  \code{summary_df}, \code{lc}) and \code{plot} (a named list of
-  ggplot objects when \code{plot = TRUE}, otherwise \code{NULL}).
+  \code{summary_df}, \code{lc}), \code{plot} (a named list of
+  ggplot objects when \code{plot = TRUE}, otherwise \code{NULL})
+  and \code{plot_file} (the written path(s) when \code{plot_file}
+  was supplied, otherwise \code{NULL}).
 }
 \description{
 Non-interactive, fully parameter-driven entry point for the LC
@@ -79,10 +96,9 @@ Non-interactive, fully parameter-driven entry point for the LC
 data list from a data frame, a named list of data frames or three
 parallel vectors, (2) computes the LC estimates with the selected
 method(s) via \code{\link{lc50_calculate}} and (3) optionally builds
-the regression plot(s) in the style of \code{\link{lc50_plot}}.
-Nothing is written to disk and no dialog is opened; export is
-handled separately by \code{\link{lc50_export}} /
-\code{\link{lc50_export_plot}}.
+the regression plot(s) in the style of \code{\link{lc50_plot}},
+optionally written to disk as png when \code{plot_file} is supplied.
+Tabular export is handled separately by \code{\link{lc50_export}}.
 }
 \examples{
 ## way 1: data frame straight from the package example csv
@@ -107,5 +123,6 @@ out3$plot$trial1        # ggplot object: print(), customise or export
 }
 \seealso{
 \code{\link{lc50_read}}, \code{\link{lc50_calculate}},
-  \code{\link{lc50_plot}}, \code{\link{lc50_export}}
+  \code{\link{lc50_plot}}, \code{\link{lc50_export}},
+  \code{\link{lc50_export_plot}}
 }

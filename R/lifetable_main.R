@@ -199,9 +199,9 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #' data frame (e.g. after \code{data <- read.csv("XXX.csv")}, or accepts
 #' a ready \code{life_table} object), (2) computes the life table
 #' parameters and (3) optionally draws the age-stage survival curves
-#' with customisable title, axis titles and legend labels. Nothing is
-#' written to disk; export is handled separately by
-#' \code{\link{lifeTable_export}}.
+#' with customisable title, axis titles and legend labels, optionally
+#' written to disk as png when \code{plot_file} is supplied. Tabular
+#' export is handled separately by \code{\link{lifeTable_export}}.
 #'
 #' @param lt Optional; an existing \code{life_table} object (from
 #'   \code{\link{lifeTable_read}} or \code{\link{lifeTable_build}}).
@@ -229,6 +229,13 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #' @param plot Logical; whether to draw the age-stage survival curves
 #'   (default \code{FALSE}). The returned ggplot object can be printed,
 #'   customised further or passed to \code{\link{lifeTable_export}}.
+#' @param plot_file Optional png path: when supplied together with
+#'   \code{plot = TRUE} the figure is written to this file (via
+#'   \code{\link[ggplot2]{ggsave}}); when \code{NULL} the plot is only
+#'   returned.
+#' @param plot_width,plot_height,plot_units,plot_res Physical size and
+#'   resolution of the exported png (only used when \code{plot_file} is
+#'   supplied); defaults 12 x 8 cm at 300 dpi.
 #' @param title Character; plot title. \code{NULL} = \code{file_name}.
 #' @param x_title,y_title Character; axis titles. Defaults
 #'   \code{"Age(days)"} and \code{"Age-Stage Survival Rate(Sxj)"}.
@@ -244,8 +251,10 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #'   object), \code{results} (the list returned by
 #'   \code{\link{lifeTable_calculate_all}}; additionally containing
 #'   \code{boot}, the \code{\link{lifeTable_bootstrap}} result, when
-#'   \code{bootstrap = TRUE}) and \code{plot} (the ggplot object when
-#'   \code{plot = TRUE}, otherwise \code{NULL}).
+#'   \code{bootstrap = TRUE}), \code{plot} (the ggplot object when
+#'   \code{plot = TRUE}, otherwise \code{NULL}) and \code{plot_file}
+#'   (the png path when \code{plot_file} was supplied, otherwise
+#'   \code{NULL}).
 #'
 #' @seealso \code{\link{lifeTable_build}},
 #'   \code{\link{lifeTable_calculate_all}}, \code{\link{lifeTable_bootstrap}},
@@ -311,7 +320,10 @@ lifeTable_analyze <- function(lt = NULL, stages = NULL, adult_days = NULL,
                               B = 100000, seed = NULL, plot = FALSE, title = NULL,
                               x_title = "Age(days)",
                               y_title = "Age-Stage Survival Rate(Sxj)",
-                              legend_labels = NULL, dpi = 300) {
+                              legend_labels = NULL, dpi = 300,
+                              plot_file = NULL, plot_width = 12,
+                              plot_height = 8, plot_units = "cm",
+                              plot_res = 300) {
   ## ---- 1) build the life_table object (or use the supplied one) ----
   if (is.null(lt))
     lt <- lifeTable_build(stages, adult_days, sex, oviposition,
@@ -324,10 +336,18 @@ lifeTable_analyze <- function(lt = NULL, stages = NULL, adult_days = NULL,
   ## ---- 3) optional bootstrap standard errors ----
   if (bootstrap) results$boot <- lifeTable_bootstrap(lt, B = B, seed = seed)
 
-  ## ---- 4) optional plot (no device interaction, no file output) ----
+  ## ---- 4) optional plot (current device or exported as png) ----
   p <- if (plot) lifeTable_plot(lt, results$sxj, title = title, x_title = x_title,
                           y_title = y_title, legend_labels = legend_labels,
                           dpi = dpi) else NULL
+  plot_file_out <- NULL
+  if (plot && !is.null(p) && !is.null(plot_file)) {
+    ggplot2::ggsave(plot_file, plot = p, width = plot_width,
+                    height = plot_height, units = plot_units,
+                    dpi = plot_res, bg = "white")
+    plot_file_out <- plot_file
+    message("Plot saved to: ", normalizePath(plot_file))
+  }
 
-  list(lt = lt, results = results, plot = p)
+  list(lt = lt, results = results, plot = p, plot_file = plot_file_out)
 }

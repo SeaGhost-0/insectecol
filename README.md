@@ -465,8 +465,20 @@ verbs everywhere, see below) and removes the no-longer-needed
   figure of an existing fit as png at any time (the standalone
   counterpart of `plot_file =` in the two `*_analyze()` functions,
   which now reuse them internally).
+- `plot_file` png export added to all four main functions: the
+  life-table (`lifeTable_analyze()`) and bioassay (`lc50_analyze()`)
+  main functions now also accept `plot_file` (with
+  `plot_width`/`plot_height`/`plot_units`/`plot_res`), so one call
+  goes from raw data to the finished figure file in every module.
 - Removed `gdd_from_lifetable()`: the raw-life-table bridge is not
   needed any more.
+- Emergence figure reworked for manuscript use: text sizes scale
+  with the new `cex` argument (default 2 - at half the text width
+  of a manuscript the labels read at about the body-text size),
+  lines are thicker (`lwd`), the quantile legend moved to a framed
+  box on the right-hand side (one block per quantile, with a true
+  arrow glyph instead of "->"), the survey annotation sits above
+  the x axis, and the axis-title spacing no longer clips.
 
 **New module: emergence-period projection (stage-grading method)**
 

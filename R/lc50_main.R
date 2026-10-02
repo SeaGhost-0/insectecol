@@ -5,10 +5,9 @@
 #' data list from a data frame, a named list of data frames or three
 #' parallel vectors, (2) computes the LC estimates with the selected
 #' method(s) via \code{\link{lc50_calculate}} and (3) optionally builds
-#' the regression plot(s) in the style of \code{\link{lc50_plot}}.
-#' Nothing is written to disk and no dialog is opened; export is
-#' handled separately by \code{\link{lc50_export}} /
-#' \code{\link{lc50_export_plot}}.
+#' the regression plot(s) in the style of \code{\link{lc50_plot}},
+#' optionally written to disk as png when \code{plot_file} is supplied.
+#' Tabular export is handled separately by \code{\link{lc50_export}}.
 #'
 #' @param d Optional; the bioassay data: a data frame with the columns
 #'   \code{Concentration}, \code{Tested} and \code{Dead} (headers are
@@ -31,7 +30,15 @@
 #'   \code{\link{lc50_calculate}}.
 #' @param plot Logical; whether to build the regression plot(s)
 #'   (default \code{FALSE}). The ggplot objects are only returned -
-#'   not printed, not saved.
+#'   not printed, not saved unless \code{plot_file} is supplied.
+#' @param plot_file Optional png path: when supplied together with
+#'   \code{plot = TRUE} the figure(s) are written as png via
+#'   \code{\link{lc50_export_plot}} - one data set gives exactly this
+#'   file, several data sets write \code{LC50_<name>.png} files into
+#'   this folder. When \code{NULL} nothing is written.
+#' @param plot_width,plot_height,plot_units,plot_res Physical size and
+#'   resolution of the exported png (only used when \code{plot_file} is
+#'   supplied); defaults 12 x 8 cm at 300 dpi.
 #' @param plot_method Character; which of the computed methods to plot
 #'   (default \code{NULL} = the first method that succeeded).
 #'   Ignored when \code{plot = FALSE}.
@@ -43,11 +50,14 @@
 #' @return A list with elements \code{data} (the standardised data
 #'   list, one data frame per data set), \code{results} (the list
 #'   returned by \code{\link{lc50_calculate}}: \code{results},
-#'   \code{summary_df}, \code{lc}) and \code{plot} (a named list of
-#'   ggplot objects when \code{plot = TRUE}, otherwise \code{NULL}).
+#'   \code{summary_df}, \code{lc}), \code{plot} (a named list of
+#'   ggplot objects when \code{plot = TRUE}, otherwise \code{NULL})
+#'   and \code{plot_file} (the written path(s) when \code{plot_file}
+#'   was supplied, otherwise \code{NULL}).
 #'
 #' @seealso \code{\link{lc50_read}}, \code{\link{lc50_calculate}},
-#'   \code{\link{lc50_plot}}, \code{\link{lc50_export}}
+#'   \code{\link{lc50_plot}}, \code{\link{lc50_export}},
+#'   \code{\link{lc50_export_plot}}
 #' @export
 #' @examples
 #' ## way 1: data frame straight from the package example csv
@@ -72,7 +82,10 @@
 lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
                          dead = NULL, name = "bioassay", lc = 0.5,
                          method = "traditional", plot = FALSE,
-                         plot_method = NULL, font = "TNM", unit = NULL,
+                         plot_file = NULL, plot_width = 12,
+                         plot_height = 8, plot_units = "cm",
+                         plot_res = 300, plot_method = NULL,
+                         font = "TNM", unit = NULL,
                          shape = c("sigmoid", "linear"), ci = TRUE,
                          ci_level = 0.95, error_bar = TRUE,
                          move_thres = 0.5, lc_ci = TRUE, lc_p = TRUE,
@@ -84,7 +97,7 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
   ## ---- 2) compute the LC estimates ----
   results <- lc50_calculate(lcd, lc = lc, method = method)
 
-  ## ---- 3) optional plots (built, not printed, not saved) ----
+  ## ---- 3) optional plots (built, not printed) ----
   plots <- NULL
   if (plot) {
     shape <- match.arg(shape)
@@ -106,7 +119,30 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
     }
   }
 
-  list(data = lcd, results = results, plot = plots)
+  ## ---- 4) optional png export ----
+  plot_file_out <- NULL
+  if (plot && !is.null(plot_file) && length(plots)) {
+    if (length(plots) == 1L && grepl("\\.[[:alnum:]]+$", plot_file)) {
+      plot_file_out <- lc50_export_plot(plots[[1]], path = plot_file,
+                                        device = "png", width = plot_width,
+                                        height = plot_height,
+                                        dpi = plot_res, units = plot_units,
+                                        bg = "white")
+    } else {
+      if (!dir.exists(plot_file))
+        dir.create(plot_file, recursive = TRUE, showWarnings = FALSE)
+      plot_file_out <- lc50_export_plot(plots, path = plot_file,
+                                        device = "png", width = plot_width,
+                                        height = plot_height,
+                                        dpi = plot_res, units = plot_units,
+                                        bg = "white")
+    }
+    message("Plot saved to: ",
+            paste(normalizePath(as.character(plot_file_out), mustWork = FALSE),
+                  collapse = ", "))
+  }
+
+  list(data = lcd, results = results, plot = plots, plot_file = plot_file_out)
 }
 
 # Internal: assemble the standardised LC data list from a data frame,
