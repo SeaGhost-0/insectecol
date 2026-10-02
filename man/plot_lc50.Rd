@@ -135,11 +135,11 @@ Replicates of the same concentration are pooled and drawn as
   If a replicate error bar reaches into the label block, the block is
   shifted vertically by the smallest amount that restores a clearance
   of about one line height from the bar end, preferring the direction
-  that keeps it on its own side of the crossing. When the extra x-axis
-  value is drawn inside the panel, its strip next to the dashed line
-  is protected as well: the block climbs back over the bar rather than
-  landing on the number, and only when no such position exists does
-  the number flip to the left of the dashed line.
+  that keeps it on its own side of the crossing. The extra x-axis
+  value always sits to the right of the vertical dashed line (it
+  moves to the left only when it would run off the right panel
+  edge); when the label block dips into the value's strip, the block
+  is raised clear of it instead.
 }
 \section{File names}{
 

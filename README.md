@@ -391,7 +391,10 @@ files are read via `readxl`.
   reach into the LC reference label, the label now shifts vertically by
   the smallest amount that restores a clearance of about one line height
   from the bar end (preferring its own side of the LC crossing) instead
-  of staying at its fixed height and colliding.
+  of staying at its fixed height and colliding. The x-axis value of the
+  dashed line always sits to the right of the line (it moves left only
+  when it would run off the panel edge); a label block that would cover
+  it is raised clear instead.
 - Plots saved with non-default display options now get a suffix in the
   file name (`_linear`, `_noband`, `_nobar`, `_nolcCI`, `_nochi`), so
   different settings saved to one folder never overwrite each other.

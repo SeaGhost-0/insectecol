@@ -86,11 +86,11 @@
 #'   If a replicate error bar reaches into the label block, the block is
 #'   shifted vertically by the smallest amount that restores a clearance
 #'   of about one line height from the bar end, preferring the direction
-#'   that keeps it on its own side of the crossing. When the extra x-axis
-#'   value is drawn inside the panel, its strip next to the dashed line
-#'   is protected as well: the block climbs back over the bar rather than
-#'   landing on the number, and only when no such position exists does
-#'   the number flip to the left of the dashed line.
+#'   that keeps it on its own side of the crossing. The extra x-axis
+#'   value always sits to the right of the vertical dashed line (it
+#'   moves to the left only when it would run off the right panel
+#'   edge); when the label block dips into the value's strip, the block
+#'   is raised clear of it instead.
 #'
 #' @section File names:
 #' Saved files are named after the data set plus suffixes for every
@@ -659,71 +659,77 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   x_val_txt <- sprintf("%.3g", lc_real)
   x_val_w <- 0.045 * nchar(x_val_txt) + 0.02
 
+  # Geometry shared by the error-bar avoidance and the value strip below
+  eb_ok <- pts[is.finite(pts[["lo"]]), , drop = FALSE]  # none w/o error bars
+  pad <- 0.9 * lab_pitch       # half text height + wanted air, in y units
+  bx_lo <- x_lab - lab_half
+  bx_hi <- x_lab + lab_half
+  hit <- eb_ok[eb_ok[["Conc"]] + bar_w / 2 >= bx_lo &
+               eb_ok[["Conc"]] - bar_w / 2 <= bx_hi, , drop = FALSE]
+  # The inside x value owns the bottom strip right of the dashed line
+  # (top edge ~0.21) and is anchored there - when they conflict, the
+  # label block yields, never the number (see x_val_left below)
+  val_obs <- x_lab_inside && bx_hi > lc_x &&
+    bx_lo < lc_x + x_val_w * (x_hi - x_lo)
+
   # NEW: with large error bars one can reach into the label block. Every
   # bar whose horizontal extent (cap width included) overlaps the block's
   # x range forbids a vertical band around [lo, hi], widened by half the
   # visual height of the text block plus the wanted air (one line pitch
-  # in total). If the block intersects such a band, it is shifted
-  # vertically by the smallest amount that lands it in a free gap,
-  # preferring the direction that keeps it on its own side of the
-  # crossing (above the crossing when it sits left of the line, below it
-  # when it sits right). When no free gap exists (the block is squeezed
-  # between two bars), the original position is kept.
-  eb_ok <- pts[is.finite(pts[["lo"]]), , drop = FALSE]  # none w/o error bars
-  if (nrow(eb_ok) > 0) {
-    pad <- 0.9 * lab_pitch  # half text height + wanted air, in y units
-    bx_lo <- x_lab - lab_half
-    bx_hi <- x_lab + lab_half
-    hit <- eb_ok[eb_ok[["Conc"]] + bar_w / 2 >= bx_lo &
-                 eb_ok[["Conc"]] - bar_w / 2 <= bx_hi, , drop = FALSE]
-    if (nrow(hit) > 0) {
-      band_lo <- hit[["lo"]] - pad
-      band_hi <- hit[["hi"]] + pad
-      # The inside x value label owns the bottom strip right of the
-      # dashed line (top edge ~0.21). Treat it as one more obstacle, so
-      # a block pushed away from a bar climbs back over the bar instead
-      # of landing on the number; the number then only flips to the left
-      # of the dashed line as a last resort (see x_val_left below)
-      val_obs <- x_lab_inside && bx_hi > lc_x &&
-        bx_lo < lc_x + x_val_w * (x_hi - x_lo)
-      if (val_obs) {
-        band_lo <- c(band_lo, 0)
-        band_hi <- c(band_hi, 0.21)
+  # in total); the value strip is one more such band. If the block
+  # intersects a band, it is shifted vertically by the smallest amount
+  # that lands it in a free gap, preferring the direction that keeps it
+  # on its own side of the crossing (above the crossing when it sits
+  # left of the line, below it when it sits right). When no free gap
+  # exists (the block is squeezed), the original position is kept.
+  if (nrow(hit) > 0) {
+    band_lo <- hit[["lo"]] - pad
+    band_hi <- hit[["hi"]] + pad
+    if (val_obs) {
+      band_lo <- c(band_lo, 0)
+      band_hi <- c(band_hi, 0.21)
+    }
+    collide <- function(b, lo, hi) any(hi > b & lo < b + lab_h)
+    if (collide(lab_bottom, band_lo, band_hi)) {
+      prefer_up <- lab_bottom >= lc_y
+      cands <- function(lo, hi) {
+        cb <- c(hi, lo - lab_h)  # on top of / under every band
+        keep <- cb >= 0.5 * lab_pitch & cb + lab_h <= 1 - 0.5 * lab_pitch
+        cb <- cb[keep]
+        cb[!vapply(cb, collide, logical(1), lo, hi)]
       }
-      collide <- function(b, lo, hi) any(hi > b & lo < b + lab_h)
-      if (collide(lab_bottom, band_lo, band_hi)) {
-        prefer_up <- lab_bottom >= lc_y
-        cands <- function(lo, hi) {
-          cb <- c(hi, lo - lab_h)  # on top of / under every band
-          keep <- cb >= 0.5 * lab_pitch & cb + lab_h <= 1 - 0.5 * lab_pitch
-          cb <- cb[keep]
-          cb[!vapply(cb, collide, logical(1), lo, hi)]
-        }
-        cand_b <- cands(band_lo, band_hi)
-        if (length(cand_b) == 0 && val_obs) {
-          # last resort: give up the value strip (the number will flip
-          # to the left of the dashed line) and clear the bars instead
-          cand_b <- cands(band_lo[-length(band_lo)],
-                          band_hi[-length(band_hi)])
-        }
-        if (length(cand_b) > 0) {
-          d <- abs(cand_b - lab_bottom)
-          # equal distances: keep the move along the block's own side
-          if (prefer_up) d[cand_b < lab_bottom] <- d[cand_b < lab_bottom] + 1e-9
-          else d[cand_b >= lab_bottom] <- d[cand_b >= lab_bottom] + 1e-9
-          lab_bottom <- cand_b[which.min(d)]
-          lab_top <- lab_bottom + lab_h
-        }
+      cand_b <- cands(band_lo, band_hi)
+      if (length(cand_b) > 0) {
+        d <- abs(cand_b - lab_bottom)
+        # equal distances: keep the move along the block's own side
+        if (prefer_up) d[cand_b < lab_bottom] <- d[cand_b < lab_bottom] + 1e-9
+        else d[cand_b >= lab_bottom] <- d[cand_b >= lab_bottom] + 1e-9
+        lab_bottom <- cand_b[which.min(d)]
+        lab_top <- lab_bottom + lab_h
       }
     }
   }
 
-  # Labels moved into the panel hug their dashed line by default and
-  # flip to the other side only when they would not fit between the line
-  # and the panel edge, or (x) when the LC label already occupies that
-  # corner (its bottom edge dipped below the value strip; see above)
-  x_val_left <- (x_hi - lc_x) < x_val_w * (x_hi - x_lo) ||
-    (lc_x < x_mid && lab_bottom < 0.21)
+  # Enforce the value strip also when no error bar is in the way (e.g. a
+  # small figure, where the default block position already dips into it):
+  # raise the block by the smallest amount that clears the strip,
+  # provided it then neither crosses the LC crossing nor lands on an
+  # error bar; otherwise the rare crowding is accepted
+  if (val_obs && lab_bottom < 0.21) {
+    newb <- 0.21
+    ok <- newb + lab_h <= min(lc_y, 1 - 0.5 * lab_pitch)
+    if (ok && nrow(hit) > 0)
+      ok <- !any(hit[["hi"]] + pad > newb &
+                 hit[["lo"]] - pad < newb + lab_h)
+    if (ok) {
+      lab_bottom <- newb
+      lab_top <- newb + lab_h
+    }
+  }
+
+  # The inside x value is anchored to the RIGHT of the dashed line; it
+  # moves to the left only when it would run off the right panel edge
+  x_val_left <- (x_hi - lc_x) < x_val_w * (x_hi - x_lo)
   y_val_below <- (1 - lc_y) < 0.16
 
   # Sizes of the hand-drawn axis elements
