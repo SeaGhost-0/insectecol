@@ -101,14 +101,14 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   sub_ <- if (!is.null(sub)) sub else auto_sub
 
   ## ---- layout: margins and axis-title positions scale with cex ----
-  ## lab_line = margin line of the axis titles; the footnote sits
-  ## clearly (but not far) below the x-axis title and the bottom
-  ## margin reserves room for both; the left margin hugs the y-axis
-  ## title so it stays near the image edge.
-  lab_line <- 2.8 + 0.9 * (cex - 1)
-  sub_line <- lab_line + 1 + 0.7 * cex + 0.3
+  ## lab_line = margin line of the axis titles (nearly constant: the
+  ## title sits tight above the tick labels); the footnote sits close
+  ## below the x-axis title and the bottom margin reserves room for
+  ## both; the left margin hugs the y-axis title near the image edge.
+  lab_line <- 2.4 - 0.1 * (cex - 1)
+  sub_line <- lab_line + 0.9 * cex - 0.7
   mar1 <- if (!is.null(sub_) && nzchar(sub_))
-    sub_line + 0.7 * cex + 0.4 else lab_line + 1.9
+    sub_line + 0.7 * cex + 0.6 else lab_line + 1.9
   mar4 <- 1
   if (legend_right) {
     ## measure the legend column (inches) and reserve it on the right;
@@ -118,7 +118,7 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
     panel_gap_in <- 0.12 * cex                # panel edge <-> frame
     fig_gap_in   <- 0.25 * cex                # frame <-> image right edge
     pad_in  <- 0.15 * cex
-    ag_in   <- 0.05 * cex                     # date <-> arrow spacing
+    ag_in   <- 0.035 * cex                    # date <-> arrow spacing
     leg_cex <- 0.64 * cex                     # 75% of the former 0.85
     dat_cex <- 0.60 * cex                     # 75% of the former 0.8
     arr_in  <- if (use_hatch) 0.35 * cex / 3 else 0
@@ -235,7 +235,7 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   main <- if (is.null(title)) auto_main else title
   title(main = main, cex.main = 0.95 * cex)
   if (!is.null(sub_) && nzchar(sub_))
-    mtext(sub_, side = 1, line = lab_line + 0.9 * cex + 0.7,
+    mtext(sub_, side = 1, line = sub_line,
           cex = 0.7 * cex, col = "grey30")
   invisible(NULL)
 }
