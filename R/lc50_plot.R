@@ -659,11 +659,14 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   x_val_txt <- sprintf("%.3g", lc_real)
   x_val_w <- 0.045 * nchar(x_val_txt) + 0.02
 
-  # Geometry shared by the error-bar avoidance and the value strip below
+  # Geometry shared by the error-bar avoidance and the value strip below.
+  # lab_half is derived from nominal font metrics and runs ~20% wider
+  # than the rendered text, so the collision logic works with lab_half_c
   eb_ok <- pts[is.finite(pts[["lo"]]), , drop = FALSE]  # none w/o error bars
   pad <- 0.9 * lab_pitch       # half text height + wanted air, in y units
-  bx_lo <- x_lab - lab_half
-  bx_hi <- x_lab + lab_half
+  lab_half_c <- 0.8 * lab_half
+  bx_lo <- x_lab - lab_half_c
+  bx_hi <- x_lab + lab_half_c
   hit <- eb_ok[eb_ok[["Conc"]] + bar_w / 2 >= bx_lo &
                eb_ok[["Conc"]] - bar_w / 2 <= bx_hi, , drop = FALSE]
   # The inside x value owns the bottom strip right of the dashed line
@@ -680,8 +683,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   # intersects a band, it is shifted vertically by the smallest amount
   # that lands it in a free gap, preferring the direction that keeps it
   # on its own side of the crossing (above the crossing when it sits
-  # left of the line, below it when it sits right). When no free gap
-  # exists (the block is squeezed), the original position is kept.
+  # left of the line, below it when it sits right).
   if (nrow(hit) > 0) {
     band_lo <- hit[["lo"]] - pad
     band_hi <- hit[["hi"]] + pad
@@ -724,6 +726,53 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
     if (ok) {
       lab_bottom <- newb
       lab_top <- newb + lab_h
+    }
+  }
+
+  # Last resort when every vertical move is blocked (bars above and
+  # below, e.g. wide CIs on neighbouring concentrations): search a small
+  # grid of positions on the block's own side of the dashed line for the
+  # nearest spot free of all error bars, of the value strip and of the
+  # fitted curve with its band; if the panel offers none, the original
+  # position is kept
+  if ((nrow(hit) > 0 || val_obs) &&
+      (any(hit[["hi"]] + pad > lab_bottom &
+           hit[["lo"]] - pad < lab_bottom + lab_h) ||
+       (val_obs && lab_bottom < 0.21))) {
+    zx1 <- lc_x + x_val_w * (x_hi - x_lo)
+    free <- function(bx0, bx1, b) {
+      if (b < 0 && b + lab_h > 1) return(FALSE)
+      if (val_obs && bx1 > lc_x && bx0 < zx1 && b < 0.21) return(FALSE)
+      if (any(hit[["hi"]] + pad > b & hit[["lo"]] - pad < b + lab_h &
+              hit[["Conc"]] + bar_w / 2 > bx0 &
+              hit[["Conc"]] - bar_w / 2 < bx1)) return(FALSE)
+      # the fitted curve with its confidence band
+      inb <- curve[["Conc"]] > bx0 & curve[["Conc"]] < bx1
+      if (any(inb) && b + lab_h > min(band[["lo"]][inb]) &&
+          b < max(band[["hi"]][inb])) return(FALSE)
+      TRUE
+    }
+    xs <- if (lab_right)
+      seq(max(x_lab, lc_x + lab_half_c + 0.02 * (x_hi - x_lo)),
+          x_hi - lab_half_c, length.out = 10)
+    else
+      seq(x_lo + lab_half_c,
+          min(x_lab, lc_x - lab_half_c - 0.02 * (x_hi - x_lo)),
+          length.out = 10)
+    ys <- seq(0.5 * lab_pitch, 1 - 0.5 * lab_pitch - lab_h, length.out = 16)
+    best <- NA_real_; best_d <- Inf
+    for (x2 in xs) {
+      for (b2 in ys) {
+        if (free(x2 - lab_half_c, x2 + lab_half_c, b2)) {
+          d <- 2 * abs(x2 - x_lab) / (x_hi - x_lo) + abs(b2 - lab_bottom)
+          if (d < best_d) { best_d <- d; best <- c(x2, b2) }
+        }
+      }
+    }
+    if (!is.na(best[1])) {
+      x_lab <- best[1]
+      lab_bottom <- best[2]
+      lab_top <- lab_bottom + lab_h
     }
   }
 
