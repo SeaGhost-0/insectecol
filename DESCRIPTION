@@ -25,8 +25,13 @@ Description: A collection of analytical tools for insect ecology research,
     temperature-dependent development models (Logan-6, Lactin, Briere,
     Wang-7), selects the best model by AICc, predicts durations,
     accumulates field degree-days and bridges from raw life-table files.
-    Further extensions, such as median lethal temperature/time (LT50),
-    are planned.
+    The emergence module projects the beginning, peak and end of the
+    adult emergence period (the 16%, 50% and 84% quantiles) from a
+    single survey of the population stage structure by the stage-grading
+    method, optionally shifting the eclosion dates by the
+    pre-oviposition period and the egg duration to forecast larval
+    hatch. Further extensions, such as median lethal temperature/time
+    (LT50), are planned.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:

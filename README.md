@@ -8,7 +8,7 @@
 ## Introduction
 
 **insectecol** (Insect Ecology Data Analysis Toolkit) is a collection of
-analytical tools for insect ecology research. It currently ships three
+analytical tools for insect ecology research. It currently ships four
 modules:
 
 - **Age-stage, two-sex life table** - main function
@@ -48,6 +48,19 @@ modules:
   group comparison (`gdd_compare()`), degree-day accumulation from daily
   Tmin/Tmax (`gdd_daily()`), deriving data from a life-table csv
   (`gdd_from_lifetable()`) and csv/xlsx export (`gdd_export()`).
+- **Emergence-period projection (stage-grading method)** - main function
+  `emergence_analyze()` for data already loaded in R (column vectors, a
+  data frame, or csv/xlsx file(s)). Turns one field survey of the
+  population stage structure (e.g. a dissected-sample count of pupal
+  grades) into the projected dates of the 16% / 50% / 84% emergence
+  quantiles - the beginning, peak and end of the adult emergence period -
+  by the classic Chinese stage-grading method (分龄分级推算法), and
+  optionally projects the larval hatch dates from the pre-oviposition
+  period and the egg duration. Quantiles outside the surveyed range are
+  extrapolated with an explicit warning, English and Chinese column
+  headers are auto-detected, publication figures follow the same
+  serif-font conventions as the degree-day module, and tables are
+  exported with `emergence_export()`.
 
 ### Which main function should I use?
 
@@ -60,6 +73,7 @@ function** for processing csv files on disk:
 | Life table | `lifeTable_analyze()` | `lifeTable_calculate()` |
 | Bioassay | `lc50_analyze()` | `save_lc50_auto()` (tables), `save_lc50_plot_auto()` (figures) |
 | Degree-day | `gdd_analyze()` | `gdd_analyze(path = ...)` also reads files/folders, `gdd_export()` writes the tables |
+| Emergence period | `emergence_analyze()` | `emergence_analyze(path = ...)` also reads files/folders, `emergence_export()` writes the tables |
 
 The main functions assemble the data, compute everything and optionally
 build the plots, but never write to disk - export is handled separately by
@@ -218,15 +232,56 @@ out3 <- gdd_analyze(path = "path/to/gdd_data", model = "auto")
 gdd_export(out3$fit, file = "gdd_results.csv")
 ```
 
+## Quick start: emergence period (stage-grading method)
+
+```r
+library(insectecol)
+
+# example data shipped with the package: one survey of the pupal
+# grade structure (Tianyang overwintering generation, 40 individuals)
+f <- system.file("extdata", "emergence_example.csv", package = "insectecol")
+d <- read.csv(f)
+#   stage        count  days     # days = days from this stage to
+#   Pupal exuviae   2      0     # adult eclosion at the current
+#   Pupa 7          3      2     # temperature (most developed first)
+#   ...
+
+# analyse straight from the columns of the loaded data frame
+out <- emergence_analyze(
+  stage = d$stage, count = d$count, days = d$days,
+  survey_date = "2026-03-20"
+)
+
+out$fit$predictions   # dates of the beginning (16%), peak (50%)
+                      # and end (84%) of the emergence period
+predict(out$fit, c(0.25, 0.75))          # arbitrary quantiles
+summary(out$fit)                         # full cumulative table
+
+# larval hatch: eclosion + pre-oviposition period + egg duration
+out2 <- emergence_analyze(data = d, survey_date = "2026-03-20",
+                          pre_ovip = 3, egg_days = 10,
+                          plot = TRUE, plot_file = "emergence.png")
+out2$fit$predictions$hatch_date
+```
+
+The three quantile dates are interpolated on the cumulative
+development curve built from the survey; a survey that misses stages
+simply renormalises the shares, while a quantile below the share of
+the most developed stage (partly eclosed before the survey) is
+extrapolated backwards with an explicit warning. Tables are exported
+with `emergence_export(fit, file = "emergence_results.csv")`.
+
 ## Example data
 
-Two example csv files ship with the package in `inst/extdata/`; the
+Four example csv files ship with the package in `inst/extdata/`; the
 examples in this README and in the help pages are built on them:
 
 ```r
 system.file("extdata", "Example.csv", package = "insectecol")      # life table
 system.file("extdata", "bioassay.csv", package = "insectecol")     # bioassay
 system.file("extdata", "gdd_example.csv", package = "insectecol")  # degree-day
+system.file("extdata", "emergence_example.csv",
+            package = "insectecol")                                # emergence
 ```
 
 - `Example.csv` - life table data in the csv template: one row per
@@ -241,6 +296,10 @@ system.file("extdata", "gdd_example.csv", package = "insectecol")  # degree-day
   columns `temp` (deg C), `duration` (mean developmental duration in
   days) and `stage` (the grouping column). `inst/extdata/gdd_batch/`
   additionally ships one file per temperature for the batch mode.
+- `emergence_example.csv` - emergence-period survey data (the Tianyang
+  overwintering-generation case): one row per stage with the columns
+  `stage`, `count` (individuals in that stage) and `days` (average days
+  from that stage to adult eclosion).
 
 The file layouts are described in detail under
 [Data formats](#data-formats).
@@ -294,6 +353,24 @@ Chinese headers are recognised); ambiguous files accept explicit
 supported; the csv delimiter (`,` `;` tab) is auto-detected, and xlsx
 files are read via `readxl`.
 
+### Emergence csv
+
+One row per stage, ordered most-developed-first (the rows are sorted
+by `days` internally anyway):
+
+| Column | Content |
+|---|---|
+| stage | stage name, e.g. the pupal grade (`stage`, `grade`, `虫态`, `阶段`) |
+| count or percent | individuals observed in that stage, or its share (`count`, `n`, `数量`, `虫数` / `percent`, `占比`) |
+| days | average days from that stage to adult eclosion (`days`, `天数`, `历期`, `距羽化天数`) |
+
+The columns are auto-detected (English and Chinese headers are
+recognised); ambiguous files accept explicit `stage_col` / `count_col`
+/ `percent_col` / `days_col`. Exactly one of count / percent is used
+(count wins with a message when both are present). UTF-8 (with BOM)
+and GBK encodings are supported; the csv delimiter is auto-detected,
+and xlsx files are read via `readxl`.
+
 ## Function reference
 
 ### Life table module
@@ -339,9 +416,50 @@ files are read via `readxl`.
 | `gdd_from_lifetable()` | derive temperature/duration data from a life-table csv |
 | `gdd_export()` | export the result tables to csv/xlsx |
 
+### Emergence module
+
+| Function | Purpose |
+|---|---|
+| `emergence_analyze()` | **main function** - read/compute/plot in one call (column vectors, data frame, or path) |
+| `emergence_read()` | read an emergence csv/xlsx file or a folder of them (batch) |
+| `emergence_calc()` | cumulative development + quantile dates from a survey table |
+| `emergence_export()` | export the prediction and stage tables to csv/xlsx |
+| `print()` / `summary()` / `predict()` / `plot()` | S3 methods for the `emergence` object (`predict(fit, p)` interpolates arbitrary quantiles) |
+
 ## Updates
 
 ### 1.0.2 (development)
+
+**New module: emergence-period projection (stage-grading method)**
+
+- New main function `emergence_analyze()`: turns one field survey of
+  the population stage structure (e.g. a dissected-sample count of
+  pupal grades) into the projected dates of the 16% / 50% / 84%
+  emergence quantiles (the beginning, peak and end of the adult
+  emergence period, i.e. the mean +/- 1 SD of a normal emergence
+  curve) by the classic Chinese stage-grading method. Accepts column
+  vectors, a data frame, or csv/xlsx file(s)/folder; nothing is
+  written to disk unless `plot_file` is supplied.
+- Larval hatch projection: `pre_ovip` (pre-oviposition period) and
+  `egg_days` (egg duration) shift the eclosion dates to the hatch
+  dates, e.g. for forecasting the hatch of larvae from a pupal-grade
+  survey.
+- Quantiles at or below the cumulative share of the most developed
+  stage (partly eclosed before the survey) are extrapolated backwards
+  from the first segment with an explicit warning; the survey shares
+  are renormalised when stages are missing. Zero-count stages are
+  dropped, rows are sorted by days to eclosion automatically, and
+  stages sharing one days value are flagged for checking.
+- Column auto-detection with English and Chinese aliases
+  (`stage`/`虫态`, `count`/`数量`, `days`/`历期`, ...), delimiter and
+  encoding handling as in the degree-day module.
+- `predict(fit, p)` interpolates arbitrary quantiles; the
+  `fit$interpolate` closure supports further programming.
+- Publication figures with the same serif-font conventions and
+  physical-size png export as the degree-day module; `emergence_export()`
+  writes the prediction and stage tables to csv/xlsx.
+- Example data: `inst/extdata/emergence_example.csv` (Tianyang
+  overwintering-generation survey, 40 individuals, 10 stages).
 
 **New module: degree-day / thermal constants**
 
