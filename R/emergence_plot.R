@@ -113,15 +113,18 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
     ## two lines per quantile keep the column narrow: the label on the
     ## first line, "date -> date" with a true arrow glyph below it
     lin_in  <- par("csi")                     # inches per margin line
-    gap_in  <- 0.12 * cex
-    arr_in  <- if (use_hatch) 0.35 * cex else 0
-    w_lab <- max(strwidth(pr$label, units = "inches", cex = 0.85 * cex))
-    w_d1  <- max(strwidth(d1, units = "inches", cex = 0.8 * cex))
-    w_d2  <- if (use_hatch)
-      max(strwidth(d2, units = "inches", cex = 0.8 * cex)) else 0
+    gap_in  <- 0.10 * cex
+    pad_in  <- 0.15 * cex
+    leg_cex <- 0.64 * cex                     # 75% of the former 0.85
+    dat_cex <- 0.60 * cex                     # 75% of the former 0.8
+    arr_in  <- if (use_hatch) 0.35 * cex / 3 else 0
+    w_lab <- strwidth(pr$label, units = "inches", cex = leg_cex)
+    w_d1  <- strwidth(d1, units = "inches", cex = dat_cex)
+    w_d2  <- if (use_hatch) strwidth(d2, units = "inches", cex = dat_cex)
+             else rep(0, nrow(pr))
     row_w <- if (use_hatch) w_d1 + arr_in + w_d2 + 2 * gap_in else w_d1
-    leg_w <- 1.08 * max(w_lab, row_w) + 2.2 * gap_in
-    mar4  <- (leg_w + gap_in) / lin_in
+    box_w <- max(pmax(w_lab, row_w)) + 2 * pad_in
+    mar4  <- (box_w + gap_in) / lin_in
   }
   op <- par(
     mar = c(mar1, lab_line + 1.9 * cex, 1.5 * cex + 0.5, mar4),
@@ -140,6 +143,8 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   axis(1, at = ats, labels = format(ats, "%m-%d"), cex.axis = 0.85 * cex)
   axis(2, at = seq(0, 100, 20), las = 1, cex.axis = 0.85 * cex)
   box(lwd = lwd * 0.8)
+  ux_in <- diff(par("usr")[1:2]) / par("pin")[1]  # user units / inch
+  uy_in <- diff(par("usr")[3:4]) / par("pin")[2]
 
   ## survey date reference line; the label sits just above the x axis
   ## so that it cannot collide with anything in the corners
@@ -159,9 +164,11 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   points(pr$date, pr$p * 100, pch = 21, bg = "white",
          col = col_acc, cex = 0.75 * cex, lwd = lwd)
 
-  ## hatch arrows (stopped short of the triangle marker) and markers
+  ## hatch arrows: the arrowhead stops right at the edge of the
+  ## triangle marker (half marker width + a hair)
   if (use_hatch) {
-    eps <- 0.035 * as.numeric(diff(range(allx)))
+    tri_half <- 0.48 * 0.6 * cex * par("csi")     # triangle half width, in
+    eps <- (tri_half + 0.01) * ux_in
     for (i in seq_len(nrow(pr)))
       arrows(pr$date[i], pr$p[i] * 100, pr$hatch_date[i] - eps,
              pr$p[i] * 100, length = 0.08, col = "grey45",
@@ -172,33 +179,35 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
 
   ## ---- quantile legend ----
   if (legend_right) {
-    ux_in <- diff(par("usr")[1:2]) / par("pin")[1]  # user units / inch
-    uy_in <- diff(par("usr")[3:4]) / par("pin")[2]
     dx <- function(inches) inches * ux_in
     dy <- function(inches) inches * uy_in
-    x0 <- grconvertX(1, "nfc") - dx(leg_w)  # legend left inside mar4
-    yto <- par("usr")[4] + dy(gap_in)               # just above the panel
-    pitch_in <- 1.5 * 0.85 * cex * par("csi")       # line pitch, inches
-    blk_in   <- 2.45 * pitch_in                     # per-quantile block
+    xL <- grconvertX(1, "nfc") - dx(box_w + gap_in)   # frame left
+    cx <- xL + dx(box_w / 2)                          # frame center
+    yto <- par("usr")[4] + dy(gap_in)
+    pitch_in <- 1.35 * leg_cex * par("csi")           # line pitch, inches
     n <- nrow(pr)
-    ylab_row <- yto - (0.55 + (seq_len(n) - 1) * 2.45) * dy(pitch_in)
-    ydat_row <- ylab_row - dy(1.15 * pitch_in)
-    ## background box, then per quantile: label line, date/arrow line
-    rect(x0 - dx(gap_in * 0.5), min(ydat_row) - dy(0.9 * pitch_in),
-         grconvertX(1, "nfc") - dx(gap_in * 0.5), yto + dy(gap_in * 0.3),
+    ylab_row <- yto - (0.6 + (seq_len(n) - 1) * 2.25) * dy(pitch_in)
+    ydat_row <- ylab_row - dy(0.95 * pitch_in)
+    ## background box, then per quantile: label line, date/arrow line,
+    ## each line centred in the frame
+    rect(xL, min(ydat_row) - dy(0.8 * pitch_in),
+         xL + dx(box_w), yto + dy(gap_in * 0.3),
          col = "white", border = "grey75", lwd = lwd * 0.5, xpd = NA)
     for (i in seq_len(n)) {
-      text(x0, ylab_row[i], pr$label[i], adj = c(0, 0.5), cex = 0.85 * cex,
-           col = col_acc, xpd = NA)
-      text(x0, ydat_row[i], d1[i], adj = c(0, 0.5), cex = 0.8 * cex,
+      text(cx, ylab_row[i], pr$label[i], adj = c(0.5, 0.5), cex = leg_cex,
            col = col_acc, xpd = NA)
       if (use_hatch) {
-        xa <- x0 + dx(w_d1 + gap_in)
-        xb <- xa + dx(arr_in)
-        arrows(xa, ydat_row[i], xb, ydat_row[i], length = 0.07,
-               col = "grey45", lwd = lwd * 0.7, xpd = NA)
-        text(xb + dx(gap_in), ydat_row[i], d2[i], adj = c(0, 0.5),
-             cex = 0.8 * cex, col = col_acc, xpd = NA)
+        rs <- cx - dx(row_w[i] / 2)         # date row start (centred)
+        text(rs, ydat_row[i], d1[i], adj = c(0, 0.5), cex = dat_cex,
+             col = col_acc, xpd = NA)
+        xa <- rs + dx(w_d1[i] + gap_in)
+        arrows(xa, ydat_row[i], xa + dx(arr_in), ydat_row[i],
+               length = 0.07, col = "grey45", lwd = lwd * 0.7, xpd = NA)
+        text(xa + dx(arr_in + gap_in), ydat_row[i], d2[i],
+             adj = c(0, 0.5), cex = dat_cex, col = col_acc, xpd = NA)
+      } else {
+        text(cx, ydat_row[i], d1[i], adj = c(0.5, 0.5), cex = dat_cex,
+             col = col_acc, xpd = NA)
       }
     }
   } else {
@@ -206,7 +215,7 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
       sprintf("%-18s %s  ->  %s", pr$label, d1, d2)
     else
       sprintf("%-18s %s", pr$label, d1)
-    legend("topleft", legend = leg, bty = "o", cex = 0.85 * cex,
+    legend("topleft", legend = leg, bty = "o", cex = 0.64 * cex,
            text.col = col_acc, box.col = "grey75", box.lwd = lwd * 0.5,
            bg = "white", inset = c(0.01, 0.01))
   }
