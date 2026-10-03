@@ -24,7 +24,7 @@
 #'   concentration greater than zero must be present, and the rows are
 #'   sorted by increasing concentration. The file encoding is detected
 #'   automatically (UTF-8 with BOM and GBK are tried), so files written
-#'   by both English and Chinese versions of Excel can be read.
+#'   by both English and Chinese versions of 'Excel' can be read.
 #'
 #' @return A named list with one data frame per csv file; the list
 #'   elements are named after the files (without extension) and each

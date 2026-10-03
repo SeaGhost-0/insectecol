@@ -3,7 +3,7 @@
 #' Checks whether the input path points to a folder or to a file. Before
 #' the check, the path is cleaned automatically: backslashes are
 #' converted to forward slashes, invisible characters that are often
-#' copied along with paths from Windows dialogs (U+202A) are removed, and
+#' copied along with paths from 'Windows' dialogs (U+202A) are removed, and
 #' a redundant trailing "/" is dropped.
 #'
 #' @param path Character string; the path to check. Anything that is not
@@ -13,7 +13,7 @@
 #' @details The function never stops: it always returns one of the four
 #'   type labels below, so callers can branch directly on the result.
 #'   The cleaned path is used for the existence checks, which makes the
-#'   function robust against paths copied out of the Windows Explorer
+#'   function robust against paths copied out of the 'Windows' Explorer
 #'   address bar. It is used internally by the reading functions of the
 #'   package to support both folder input (batch mode) and single-file
 #'   input.

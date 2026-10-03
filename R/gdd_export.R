@@ -79,7 +79,7 @@ gdd_export <- function(x, file = "gdd_results.csv",
 #' Export the Degree-Day Plot as PNG
 #'
 #' Draws the degree-day figure of a \code{"gdd"} object on a png
-#' device (ragg when available, otherwise \code{\link[grDevices]{png}})
+#' device ('ragg' when available, otherwise \code{\link[grDevices]{png}})
 #' and writes it to disk - the standalone counterpart of
 #' \code{plot_file =} in \code{\link{gdd_analyze}}, usable on an
 #' existing fit at any time. All plot options of \code{\link{gdd_plot}}

@@ -34,10 +34,10 @@ parameters when \code{show_hatch} is active (drawn below the
 x-axis title). Use \code{""} to drop it.}
 
 \item{family}{Text font family. Default \code{"serif"} --- a
-portable alias that maps to Times New Roman on Windows and to
+portable alias that maps to Times New Roman on 'Windows' and to
 the system serif font elsewhere; Chinese characters are
 rendered through the device's font fallback (SimSun on Chinese
-Windows). Set to \code{""} for the device default.}
+'Windows'). Set to \code{""} for the device default.}
 
 \item{cex}{Overall text-size multiplier. Default \code{2}: the
 exported figure is meant to be placed at half the text width of
@@ -75,12 +75,18 @@ fit <- emergence_calc(emergence_read(f), survey_date = "2026-03-20",
                       pre_ovip = 3, egg_days = 10)
 plot(fit)
 
-## Chinese labels work on the interactive Windows and ragg devices
+## Chinese labels work on the interactive 'Windows' and 'ragg' devices
 ## (the Chinese characters fall back to SimSun); the plain pdf()
 ## device cannot render CJK glyphs on many platforms, so this part
 ## is not run automatically:
+## Chinese labels: the CJK glyphs fall back to the system font on
+## the png device (SimSun on Chinese Windows). The plain pdf() of
+## R CMD check cannot render them, so draw on a png here:
 \donttest{
+png(file.path(tempdir(), "emergence_zh.png"),
+    width = 1600, height = 900, units = "px", res = 150)
 plot(fit, title = "二化螟越冬代发生期预测",
      xlab = "推算日期", ylab = "累计发育进度 (\%)")
+dev.off()
 }
 }

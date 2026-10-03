@@ -25,7 +25,7 @@ The paths of the written xlsx files, invisibly.
 }
 \description{
 Reads the csv file(s) at \code{path}, computes the LC values with
-\code{\link{lc50_calculate}} and writes one Excel workbook per csv
+\code{\link{lc50_calculate}} and writes one 'Excel' workbook per csv
 file with \code{\link{lc50_export}} - named after the data file and
 placed next to the raw data.
 }

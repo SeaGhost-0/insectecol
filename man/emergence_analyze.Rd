@@ -99,8 +99,8 @@ defaults of \code{\link{plot.emergence}}.}
 
 \item{plot_family}{Text font family, see \code{\link{plot.emergence}}
 (\code{NULL} keeps the default \code{"serif"} --- Times New
-Roman on Windows; Chinese characters are rendered through the
-device's font fallback, i.e. SimSun on Chinese Windows).}
+Roman on 'Windows'; Chinese characters are rendered through the
+device's font fallback, i.e. SimSun on Chinese 'Windows').}
 
 \item{plot_width, plot_height, plot_units, plot_res}{Physical size
 and resolution of the exported png (only used when

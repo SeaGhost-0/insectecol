@@ -32,14 +32,14 @@
 #'   none.
 #' @param family Text font family used for the title, axis labels and
 #'   tick labels. Default \code{"serif"} --- a portable alias that maps
-#'   to Times New Roman on Windows (the journal standard) and to the
+#'   to Times New Roman on 'Windows' (the journal standard) and to the
 #'   system serif font elsewhere, and is valid on every device
 #'   (including \code{pdf()}). Latin characters are rendered with this
 #'   font; Chinese characters are rendered through the device's font
-#'   fallback, which on Chinese Windows is SimSun (宋体), so mixed
+#'   fallback, which on Chinese 'Windows' is SimSun (宋体), so mixed
 #'   English-Chinese titles work without extra settings. Set to
 #'   \code{""} to use the device default, or pass an explicit family
-#'   such as \code{"Times New Roman"} (widely available on Windows;
+#'   such as \code{"Times New Roman"} (widely available on 'Windows';
 #'   may be unknown to the \code{pdf()} device on other platforms).
 #' @param xlab,ylab Axis labels.
 #' @param ... Further graphical parameters passed to \code{plot}.
@@ -54,14 +54,20 @@
 #'          title = "Developmental rate vs temperature",
 #'          sub = "Constant-temperature rearing experiment, 2026")
 #'
-#' ## Chinese titles work on the interactive Windows and ragg devices
+#' ## Chinese titles work on the interactive 'Windows' and 'ragg' devices
 #' ## (the Chinese characters fall back to SimSun); the plain pdf()
 #' ## device cannot render CJK glyphs on many platforms, so this part
 #' ## is not run automatically:
+#' ## Chinese titles: the CJK glyphs fall back to the system font on
+#' ## the png device (SimSun on Chinese Windows). The plain pdf() of
+#' ## R CMD check cannot render them, so draw on a png here:
 #' \donttest{
+#' png(file.path(tempdir(), "gdd_zh.png"),
+#'     width = 1600, height = 900, units = "px", res = 150)
 #' gdd_plot(fit, group = "Egg", title = "卵的发育速率",
 #'          sub = "2026 年饲养实验", xlab = "温度 (°C)",
 #'          ylab = "发育速率 (1/d)")
+#' dev.off()
 #' }
 #' @export
 gdd_plot <- function(x, group = NULL, show_C = TRUE, show_Topt = TRUE,
@@ -92,7 +98,7 @@ gdd_plot <- function(x, group = NULL, show_C = TRUE, show_Topt = TRUE,
   ## mixed English-Chinese titles would lose one of the two scripts.
   ## ragg and the classic Windows devices (GDI font linking) fall back
   ## per glyph: Latin chars use `family` (Times New Roman), Chinese
-  ## chars use the system serif CJK font (SimSun on Chinese Windows).
+  ## chars use the system serif CJK font (SimSun on Chinese 'Windows').
   if (requireNamespace("showtext", quietly = TRUE))
     try(showtext::showtext_auto(enable = FALSE), silent = TRUE)   # see comment above
   ## classic windows devices resolve families through windowsFonts()

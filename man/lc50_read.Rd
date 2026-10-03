@@ -39,7 +39,7 @@ Each csv file must contain one row per concentration with
   concentration greater than zero must be present, and the rows are
   sorted by increasing concentration. The file encoding is detected
   automatically (UTF-8 with BOM and GBK are tried), so files written
-  by both English and Chinese versions of Excel can be read.
+  by both English and Chinese versions of 'Excel' can be read.
 }
 \examples{
 f <- system.file("extdata", "lc50_example.csv", package = "insectecol")

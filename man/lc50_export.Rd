@@ -2,7 +2,7 @@
 % Please edit documentation in R/lc50_export.R
 \name{lc50_export}
 \alias{lc50_export}
-\title{Export LC Results to Excel}
+\title{Export LC Results to 'Excel'}
 \usage{
 lc50_export(results, output_dir = NULL, filename = "LC50_results.xlsx")
 }
@@ -21,7 +21,7 @@ The full path of the exported xlsx file (invisibly).
 }
 \description{
 Writes the results of \code{\link{lc50_calculate}} into a multi-sheet
-Excel workbook: a summary sheet with the LC estimates, confidence
+'Excel' workbook: a summary sheet with the LC estimates, confidence
 intervals and regression parameters of all files and methods, plus
 one detail sheet per file with the preprocessed data and the
 parameters of the successfully computed methods.

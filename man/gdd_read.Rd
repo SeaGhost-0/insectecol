@@ -16,7 +16,7 @@ gdd_read(
 \item{path}{Path to a csv/xlsx file or to a folder (batch mode).}
 
 \item{encoding}{Text encoding of csv files, default \code{"UTF-8"}.
-Use \code{"GBK"} for csv files saved from Chinese Excel on Windows.}
+Use \code{"GBK"} for csv files saved from Chinese 'Excel' on 'Windows'.}
 
 \item{header}{Logical; whether the file(s) contain a header row.
 Default TRUE.}
@@ -39,7 +39,7 @@ per observation, with a temperature column and a duration column;
 optional grouping columns such as life stage). The input may be:
 \itemize{
   \item a single csv file (delimiter auto-detected),
-  \item a single xlsx/xls file (via the readxl package),
+  \item a single xlsx/xls file (via the 'readxl' package),
   \item a folder containing csv/xlsx files (batch mode), e.g. one
     file per temperature or per stage; the files are combined and
     the source file name is kept in a \code{source_file} column.

@@ -43,7 +43,7 @@ Invisibly, \code{file}.
 }
 \description{
 Draws the emergence-period projection of an \code{"emergence"}
-object on a png device (ragg when available, otherwise
+object on a png device ('ragg' when available, otherwise
 \code{\link[grDevices]{png}}) and writes it to disk - the
 standalone counterpart of \code{plot_file =} in
 \code{\link{emergence_analyze}}, usable on an existing fit at any

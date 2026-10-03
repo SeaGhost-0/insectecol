@@ -55,10 +55,10 @@ To keep the figure clean, each stage is drawn only over the
   points. By default all text of the figure is in English; title,
   axis titles and legend labels can be customised.
 
-  The text sizes are calibrated for being drawn while showtext is
+  The text sizes are calibrated for being drawn while 'showtext' is
   active at its default internal dpi (96); \code{\link{lifeTable_export}}
   takes care of this when exporting. If you save the plot yourself,
-  switch showtext on around the \code{\link[ggplot2]{ggsave}} call,
+  switch 'showtext' on around the \code{\link[ggplot2]{ggsave}} call,
   otherwise the text comes out about 300/96 times too large.
 }
 \examples{

@@ -54,7 +54,7 @@ lifeTable_calculate_all <- function(lt, fecundity = TRUE) {
 #'
 #' Runs the complete workflow (reading, validation, calculation, plotting
 #' and exporting) for every csv file in a folder, or for a single csv
-#' file. Each data set gets its own Excel workbook; in addition an
+#' file. Each data set gets its own 'Excel' workbook; in addition an
 #' \code{all.xlsx} with the summary of all files is created. Files that
 #' fail (e.g. because of data errors) are skipped and reported at the end
 #' without interrupting the remaining files.

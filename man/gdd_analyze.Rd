@@ -110,8 +110,8 @@ the defaults of \code{\link{gdd_plot}}.}
 
 \item{plot_family}{Text font family, see \code{\link{gdd_plot}}
 (\code{NULL} keeps the default \code{"serif"} --- Times New Roman
-on Windows; Chinese characters are rendered through the device's
-font fallback, i.e. SimSun on Chinese Windows).}
+on 'Windows'; Chinese characters are rendered through the device's
+font fallback, i.e. SimSun on Chinese 'Windows').}
 
 \item{plot_width, plot_height}{Physical size of the exported figure
 in \code{plot_units} (only used when \code{plot_file} is

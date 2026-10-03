@@ -10,14 +10,14 @@
 #' \code{\link{emergence_calc}}: one row per stage, with a stage
 #' name column, a count (or percent) column and a days-to-eclosion
 #' column. The input may be a single csv file (delimiter
-#' auto-detected), a single xlsx/xls file (via the readxl package)
+#' auto-detected), a single xlsx/xls file (via the 'readxl' package)
 #' or a folder containing csv/xlsx files (batch mode; the files are
 #' combined and the source file name kept in a \code{source_file}
 #' column).
 #'
 #' @param path Path to a csv/xlsx file or to a folder (batch mode).
 #' @param encoding Text encoding of csv files, default \code{"UTF-8"}.
-#'   Use \code{"GBK"} for csv files saved from Chinese Excel on Windows.
+#'   Use \code{"GBK"} for csv files saved from Chinese 'Excel' on 'Windows'.
 #' @param header Logical; whether the file(s) contain a header row.
 #'   Default TRUE.
 #' @param pattern Regular expression selecting the files in batch mode;
