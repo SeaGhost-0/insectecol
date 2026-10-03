@@ -151,10 +151,16 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   ## mgp[1]) so that the x title can sit tighter to its ticks
   title(ylab = ylab, line = y_lab_line, cex.lab = cex)
   ats <- pretty(xs)
+  ## tick labels sit a little further from the tick marks: the x
+  ## labels move down by 0.4 lines, the y labels left by a third of
+  ## that; the axis titles are placed independently (mgp[1] and
+  ## title(line=)) so they do not move along
+  tick_lab_x <- 1.0
+  tick_lab_y <- 0.6 + (tick_lab_x - 0.6) / 3
   axis(1, at = ats, labels = format(ats, "%m-%d"), cex.axis = 0.85 * cex,
-       lwd = 0.5 * lwd)
+       lwd = 0.5 * lwd, mgp = c(lab_line, tick_lab_x, 0))
   axis(2, at = seq(0, 100, 20), las = 1, cex.axis = 0.85 * cex,
-       lwd = 0.5 * lwd)
+       lwd = 0.5 * lwd, mgp = c(y_lab_line, tick_lab_y, 0))
   box(lwd = lwd * 0.8)
   ux_in <- diff(par("usr")[1:2]) / par("pin")[1]  # user units / inch
   uy_in <- diff(par("usr")[3:4]) / par("pin")[2]
