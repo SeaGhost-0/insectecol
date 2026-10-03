@@ -138,6 +138,8 @@ out3 <- lifeTable_analyze(
 print(out3$plot)
 ```
 
+![Age-stage survival curve](man/figures/lifeTable.png)
+
 To batch-process csv files on disk instead (each csv gets its own Excel
 workbook with all results and the survival curve; an additional
 `all.xlsx` summarises every file):
@@ -179,6 +181,8 @@ out2 <- lc50_analyze(
 )
 print(out2$plot$trial1)
 ```
+
+![Probit regression with the LC values](man/figures/lc50.png)
 
 To batch-process csv files on disk instead (one xlsx / one tiff per csv,
 written next to the raw data; non-default settings are appended to the
@@ -267,6 +271,8 @@ out2 <- emergence_analyze(data = d, survey_date = "2026-03-20",
 out2$fit$predictions$hatch_date
 ```
 
+![Emergence-period projection](man/figures/emergence.png)
+
 The three quantile dates are interpolated on the cumulative
 development curve built from the survey; a survey that misses stages
 simply renormalises the shares, while a quantile below the share of
@@ -274,18 +280,6 @@ the most developed stage (partly eclosed before the survey) is
 extrapolated backwards with an explicit warning. Tables are exported
 with `emergence_export(fit, file = "emergence_results.csv")`, the
 figure with `emergence_export_plot(fit, file = "emergence.png")`.
-
-## Example figures
-
-Output figures of the four modules, as produced by the quick-start
-code above (the `plot_file` pngs):
-
-| Module | Figure |
-|---|---|
-| Life table — age-stage survival curves | ![Life table](man/figures/lifeTable.png) |
-| Bioassay — probit regression with LC values | ![Bioassay](man/figures/lc50.png) |
-| Degree-day — linear and selected nonlinear fits | ![Degree-day](man/figures/gdd.png) |
-| Emergence period — stage-grading projection | ![Emergence](man/figures/emergence.png) |
 
 ## Example data
 
