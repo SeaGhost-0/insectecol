@@ -24,7 +24,7 @@ that eggs are attributed to the correct age class; the mean is taken
 over the females still alive at each age.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 head(calc_fxj(lt))
 }

@@ -1,4 +1,4 @@
-example_csv <- system.file("extdata", "bioassay.csv", package = "insectecol")
+example_csv <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 
 test_that("lc50_analyze() 的 plot_file 参数导出 png", {
   f <- tempfile(fileext = ".png")

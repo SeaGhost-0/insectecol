@@ -40,7 +40,7 @@
 #' @seealso \code{\link{lifeTable_calculate}}, \code{\link{lifeTable_plot}}
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' results <- lifeTable_calculate_all(lt)
 #' lifeTable_export(lt, results, tempdir())

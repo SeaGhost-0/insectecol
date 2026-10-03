@@ -148,7 +148,7 @@
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' calc_N(lt)
 calc_N <- function(lt) nrow(lt$data)
@@ -168,7 +168,7 @@ calc_N <- function(lt) nrow(lt$data)
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' calc_F(lt)
 calc_F <- function(lt) {
@@ -213,7 +213,7 @@ calc_F <- function(lt) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' head(calc_sxj(lt))
 calc_sxj <- function(lt) {
@@ -251,7 +251,7 @@ calc_sxj <- function(lt) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' head(calc_lx(lt))
 calc_lx <- function(lt, sxj = NULL) {
@@ -284,7 +284,7 @@ calc_lx <- function(lt, sxj = NULL) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' head(calc_fxj(lt))
 calc_fxj <- function(lt, sxj = NULL) {
@@ -322,7 +322,7 @@ calc_fxj <- function(lt, sxj = NULL) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' head(calc_mx(lt))
 calc_mx <- function(lt, sxj = NULL, fxj = NULL, lx = NULL) {
@@ -364,7 +364,7 @@ calc_mx <- function(lt, sxj = NULL, fxj = NULL, lx = NULL) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' calc_R0(lt)
 calc_R0 <- function(lt, sxj = NULL, fxj = NULL) {
@@ -400,7 +400,7 @@ calc_R0 <- function(lt, sxj = NULL, fxj = NULL) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' calc_r(lt)
 calc_r <- function(lt, lx = NULL, mx = NULL) {
@@ -432,7 +432,7 @@ calc_r <- function(lt, lx = NULL, mx = NULL) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' calc_lambda(lt)
 calc_lambda <- function(lt, r = NULL) {
@@ -462,7 +462,7 @@ calc_lambda <- function(lt, r = NULL) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' calc_T(lt)
 calc_T <- function(lt, R0 = NULL, r = NULL) {
@@ -494,7 +494,7 @@ calc_T <- function(lt, R0 = NULL, r = NULL) {
 #' @keywords internal
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' head(calc_ex(lt))
 calc_ex <- function(lt, lx = NULL) {

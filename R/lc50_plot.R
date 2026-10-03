@@ -105,7 +105,7 @@
 #' @seealso \code{\link{lc50_export}}, \code{\link{lc50_export_plot}}
 #' @export
 #' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+#' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 #' res <- lc50_calculate(lc50_read(f))
 #' plots <- lc50_plot(res, save_path = tempdir())
 #' plots <- lc50_plot(res, shape = "linear", save_path = tempdir())  # original axis
@@ -181,7 +181,7 @@ lc50_plot <- function(results, save_path = NULL, font = "TNM",
 #' @seealso \code{\link{lc50_plot}}, \code{\link{lc50_export}}
 #' @export
 #' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+#' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 #' plots <- lc50_plot(lc50_calculate(lc50_read(f)))
 #' lc50_export_plot(plots$bioassay, file.path(tempdir(), "LC50_demo.tiff"))
 lc50_export_plot <- function(plot, path = NULL, device = "tiff",

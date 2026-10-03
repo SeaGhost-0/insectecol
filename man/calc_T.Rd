@@ -24,7 +24,7 @@ time needed for the population to grow to an \code{R0}-fold of its
 current size when increasing at the constant rate \code{r}.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 calc_T(lt)
 }

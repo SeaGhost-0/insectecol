@@ -56,7 +56,7 @@ analysing data that do not come from a package-conform csv file.
 }
 \examples{
 ## The raw example data shipped with the package
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 ## ^^ change to the actual package name
 d <- read.csv(f)
 

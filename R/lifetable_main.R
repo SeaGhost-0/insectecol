@@ -67,7 +67,7 @@ default_stage_names <- function(k) {
 #' @export
 #' @examples
 #' ## The raw example data shipped with the package
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' ## ^^ change to the actual package name
 #' d <- read.csv(f)
 #'
@@ -264,7 +264,7 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #' ## The example raw data shipped with the package (the same layout as
 #' ## the csv template: ID + immature stage columns + Adult + gender +
 #' ## one column per oviposition day of the females)
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' ## ^^ change "lifeTable" to the actual package name
 #' d  <- read.csv(f)
 #' names(d)   # with check.names = TRUE (default) the names become

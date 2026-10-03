@@ -44,8 +44,8 @@ Each csv file is processed completely on its own (read,
   \code{LB_48_probit.xlsx}.
 }
 \examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-tmp <- file.path(tempdir(), "bioassay.csv")
+f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
+tmp <- file.path(tempdir(), "lc50_example.csv")
 file.copy(f, tmp, overwrite = TRUE)
 lc50_export_auto(tmp)                    # -> <tempdir>/bioassay.xlsx
 }

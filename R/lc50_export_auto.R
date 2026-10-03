@@ -68,8 +68,8 @@ lc50_auto_stem <- function(nm, lc, method, suffix) {
 #'   export, \code{\link{lc50_export}} for a custom output location
 #' @export
 #' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-#' tmp <- file.path(tempdir(), "bioassay.csv")
+#' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
+#' tmp <- file.path(tempdir(), "lc50_example.csv")
 #' file.copy(f, tmp, overwrite = TRUE)
 #' lc50_export_auto(tmp)                    # -> <tempdir>/bioassay.xlsx
 lc50_export_auto <- function(path = NULL, lc = 0.5, method = "traditional",
@@ -145,8 +145,8 @@ lc50_export_auto <- function(path = NULL, lc = 0.5, method = "traditional",
 #'   \code{\link{lc50_export_plot}}
 #' @export
 #' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-#' tmp <- file.path(tempdir(), "bioassay.csv")
+#' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
+#' tmp <- file.path(tempdir(), "lc50_example.csv")
 #' file.copy(f, tmp, overwrite = TRUE)
 #' lc50_export_plot_auto(tmp)               # -> <tempdir>/bioassay.tiff
 lc50_export_plot_auto <- function(path = NULL, lc = 0.5,

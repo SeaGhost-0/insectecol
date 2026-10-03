@@ -30,7 +30,7 @@ The returned data frame has one row per age class (day) and
   \code{"Female"} and \code{"Male"}).
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 head(calc_sxj(lt))
 }

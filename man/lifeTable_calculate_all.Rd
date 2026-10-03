@@ -34,7 +34,7 @@ The intermediate results are passed on internally, so nothing
   R0, and finally \code{lambda = exp(r)} and \code{T = log(R0) / r}.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 results <- lifeTable_calculate_all(lt)
 results$R0

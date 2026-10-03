@@ -32,7 +32,7 @@ Stage names are taken from the header exactly as they are
   \code{ID} (both are fixed parts of the csv template).
 }
 \examples{
-lt <- lifeTable_read(system.file("extdata", "Example.csv",
+lt <- lifeTable_read(system.file("extdata", "lifetable_example.csv",
                                   package = "insectecol"))
 get_stage_names(lt)
 }

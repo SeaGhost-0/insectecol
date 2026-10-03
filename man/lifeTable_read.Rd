@@ -51,7 +51,7 @@ encoding is detected automatically, so UTF-8 and GBK files are both
 supported.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 head(lt$data[, 1:5])
 }

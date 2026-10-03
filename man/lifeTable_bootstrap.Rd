@@ -64,7 +64,7 @@ The parameters covered are the mean developmental time of
   \code{results$boot <- lifeTable_bootstrap(lt)}.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 
 ## B = 100000 is the recommended setting for publications; a smaller

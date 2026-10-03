@@ -61,7 +61,7 @@
 #' @export
 #' @examples
 #' ## way 1: data frame straight from the package example csv
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+#' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 #' out1 <- lc50_analyze(lc50_read(f), method = "probit")
 #' out1$results$summary_df
 #'

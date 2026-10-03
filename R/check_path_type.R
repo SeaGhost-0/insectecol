@@ -28,7 +28,7 @@
 #' @export
 #' @examples
 #' check_path_type(tempdir())
-#' check_path_type(system.file("extdata", "bioassay.csv", package = "insectecol"))
+#' check_path_type(system.file("extdata", "lc50_example.csv", package = "insectecol"))
 check_path_type <- function(path) {
   # Input protection: non-character, length != 1, NA or empty string -> invalid
   if (!is.character(path) || length(path) != 1 ||

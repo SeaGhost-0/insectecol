@@ -153,7 +153,7 @@ overwrite each other.
 }
 
 \examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 res <- lc50_calculate(lc50_read(f))
 plots <- lc50_plot(res, save_path = tempdir())
 plots <- lc50_plot(res, shape = "linear", save_path = tempdir())  # original axis

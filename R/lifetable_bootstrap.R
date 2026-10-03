@@ -321,7 +321,7 @@
 #' @importFrom stats sd quantile
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #'
 #' ## B = 100000 is the recommended setting for publications; a smaller
@@ -417,7 +417,7 @@ lifeTable_bootstrap <- function(lt, B = 100000, seed = NULL,
 #'   of a single cohort.
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt1 <- lifeTable_read(f)
 #'
 #' ## compare the full cohort with its first half (demo only - a real

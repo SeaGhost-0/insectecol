@@ -67,8 +67,8 @@ The pipeline and the file-naming rules are the same as in
   the first method that succeeded.
 }
 \examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
-tmp <- file.path(tempdir(), "bioassay.csv")
+f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
+tmp <- file.path(tempdir(), "lc50_example.csv")
 file.copy(f, tmp, overwrite = TRUE)
 lc50_export_plot_auto(tmp)               # -> <tempdir>/bioassay.tiff
 }

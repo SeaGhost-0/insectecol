@@ -26,7 +26,7 @@
 #'   \code{\link{lifeTable_calculate}} for the batch workflow.
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' results <- lifeTable_calculate_all(lt)
 #' results$R0
@@ -95,7 +95,7 @@ lifeTable_calculate_all <- function(lt, fecundity = TRUE) {
 #'   \code{\link{lifeTable_export}}
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lifeTable_calculate(f, output_path = file.path(tempdir(), "insectecol-demo"))
 lifeTable_calculate <- function(path, output_path = NULL, plot = TRUE,
                                 keep_tiff = FALSE, dpi = 300,

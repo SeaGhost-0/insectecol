@@ -41,7 +41,7 @@ dpi = 300, units = "cm", bg = "white")} but with the dpi handling of
 dpi without being re-created.
 }
 \examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 plots <- lc50_plot(lc50_calculate(lc50_read(f)))
 lc50_export_plot(plots$bioassay, file.path(tempdir(), "LC50_demo.tiff"))
 }

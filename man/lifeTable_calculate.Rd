@@ -64,7 +64,7 @@ fail (e.g. because of data errors) are skipped and reported at the end
 without interrupting the remaining files.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lifeTable_calculate(f, output_path = file.path(tempdir(), "insectecol-demo"))
 }
 \seealso{

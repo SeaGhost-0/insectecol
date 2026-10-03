@@ -41,7 +41,7 @@
 #'   \code{\link{lc50_plot}}, \code{\link{lc50_export}}
 #' @export
 #' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+#' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 #' res <- lc50_calculate(lc50_read(f), lc = 0.7)     # LC70
 #' res$summary_df
 #' lc50_calculate(lc50_read(f), method = "all")$summary_df   # all methods

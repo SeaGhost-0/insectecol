@@ -106,7 +106,7 @@ devtools::install_github("SeaGhost-0/insectecol")
 library(insectecol)
 
 # example data shipped with the package
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 d <- read.csv(f)
 
 # analyse straight from the columns of the loaded data frame
@@ -170,7 +170,7 @@ out <- lc50_analyze(
 out$results$summary_df       # estimate, 95% CI, slope, chi-square, ...
 
 # ... or straight from the example csv shipped with the package
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 out_csv <- lc50_analyze(lc50_read(f), method = "all")
 out_csv$results$summary_df
 
@@ -287,8 +287,8 @@ Four example csv files ship with the package in `inst/extdata/`; the
 examples in this README and in the help pages are built on them:
 
 ```r
-system.file("extdata", "Example.csv", package = "insectecol")      # life table
-system.file("extdata", "bioassay.csv", package = "insectecol")     # bioassay
+system.file("extdata", "lifetable_example.csv", package = "insectecol")      # life table
+system.file("extdata", "lc50_example.csv", package = "insectecol")     # bioassay
 system.file("extdata", "gdd_example.csv", package = "insectecol")  # degree-day
 system.file("extdata", "emergence_example.csv",
             package = "insectecol")                                # emergence

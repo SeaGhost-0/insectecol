@@ -19,7 +19,7 @@ eggs laid by all females divided by the number of females,
 \code{F = (total number of eggs) / (number of females)}.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 calc_F(lt)
 }

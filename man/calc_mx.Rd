@@ -30,7 +30,7 @@ definition \code{sum(l_x * m_x)} equals the net reproductive rate
 \code{\link{calc_r}} is consistent.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 head(calc_mx(lt))
 }

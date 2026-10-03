@@ -58,7 +58,7 @@ The two cohorts are resampled independently, so they do
   (e.g. no female drawn) are dropped from the comparison.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt1 <- lifeTable_read(f)
 
 ## compare the full cohort with its first half (demo only - a real

@@ -60,7 +60,7 @@ The tiff is written through the internal \code{lt_ggsave()},
   confidence interval) is written.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 results <- lifeTable_calculate_all(lt)
 lifeTable_export(lt, results, tempdir())

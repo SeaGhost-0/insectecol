@@ -24,7 +24,7 @@
 #' @seealso \code{\link{lc50_calculate}}, \code{\link{lc50_plot}}
 #' @export
 #' @examples
-#' f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+#' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 #' lc50_export(lc50_calculate(lc50_read(f)), output_dir = tempdir())
 lc50_export <- function(results, output_dir = NULL, filename = "LC50_results.xlsx") {
   if (is.null(output_dir)) {

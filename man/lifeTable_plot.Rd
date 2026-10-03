@@ -62,7 +62,7 @@ To keep the figure clean, each stage is drawn only over the
   otherwise the text comes out about 300/96 times too large.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 p <- lifeTable_plot(lifeTable_read(f))
 }
 \seealso{

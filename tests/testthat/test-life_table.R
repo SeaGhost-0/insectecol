@@ -1,11 +1,11 @@
 # 测试开头：拿到示例数据路径（写一次，整个文件可用）
-example_csv <- system.file("extdata", "Example.csv",
+example_csv <- system.file("extdata", "lifetable_example.csv",
                            package = "insectecol")
 
 test_that("lifeTable_read() 正确读取并定位性别列", {
   lt <- lifeTable_read(example_csv)
   expect_s3_class(lt, "life_table")
-  expect_equal(lt$file_name, "Example")
+  expect_equal(lt$file_name, "lifetable_example")
   expect_identical(sort(unique(lt$data[[lt$n]])), c("F", "M", "N"))
 })
 

@@ -40,7 +40,7 @@
 #' @seealso \code{\link{calc_sxj}}, \code{\link{lifeTable_export}}
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' p <- lifeTable_plot(lifeTable_read(f))
 lifeTable_plot <- function(lt, sxj = NULL, title = NULL,
                      x_title = "Age(days)",

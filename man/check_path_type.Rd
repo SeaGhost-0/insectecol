@@ -36,7 +36,7 @@ The function never stops: it always returns one of the four
 }
 \examples{
 check_path_type(tempdir())
-check_path_type(system.file("extdata", "bioassay.csv", package = "insectecol"))
+check_path_type(system.file("extdata", "lc50_example.csv", package = "insectecol"))
 }
 \seealso{
 \code{\link{lc50_read}}

@@ -51,7 +51,7 @@
 #'   \code{\link{lifeTable_calculate}} for the complete analysis workflow.
 #' @export
 #' @examples
-#' f <- system.file("extdata", "Example.csv", package = "insectecol")
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' head(lt$data[, 1:5])
 lifeTable_read <- function(path, check = TRUE) {
@@ -116,7 +116,7 @@ lifeTable_read <- function(path, check = TRUE) {
 #'   \code{\link{lifeTable_plot}}
 #' @export
 #' @examples
-#' lt <- lifeTable_read(system.file("extdata", "Example.csv",
+#' lt <- lifeTable_read(system.file("extdata", "lifetable_example.csv",
 #'                                   package = "insectecol"))
 #' get_stage_names(lt)
 get_stage_names <- function(lt) {

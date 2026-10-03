@@ -24,7 +24,7 @@ obtained by summing the age-stage survival rates over all stages:
 \code{l_x = sum over j of s_xj}.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 head(calc_lx(lt))
 }

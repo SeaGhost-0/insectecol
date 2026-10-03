@@ -34,7 +34,7 @@ The detail sheet of each file contains the preprocessed data
   which no method succeeded get an empty sheet.
 }
 \examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 lc50_export(lc50_calculate(lc50_read(f)), output_dir = tempdir())
 }
 \seealso{

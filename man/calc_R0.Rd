@@ -26,7 +26,7 @@ average individual of the cohort over its whole life,
 and \code{R0 < 1} decline.
 }
 \examples{
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 calc_R0(lt)
 }

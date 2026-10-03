@@ -111,7 +111,7 @@ export is handled separately by \code{\link{lifeTable_export}}.
 ## The example raw data shipped with the package (the same layout as
 ## the csv template: ID + immature stage columns + Adult + gender +
 ## one column per oviposition day of the females)
-f <- system.file("extdata", "Example.csv", package = "insectecol")
+f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 ## ^^ change "lifeTable" to the actual package name
 d  <- read.csv(f)
 names(d)   # with check.names = TRUE (default) the names become

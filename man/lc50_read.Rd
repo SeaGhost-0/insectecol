@@ -42,7 +42,7 @@ Each csv file must contain one row per concentration with
   by both English and Chinese versions of Excel can be read.
 }
 \examples{
-f <- system.file("extdata", "bioassay.csv", package = "insectecol")
+f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 lcd <- lc50_read(f)
 lcd$bioassay
 if (interactive()) lcd <- lc50_read()   # interactive folder dialog
