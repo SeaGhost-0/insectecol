@@ -74,7 +74,7 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
          "emergence_calc().", call. = FALSE)
   cex <- max(cex, 0.2)
   lwd <- max(lwd, 0.2)
-  lwd <- lwd * 1.35   # all strokes 1.35x thicker (manuscript feedback)
+  lwd <- lwd * 1.35 * 1.5   # strokes 1.35x thicker, then 1.5x larger
 
   ## font handling: identical to gdd_plot --- showtext off (it
   ## renders whole strings in one font, losing the per-glyph CJK
@@ -180,21 +180,21 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
 
   ## cumulative development curve, THEN the points (markers on top)
   lines(xs, ys, col = "grey20", lwd = lwd)
-  points(xs, ys, pch = 19, cex = 0.55 * cex, col = "grey20")
+  points(xs, ys, pch = 19, cex = 0.825 * cex, col = "grey20")
   points(pr$date, pr$p * 100, pch = 21, bg = "white",
-         col = col_acc, cex = 0.75 * cex, lwd = lwd)
+         col = col_acc, cex = 1.125 * cex, lwd = lwd)
 
   ## hatch arrows: the arrowhead stops right at the edge of the
   ## triangle marker (half marker width + a hair)
   if (use_hatch) {
-    tri_half <- 0.44 * 0.6 * cex * par("csi")     # triangle half width, in
+    tri_half <- 0.44 * 0.9 * cex * par("csi")     # triangle half width, in
     eps <- (tri_half + 0.005) * ux_in
     for (i in seq_len(nrow(pr)))
       arrows(pr$date[i], pr$p[i] * 100, pr$hatch_date[i] - eps,
              pr$p[i] * 100, length = 0.08, col = "grey45",
              lwd = lwd * 0.7, lty = 1)
     points(pr$hatch_date, pr$p * 100, pch = 24, bg = "white",
-           col = "grey30", cex = 0.6 * cex, lwd = lwd * 0.8)
+           col = "grey30", cex = 0.9 * cex, lwd = lwd * 0.8)
   }
 
   ## ---- quantile legend ----
