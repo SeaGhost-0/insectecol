@@ -2,7 +2,14 @@ Package: insectecol
 Type: Package
 Title: Insect Ecology Data Analysis Toolkit
 Version: 1.1.0
-Authors@R: person(given = "Wangyao", family = "Li", email = "1561941342@qq.com", role = c("aut", "cre", "cph"))
+Authors@R: c(
+    person(given = "Wangyao", family = "Li",
+           email = "1561941342@qq.com", role = c("aut", "cre", "cph")),
+    person(given = "Yongsheng", family = "Zhang",
+           email = "yshzhang@hunau.edu.cn", role = "aut"),
+    person(given = "Huan", family = "Yu",
+           email = "huanyu@hunau.edu.cn", role = "aut")
+    )
 Description: A collection of analytical tools for insect ecology research,
     currently covering age-stage, two-sex life table analysis and
     dose-response bioassays. The life table module supports fast batch

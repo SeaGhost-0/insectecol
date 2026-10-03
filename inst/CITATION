@@ -1,8 +1,12 @@
 bibentry(
   "Manual",
   title  = "{insectecol}: Tools for Insect Ecology Research",
-  author = person(given = "Wangyao", family = "Li"),
+  author = c(
+    person(given = "Wangyao", family = "Li"),
+    person(given = "Yongsheng", family = "Zhang"),
+    person(given = "Huan", family = "Yu")
+  ),
   year   = 2026,
-  note   = "R package version 1.0.1",
+  note   = "R package version 1.1.0",
   url    = "https://github.com/SeaGhost-0/insectecol"
 )

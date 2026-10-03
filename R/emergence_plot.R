@@ -45,8 +45,8 @@
 #'   (\code{FALSE}).
 #' @param xlab,ylab Axis labels.
 #' @param ... Further graphical parameters passed to \code{plot}.
-#' @importFrom graphics abline arrows axis box legend lines mtext par
-#'   plot points rect text
+#' @importFrom graphics abline arrows axis box grconvertX legend lines
+#'   mtext par plot points rect strwidth text
 #' @method plot emergence
 #' @export
 #' @examples
