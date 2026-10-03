@@ -275,6 +275,18 @@ extrapolated backwards with an explicit warning. Tables are exported
 with `emergence_export(fit, file = "emergence_results.csv")`, the
 figure with `emergence_export_plot(fit, file = "emergence.png")`.
 
+## Example figures
+
+Output figures of the four modules, as produced by the quick-start
+code above (the `plot_file` pngs):
+
+| Module | Figure |
+|---|---|
+| Life table — age-stage survival curves | ![Life table](man/figures/lifeTable.png) |
+| Bioassay — probit regression with LC values | ![Bioassay](man/figures/lc50.png) |
+| Degree-day — linear and selected nonlinear fits | ![Degree-day](man/figures/gdd.png) |
+| Emergence period — stage-grading projection | ![Emergence](man/figures/emergence.png) |
+
 ## Example data
 
 Four example csv files ship with the package in `inst/extdata/`; the
