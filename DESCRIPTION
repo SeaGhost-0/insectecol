@@ -64,4 +64,3 @@ BugReports: https://github.com/SeaGhost-0/insectecol/issues
 Depends: 
     R (>= 3.5)
 LazyData: true
-RoxygenNote: 7.3.3
