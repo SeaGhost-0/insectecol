@@ -74,6 +74,7 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
          "emergence_calc().", call. = FALSE)
   cex <- max(cex, 0.2)
   lwd <- max(lwd, 0.2)
+  lwd <- lwd * 1.35   # all strokes 1.35x thicker (manuscript feedback)
 
   ## font handling: identical to gdd_plot --- showtext off (it
   ## renders whole strings in one font, losing the per-glyph CJK
@@ -150,8 +151,10 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   ## mgp[1]) so that the x title can sit tighter to its ticks
   title(ylab = ylab, line = y_lab_line, cex.lab = cex)
   ats <- pretty(xs)
-  axis(1, at = ats, labels = format(ats, "%m-%d"), cex.axis = 0.85 * cex)
-  axis(2, at = seq(0, 100, 20), las = 1, cex.axis = 0.85 * cex)
+  axis(1, at = ats, labels = format(ats, "%m-%d"), cex.axis = 0.85 * cex,
+       lwd = 0.5 * lwd)
+  axis(2, at = seq(0, 100, 20), las = 1, cex.axis = 0.85 * cex,
+       lwd = 0.5 * lwd)
   box(lwd = lwd * 0.8)
   ux_in <- diff(par("usr")[1:2]) / par("pin")[1]  # user units / inch
   uy_in <- diff(par("usr")[3:4]) / par("pin")[2]
