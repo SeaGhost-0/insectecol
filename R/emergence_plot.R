@@ -102,13 +102,17 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   sub_ <- if (!is.null(sub)) sub else auto_sub
 
   ## ---- layout: margins and axis-title positions scale with cex ----
-  ## lab_line = margin line of the x-axis title (nearly constant: it
-  ## sits tight above the tick labels); y_lab_line = margin line of
-  ## the y-axis title, kept independent so that tightening the x
-  ## title does not move the y title; the footnote sits close below
-  ## the x-axis title and the bottom margin reserves room for both;
-  ## the left margin hugs the y-axis title near the image edge.
-  lab_line <- 2.4 - 0.1 * (cex - 1)
+  ## tick_lab_x = margin line of the x tick labels; lab_line = margin
+  ## line of the x-axis title, anchored 1.7 lines above the tick
+  ## labels so that moving the labels moves the whole bottom stack
+  ## (title + footnote) along; y_lab_line = margin line of the y-axis
+  ## title, kept independent so that tightening the x stack does not
+  ## move the y title; the footnote sits close below the x-axis title
+  ## and the bottom margin reserves room for both; the left margin
+  ## hugs the y-axis title near the image edge.
+  tick_lab_x <- 1.0
+  tick_lab_y <- 0.6 + (tick_lab_x - 0.6) / 3
+  lab_line <- tick_lab_x + 1.7
   y_lab_line <- 2.8 + 0.9 * (cex - 1)
   sub_line <- lab_line + 0.9 * cex - 0.35
   mar1 <- if (!is.null(sub_) && nzchar(sub_))
@@ -151,12 +155,9 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   ## mgp[1]) so that the x title can sit tighter to its ticks
   title(ylab = ylab, line = y_lab_line, cex.lab = cex)
   ats <- pretty(xs)
-  ## tick labels sit a little further from the tick marks: the x
-  ## labels move down by 0.4 lines, the y labels left by a third of
-  ## that; the axis titles are placed independently (mgp[1] and
-  ## title(line=)) so they do not move along
-  tick_lab_x <- 1.0
-  tick_lab_y <- 0.6 + (tick_lab_x - 0.6) / 3
+  ## tick labels use their own line positions (see tick_lab_x above);
+  ## the axis titles are placed independently (mgp[1] and
+  ## title(line=)) but the x title anchors to the tick labels
   axis(1, at = ats, labels = format(ats, "%m-%d"), cex.axis = 0.85 * cex,
        lwd = 0.5 * lwd, mgp = c(lab_line, tick_lab_x, 0))
   axis(2, at = seq(0, 100, 20), las = 1, cex.axis = 0.85 * cex,
