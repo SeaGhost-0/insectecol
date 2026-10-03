@@ -80,7 +80,7 @@ gdd_plot(fit, group = "Egg",
 ## (the Chinese characters fall back to SimSun); the plain pdf()
 ## device cannot render CJK glyphs on many platforms, so this part
 ## is not run automatically:
-\dontrun{
+\donttest{
 gdd_plot(fit, group = "Egg", title = "卵的发育速率",
          sub = "2026 年饲养实验", xlab = "温度 (°C)",
          ylab = "发育速率 (1/d)")

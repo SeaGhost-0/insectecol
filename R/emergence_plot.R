@@ -60,7 +60,7 @@
 #' ## (the Chinese characters fall back to SimSun); the plain pdf()
 #' ## device cannot render CJK glyphs on many platforms, so this part
 #' ## is not run automatically:
-#' \dontrun{
+#' \donttest{
 #' plot(fit, title = "二化螟越冬代发生期预测",
 #'      xlab = "推算日期", ylab = "累计发育进度 (%)")
 #' }
