@@ -101,12 +101,15 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   sub_ <- if (!is.null(sub)) sub else auto_sub
 
   ## ---- layout: margins and axis-title positions scale with cex ----
-  ## lab_line = margin line of the axis titles (nearly constant: the
-  ## title sits tight above the tick labels); the footnote sits close
-  ## below the x-axis title and the bottom margin reserves room for
-  ## both; the left margin hugs the y-axis title near the image edge.
+  ## lab_line = margin line of the x-axis title (nearly constant: it
+  ## sits tight above the tick labels); y_lab_line = margin line of
+  ## the y-axis title, kept independent so that tightening the x
+  ## title does not move the y title; the footnote sits close below
+  ## the x-axis title and the bottom margin reserves room for both;
+  ## the left margin hugs the y-axis title near the image edge.
   lab_line <- 2.4 - 0.1 * (cex - 1)
-  sub_line <- lab_line + 0.9 * cex - 0.7
+  y_lab_line <- 2.8 + 0.9 * (cex - 1)
+  sub_line <- lab_line + 0.9 * cex - 0.35
   mar1 <- if (!is.null(sub_) && nzchar(sub_))
     sub_line + 0.7 * cex + 0.6 else lab_line + 1.9
   mar4 <- 1
@@ -131,7 +134,7 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
     mar4  <- (box_w + panel_gap_in + fig_gap_in) / lin_in
   }
   op <- par(
-    mar = c(mar1, lab_line + 1.7, 1.5 * cex + 0.5, mar4),
+    mar = c(mar1, y_lab_line + 1.7, 1.5 * cex + 0.5, mar4),
     mgp = c(lab_line, 0.6, 0), family = family)
   on.exit(par(op), add = TRUE)
 
@@ -142,7 +145,10 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   xr <- c(xr[1] - pad, xr[2] + pad)
 
   plot(NA, xlim = xr, ylim = c(0, 106), type = "n", axes = FALSE,
-       xlab = xlab, ylab = ylab, cex.lab = cex, ...)
+       xlab = xlab, ylab = "", cex.lab = cex, ...)
+  ## the y-axis title is placed separately (title's line overrides
+  ## mgp[1]) so that the x title can sit tighter to its ticks
+  title(ylab = ylab, line = y_lab_line, cex.lab = cex)
   ats <- pretty(xs)
   axis(1, at = ats, labels = format(ats, "%m-%d"), cex.axis = 0.85 * cex)
   axis(2, at = seq(0, 100, 20), las = 1, cex.axis = 0.85 * cex)
