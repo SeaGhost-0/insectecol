@@ -34,7 +34,7 @@ per-group caption (group name + C / K / R-squared for the linear
 model, group name + model label + R-squared / AIC for nonlinear
 models). A single character string is used for every plotted
 group; a named character vector is matched by group name
-(e.g. \code{c(Egg = "卵", Pupa = "蛹")}); use \code{""} to drop
+(e.g. \code{c(Egg = "egg", Pupa = "pupa")}); use \code{""} to drop
 the title. When a custom title is given, the automatic statistics
 caption is moved to the \code{sub} line unless \code{sub} is also
 supplied.}
@@ -49,7 +49,7 @@ to Times New Roman on 'Windows' (the journal standard) and to the
 system serif font elsewhere, and is valid on every device
 (including \code{pdf()}). Latin characters are rendered with this
 font; Chinese characters are rendered through the device's font
-fallback, which on Chinese 'Windows' is SimSun (宋体), so mixed
+fallback, which on Chinese 'Windows' is SimSun, so mixed
 English-Chinese titles work without extra settings. Set to
 \code{""} to use the device default, or pass an explicit family
 such as \code{"Times New Roman"} (widely available on 'Windows';
@@ -76,19 +76,8 @@ gdd_plot(fit, group = "Egg",
          title = "Developmental rate vs temperature",
          sub = "Constant-temperature rearing experiment, 2026")
 
-## Chinese titles work on the interactive 'Windows' and 'ragg' devices
-## (the Chinese characters fall back to SimSun); the plain pdf()
-## device cannot render CJK glyphs on many platforms, so this part
-## is not run automatically:
-## Chinese titles: the CJK glyphs fall back to the system font on
-## the png device (SimSun on Chinese Windows). The plain pdf() of
-## R CMD check cannot render them, so draw on a png here:
-\donttest{
-png(file.path(tempdir(), "gdd_zh.png"),
-    width = 1600, height = 900, units = "px", res = 150)
-gdd_plot(fit, group = "Egg", title = "卵的发育速率",
-         sub = "2026 年饲养实验", xlab = "温度 (°C)",
-         ylab = "发育速率 (1/d)")
-dev.off()
-}
+## Chinese titles are rendered through the device's font fallback
+## (SimSun on Chinese 'Windows'); note that the plain pdf() device
+## cannot embed CJK glyphs on many platforms, so draw on a png or
+## cairo device for Chinese titles.
 }

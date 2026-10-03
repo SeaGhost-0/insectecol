@@ -162,16 +162,15 @@ out2 <- emergence_analyze(data = d, survey_date = "2026-03-20")
 ## --- way 3: let the function read the file ---
 out3 <- emergence_analyze(path = f, survey_date = "2026-03-20")
 
-## --- hatch projection + png export + Chinese labels ---
-\donttest{
-out4 <- emergence_analyze(
-  path = f, survey_date = "2026-03-20",
-  pre_ovip = 3, egg_days = 10,
-  plot = TRUE, plot_file = tempfile(fileext = ".png"),
-  plot_title = "二化螟越冬代发生期预测",
-  plot_xlab = "推算日期", plot_ylab = "累计发育进度 (\%)")
+## --- hatch projection + png export + custom labels ---
+## plot_title / plot_xlab / plot_ylab accept custom labels; Chinese
+## labels are rendered through the device's font fallback (SimSun
+## on Chinese Windows)
+out4 <- emergence_analyze(path = f, survey_date = "2026-03-20",
+                          pre_ovip = 3, egg_days = 10,
+                          plot = TRUE,
+                          plot_file = tempfile(fileext = ".png"))
 out4$fit$predictions
-}
 }
 \seealso{
 \code{\link{emergence_read}},

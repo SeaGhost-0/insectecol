@@ -68,7 +68,7 @@
 #'   \code{\link{gdd_plot}}.
 #' @param plot_title Custom plot title; \code{NULL} = the automatic
 #'   per-group caption (group + fitted statistics). A named vector is
-#'   matched per group, e.g. \code{c(Egg = "卵", Pupa = "蛹")}.
+#'   matched per group, e.g. \code{c(Egg = "egg", Pupa = "pupa")}.
 #' @param plot_sub Custom subtitle; \code{NULL} keeps the automatic
 #'   statistics caption (as subtitle when \code{plot_title} is set).
 #' @param plot_xlab,plot_ylab Custom axis labels; \code{NULL} keeps
@@ -136,13 +136,13 @@
 #' ## --- way 3: let the function read the file ---
 #' out3 <- gdd_analyze(path = f, by = "stage")
 #'
-#' ## --- AICc model selection + png export + Chinese labels ---
+#' ## --- AICc model selection + png export + custom labels ---
+#' ## plot_title / plot_xlab / plot_ylab accept custom labels; Chinese
+#' ## labels are rendered through the device's font fallback
 #' \donttest{
 #' out4 <- gdd_analyze(temp = d$temp, duration = d$duration, group = d$stage,
 #'                     model = "auto", plot = TRUE,
-#'                     plot_file = tempfile(fileext = ".png"),
-#'                     plot_title = "发育速率与温度的关系",
-#'                     plot_xlab = "温度 (°C)", plot_ylab = "发育速率 (1/d)")
+#'                     plot_file = tempfile(fileext = ".png"))
 #' out4$fit$comparison       # full comparison table, best flag included
 #' }
 gdd_analyze <- function(temp = NULL, duration = NULL, group = NULL,

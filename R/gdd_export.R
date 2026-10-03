@@ -102,7 +102,7 @@ gdd_export <- function(x, file = "gdd_results.csv",
 #' f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
 #' fit <- gdd_calc(gdd_read(f), by = "stage")
 #' gdd_export_plot(fit, tempfile(fileext = ".png"),
-#'                 title = "发育速率与温度的关系")
+#'                 title = "Developmental rate vs temperature")
 #' }
 #' @export
 gdd_export_plot <- function(x, file = "gdd_plot.png", group = NULL,
