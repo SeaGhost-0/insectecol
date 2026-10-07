@@ -119,8 +119,11 @@ lc50_plot <- function(results, save_path = NULL, font = "TNM",
                       lc_ci = TRUE, lc_p = TRUE,
                       lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
                       lc_lab_dy = 0.1, lc_lab_lh = 1.05) {
-  showtext::showtext_auto(enable = TRUE)
   font <- pkg_resolve_font(font)
+  ## No CJK switch over the whole figure: it used to be re-labelled with
+  ## a Chinese font as soon as one label contained Chinese, which also
+  ## turned the digits and symbols into that font. Labels are split per
+  ## character instead, in pkg_plot_grob().
   shape <- match.arg(shape)
   if (is.null(unit)) unit <- "mg/L"
 
@@ -153,10 +156,11 @@ lc50_plot <- function(results, save_path = NULL, font = "TNM",
                             paste0("LC50_", attr(gp, "lc50_name"), ".png")),
                   gp, width = width, height = height, dpi = dpi)
     } else {
-      print(gp)
+      ## on-screen preview: the interactive device falls back per glyph
+      ## as well, so 'showtext' stays off
+      pkg_print(gp)
     }
   }
-  showtext_auto(enable = FALSE)
   invisible(plot_list)
 }
 
@@ -219,37 +223,25 @@ lc50_export_plot <- function(plot, path = NULL, device = "tiff",
   if (!dir.exists(dirname(path)))
     dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
 
-  showtext::showtext_auto(enable = TRUE)
-  lc50_ggsave(path, plot, width = width, height = height, dpi = dpi,
-              device = device, units = units, bg = bg, ...)
+  pkg_ggsave(path, plot, width = width, height = height, dpi = dpi,
+             device = device, units = units, bg = bg, ...)
   invisible(path)
 }
 
-# Current internal dpi of showtext (default 96)
-lc50_showtext_dpi <- function() {
-  opts <- tryCatch(showtext::showtext_opts(), error = function(e) NULL)
-  if (is.list(opts) && is.numeric(opts$dpi) &&
-      length(opts$dpi) == 1 && is.finite(opts$dpi)) opts$dpi else 96
-}
+# Text sizes are true typographic points.
+#
+# They used to be nominal sizes handed to 'showtext', which rendered and
+# measured them at 96/300 of their nominal value; the figures were
+# calibrated for that. Text is now drawn at the size it says, so the
+# calibrated values are multiplied by that old factor, which keeps the
+# figures looking exactly as before - and makes them independent of dpi,
+# as the documentation promises.
+lc50_pt <- function(nominal) nominal * 96 / 300
 
-# showtext renders/measures text only at its own fixed internal resolution
-# (default 96), ignoring the device dpi, so text, points and spacing in the
-# output scale with dpi as a whole. When saving, the internal dpi is set to
-# eff * 96/300 so the "internal/actual" ratio matches the one at 300 dpi and
-# the physical size of the output matches 300 dpi exactly; afterwards the
-# default is restored, leaving screen previews unaffected.
 lc50_ggsave <- function(filename, plot, width, height, dpi,
                         device = "png", units = "in", bg = "white", ...) {
-  ref <- lc50_showtext_dpi()
-  # Vector devices have no pixels; convert at 72 pt/in
-  eff <- if (is.character(device) &&
-             tolower(device) %in% c("pdf", "cairo_pdf", "eps", "ps",
-                                    "postscript", "cairo_ps")) 72 else dpi
-  showtext::showtext_opts(dpi = eff * ref / 300)
-  on.exit(showtext::showtext_opts(dpi = ref), add = TRUE)
-  ggplot2::ggsave(filename, plot = plot, device = device,
-                  width = width, height = height, dpi = dpi,
-                  units = units, bg = bg, ...)
+  pkg_ggsave(filename, plot, device = device, width = width, height = height,
+             units = units, dpi = dpi, bg = bg, ...)
 }
 
 # Color palette of the three methods
@@ -418,7 +410,7 @@ lc50_panel_size <- function(fig_w = 7, fig_h = 6) {
     ggplot2::scale_y_continuous(labels = function(v) sprintf("%g", v)) +
     ggplot2::labs(x = "Concentration (mg/L, log scale)",
                   y = "Corrected mortality") +
-    lc50_plot_theme(45, "serif")
+    lc50_plot_theme(lc50_pt(45), "serif")
   gt <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(dummy))
   rows <- gt$layout$t[gt$layout$name == "panel"]
   cols <- gt$layout$l[gt$layout$name == "panel"]
@@ -525,6 +517,29 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
     lc_lines <- c(lc_lines, sprintf("chi-square = %.2f, P %s",
                                     r$chisq, p_txt))
   }
+  # Display versions with proper sub/superscripts: LC with a subscripted
+  # percentage (LC50 -> LC_50) and chi^2 instead of "chi-square". The
+  # plain-text lines above are kept for the label-block width
+  # measurement, which is character-table based and cannot handle
+  # plotmath. Missing entries fall back to the plain text.
+  lc_draw <- vector("list", length(lc_lines))
+  lc_draw[[1]] <- if (nzchar(unit)) {
+    ## plotmath draws a whole expression with one font, so a Chinese unit
+    ## in it would come from the device's fallback font - Microsoft YaHei
+    ## on Windows, the one family that cannot be asked for. The plain
+    ## line is left alone in that case; pkg_plot_grob() then splits it,
+    ## and the unit is set in the CJK font like every other label
+    if (pkg_has_cjk(unit)) NULL
+    else bquote("LC"[.(round(lc_y * 100))] == .(sprintf("%.3g", lc_real)) ~
+                  .(unit))
+  } else {
+    bquote("LC"[.(round(lc_y * 100))] == .(sprintf("%.3g", lc_real)))
+  }
+  if (length(lc_lines) >= 3) {
+    p_txt2 <- if (r$p_chi < 0.001) "< 0.001" else sprintf("= %.3f", r$p_chi)
+    lc_draw[[3]] <- bquote(chi^2 == .(sprintf("%.2f", r$chisq)) ~ "," ~
+                             italic(P) ~ .(p_txt2))
+  }
   # The lines are drawn one by one further down, each centred on the same
   # vertical axis (see the annotate calls), so they need no padding here
   serif_font <- !grepl("sans|arial|helvet|calibri", font, ignore.case = TRUE)
@@ -589,7 +604,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   x_mid <- (x_lo + x_hi) / 2
   x_lab_w <- x_hi - x_lo
   bar_w <- 0.018 * (x_hi - x_lo)   # cap width of the error bars
-  lc_lab_pt <- 25                    # LC label font, in points on the device
+  lc_lab_pt <- lc50_pt(25)           # LC label font, in points on the device
   lc_lab_size <- lc_lab_pt / ggplot2::.pt
   n_lab <- length(lc_lines)
   # The block is centred on x_lab, so half of the widest line must stay
@@ -782,7 +797,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   y_val_below <- (1 - lc_y) < 0.16
 
   # Sizes of the hand-drawn axis elements
-  base_size <- 45
+  base_size <- lc50_pt(45)
   tick_len_x <- 0.04
   tick_len_y <- 0.025 * (x_hi - x_lo)
   tick_len_ratio <- 0.6
@@ -841,9 +856,11 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   # pitch computed above, so the lines line up on one another no matter
   # how different their widths are
   for (i in seq_along(lc_lines)) {
+    lab <- if (!is.null(lc_draw[[i]])) as.expression(lc_draw[[i]])
+           else lc_lines[i]
     gp <- gp + annotate("text",
                         x = x_lab, y = lab_top - (i - 1) * lab_pitch,
-                        label = lc_lines[i],
+                        label = lab,
                         hjust = 0.5, vjust = 0.5,
                         size = lc_lab_size, fontface = "bold",
                         family = font, color = col)
@@ -928,24 +945,34 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
     gp <- gp + scale_x_continuous(breaks = x_ticks_reg,
                                   labels = x_labels_reg)
   }
+  x_lab <- if (nzchar(unit)) {
+    if (shape == "sigmoid")
+      sprintf("Concentration (%s, log scale)", unit)
+    else sprintf("Concentration (%s)", unit)
+  } else {
+    if (shape == "sigmoid") "Concentration (log scale)"
+    else "Concentration"
+  }
+  y_lab <- if (y_percent) "Corrected mortality (%)" else "Corrected mortality"
+  ## the axis titles are the only labels a user can fill with Chinese
+  ## (through `unit`). They are set in the CJK font as a whole here, so
+  ## that the Chinese shows up even when the figure is drawn by
+  ## something else; pkg_plot_grob() then splits the label and gives the
+  ## Latin part back to the serif font. The tick labels, the LC labels
+  ## and every number stay in the serif font either way.
+  cjk <- pkg_resolve_cjk()
   gp <- gp +
     scale_y_continuous(breaks = y_ticks_reg, labels = y_labels_reg) +
-    labs(x = if (nzchar(unit)) {
-      if (shape == "sigmoid")
-        sprintf("Concentration (%s, log scale)", unit)
-      else sprintf("Concentration (%s)", unit)
-    } else {
-      if (shape == "sigmoid") "Concentration (log scale)"
-      else "Concentration"
-    },
-    y = if (y_percent) "Corrected mortality (%)" else "Corrected mortality") +
-    lc50_plot_theme(base_size, font)
+    labs(x = x_lab, y = y_lab) +
+    lc50_plot_theme(base_size, font,
+                    font_x = pkg_label_family(x_lab, font, cjk),
+                    font_y = pkg_label_family(y_lab, font, cjk))
   gp
 }
 
 # The theme shared by the LC plots and by the dummy plot that measures the
 # panel height, so both have exactly the same margins and axis text
-lc50_plot_theme <- function(base_size, font) {
+lc50_plot_theme <- function(base_size, font, font_x = font, font_y = font) {
   theme_bw(base_size = base_size) +
     theme(
       text = element_text(family = font),
@@ -960,10 +987,12 @@ lc50_plot_theme <- function(base_size, font) {
       axis.line = element_line(linewidth = 0.65),
       axis.ticks = element_blank(),
       axis.ticks.length = unit(10.2, "cm"),
-      axis.title = element_text(size = 48),
+      axis.title = element_text(size = lc50_pt(48)),
       axis.text.x = element_text(margin = margin(t = 10)),
       axis.text.y = element_text(margin = margin(r = 10)),
-      axis.title.x = element_text(margin = margin(t = 5), hjust = 0.5),
+      axis.title.x = element_text(margin = margin(t = 5), hjust = 0.5,
+                                  family = font_x),
+      axis.title.y = element_text(family = font_y),
       legend.position = "none",
       panel.border       = element_blank()
     )

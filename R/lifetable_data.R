@@ -61,6 +61,16 @@ lifeTable_read <- function(path, check = TRUE) {
   enc <- readr::guess_encoding(path)
   encoding_type <- if (nrow(enc) > 0) enc$encoding[1] else "UTF-8"
 
+  # Detect a UTF-8 byte order mark (BOM, EF BB BF). Files saved by
+  # Excel/Notepad as "UTF-8 with BOM" choke read.csv's re-encoding
+  # under non-UTF-8 locales ("invalid input found on input
+  # connection"), so the encoding is switched to the BOM-aware variant.
+  bom <- identical(readBin(path, what = "raw", n = 3L),
+                   as.raw(c(0xEF, 0xBB, 0xBF)))
+  if (bom && grepl("UTF-8|ASCII", encoding_type, ignore.case = TRUE)) {
+    encoding_type <- "UTF-8-BOM"
+  }
+
   # Read the first row (used to extract the stage names)
   header <- read.csv(file = path, header = FALSE, nrows = 1,
                      fileEncoding = encoding_type) %>%

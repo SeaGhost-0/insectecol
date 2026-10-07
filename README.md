@@ -439,9 +439,46 @@ and xlsx files are read via `readxl`.
 
 ## Updates
 
-### 1.1.0 (development)
+### 1.1.2 (CRAN submission round)
 
-Version 1.1.0 adds the emergence-period module, standardises the
+**Figures and fonts**
+
+- In a label that mixes the two scripts, every character now keeps its
+  own font: digits, symbols and Latin words stay in Times New Roman and
+  only the Chinese characters are set in the system CJK font (SimSun on
+  Windows, Songti on macOS). A label used to be set in one font as a
+  whole, so "Concentration (mg/L)" written with a Chinese unit came out
+  entirely in the CJK font, Latin letters included.
+- Text sizes are true typographic points on every device and at every
+  dpi, so a label has the same physical size in a 300 dpi png and in a
+  pdf (it used to grow with the dpi).
+- Chinese labels are written to vector devices (pdf, svg) as well: the
+  TrueType font is embedded, and the family is registered with the
+  classic font databases, which removes the "invalid font type" and
+  "font family not found" failures when a figure is printed to the
+  default device.
+- The LC label of `lc50_plot()` falls back to plain text when the unit
+  contains Chinese, so that the unit is set in the CJK font like every
+  other label. The percentage is then written `LC50` instead of with a
+  subscript, because plotmath can only draw a whole expression with one
+  font.
+
+**Examples**
+
+- `\dontrun` replaced by `\donttest` throughout: every example can be
+  run by the user, and only the parts that write a workbook - which
+  take well over five seconds - are skipped by `R CMD check`.
+
+**Internal changes**
+
+- `systemfonts` added to Imports (the package `ragg` draws and measures
+  text with); it supplies the per-character widths used to split a
+  mixed label into runs.
+- Bumped the version to 1.1.2.
+
+### 1.1.1 (CRAN submission round)
+
+Version 1.1.1 adds the emergence-period module, standardises the
 function naming across all modules (`<module>_<verb>` with the same
 verbs everywhere, see below) and removes the no-longer-needed
 `gdd_from_lifetable()` bridge.
@@ -581,7 +618,7 @@ verbs everywhere, see below) and removes the no-longer-needed
   renamed functions and S3 methods (`print`/`summary`/`plot`/`predict`
   methods for the `gdd` and `emergence` objects, `print` for the
   bootstrap object).
-- Bumped the version to 1.1.0.
+- Bumped the version to 1.1.1.
 
 ### 1.0.1 (CRAN submission round)
 

@@ -6,6 +6,7 @@
 \usage{
 lifeTable_analyze(
   lt = NULL,
+  path = NULL,
   stages = NULL,
   adult_days = NULL,
   sex = NULL,
@@ -20,14 +21,17 @@ lifeTable_analyze(
   plot = FALSE,
   title = NULL,
   x_title = "Age(days)",
-  y_title = "Age-Stage Survival Rate(Sxj)",
+  y_title = expression("Age-Stage Survival Rate (" * italic(S)[italic(xj)] * ")"),
   legend_labels = NULL,
   dpi = 300,
   plot_file = NULL,
   plot_width = 12,
   plot_height = 8,
   plot_units = "cm",
-  plot_res = 300
+  plot_res = 300,
+  export = FALSE,
+  export_path = NULL,
+  export_file = NULL
 )
 }
 \arguments{
@@ -35,6 +39,9 @@ lifeTable_analyze(
 \code{\link{lifeTable_read}} or \code{\link{lifeTable_build}}).
 If \code{NULL} (default), the object is built from \code{stages},
 \code{adult_days}, \code{sex} and \code{oviposition}.}
+
+\item{path}{Path to a csv file; read with \code{\link{lifeTable_read}}
+and used instead of \code{lt}/\code{stages}.}
 
 \item{stages, adult_days, sex, oviposition, stage_names, file_name, check}{Passed to \code{\link{lifeTable_build}} (ignored when \code{lt} is
 supplied).}
@@ -46,13 +53,13 @@ be left \code{NULL}.}
 
 \item{bootstrap}{Logical; whether to estimate the standard errors and
 percentile confidence intervals of all scalar parameters with the
-bootstrap technique of TWOSEX-MSChart via
+bootstrap technique of 'TWOSEX-MSChart' via
 \code{\link{lifeTable_bootstrap}} (default \code{FALSE}). The
 result is attached as \code{results$boot} and is exported by
 \code{\link{lifeTable_export}} as an extra worksheet.}
 
 \item{B}{Integer; number of bootstrap replicates (only used when
-\code{bootstrap = TRUE}). The TWOSEX-MSChart standard is
+\code{bootstrap = TRUE}). The 'TWOSEX-MSChart' standard is
 \code{100000} (the default).}
 
 \item{seed}{Integer; seed of the bootstrap random number generator
@@ -65,8 +72,10 @@ customised further or passed to \code{\link{lifeTable_export}}.}
 
 \item{title}{Character; plot title. \code{NULL} = \code{file_name}.}
 
-\item{x_title, y_title}{Character; axis titles. Defaults
-\code{"Age(days)"} and \code{"Age-Stage Survival Rate(Sxj)"}.}
+\item{x_title, y_title}{Character or plotmath expression; axis
+titles. Defaults \code{"Age(days)"} and
+\code{expression("Age-Stage Survival Rate ("*italic(S)[italic(xj)]*")")}
+(S with an italic xj subscript).}
 
 \item{legend_labels}{Character vector; legend labels, one per stage
 (immature stages + Female + Male), e.g.
@@ -85,6 +94,21 @@ returned.}
 \item{plot_width, plot_height, plot_units, plot_res}{Physical size and
 resolution of the exported png (only used when \code{plot_file} is
 supplied); defaults 12 x 8 cm at 300 dpi.}
+
+\item{export}{Logical; write the results workbook to disk?
+Default \code{FALSE}.}
+
+\item{export_path}{Output directory for the results workbook;
+created when missing. \code{NULL} (default) means
+\code{\link{getwd}}.}
+
+\item{export_file}{File name of the results workbook;
+\code{NULL} (default) means \code{<file_name>_results.xlsx}.
+Relative paths are resolved against \code{export_path}; absolute
+paths are used as-is. The parent directory is created when it
+does not exist. The
+written path is returned invisibly in the \code{export_file}
+component of the result.}
 }
 \value{
 A list with components \code{lt} (the \code{life_table}
@@ -92,9 +116,10 @@ A list with components \code{lt} (the \code{life_table}
   \code{\link{lifeTable_calculate_all}}; additionally containing
   \code{boot}, the \code{\link{lifeTable_bootstrap}} result, when
   \code{bootstrap = TRUE}), \code{plot} (the ggplot object when
-  \code{plot = TRUE}, otherwise \code{NULL}) and \code{plot_file}
+  \code{plot = TRUE}, otherwise \code{NULL}), \code{plot_file}
   (the png path when \code{plot_file} was supplied, otherwise
-  \code{NULL}).
+  \code{NULL}) and \code{export_file} (the workbook path when
+  \code{export = TRUE}, otherwise \code{NULL}).
 }
 \description{
 Non-interactive, fully parameter-driven entry point for the
@@ -160,6 +185,26 @@ out3 <- lifeTable_analyze(stages = d3[, c("Egg", "1st instar", "2nd instar",
                                            "Prepupa", "Pupa",
                                            "Female", "Male"))
 out3$plot               # print or further customise the ggplot object
+
+## --- way 4: export the figure (png) and the results workbook (xlsx) ---
+## plot_file writes the survival-curve png; export = TRUE writes the
+## workbook with all result tables (Summary, s_xj, l_x, e_x, e_xj, ...).
+## export_file accepts an absolute path (the parent directory is
+## created when missing); a relative path would be resolved against
+## export_path (default getwd()). Writing the workbook takes well over
+## 5 seconds, so this last part is not run by default.
+\donttest{
+out4 <- lifeTable_analyze(stages = d[2:8], adult_days = d$Adult,
+                          sex = d$gender, oviposition = d[, 11:17],
+                          file_name = "Example - export",
+                          plot = TRUE,
+                          plot_file = file.path(tempdir(), "sxj.png"),
+                          export = TRUE,
+                          export_file = file.path(tempdir(),
+                                                  "life_table_results.xlsx"))
+out4$plot_file        # path of the written png
+out4$export_file      # path of the written workbook (all result tables)
+}
 }
 \seealso{
 \code{\link{lifeTable_build}},

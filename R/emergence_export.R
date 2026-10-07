@@ -18,12 +18,10 @@
 #'   cumulative-development table. Default TRUE.
 #' @param ... Further arguments passed to \code{write.csv} (CSV mode).
 #' @examples
-#' \donttest{
 #' f <- system.file("extdata", "emergence_example.csv",
 #'                  package = "insectecol")
 #' fit <- emergence_calc(emergence_read(f), survey_date = "2026-03-20")
 #' emergence_export(fit, tempfile(fileext = ".csv"))
-#' }
 #' @export
 emergence_export <- function(x, file = "emergence_results.csv",
                              include_stages = TRUE, ...) {
@@ -78,13 +76,11 @@ emergence_export <- function(x, file = "emergence_results.csv",
 #'   \code{\link{plot.emergence}}.
 #' @return Invisibly, \code{file}.
 #' @examples
-#' \donttest{
 #' f <- system.file("extdata", "emergence_example.csv",
 #'                  package = "insectecol")
 #' fit <- emergence_calc(emergence_read(f), survey_date = "2026-03-20",
 #'                       pre_ovip = 3, egg_days = 10)
 #' emergence_export_plot(fit, tempfile(fileext = ".png"))
-#' }
 #' @export
 emergence_export_plot <- function(x, file = "emergence_plot.png",
                                   show_hatch = TRUE,

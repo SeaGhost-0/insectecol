@@ -77,8 +77,10 @@ plot.emergence <- function(x, show_hatch = TRUE, title = NULL,
   ## font handling: identical to gdd_plot --- showtext off (it
   ## renders whole strings in one font, losing the per-glyph CJK
   ## fallback), classic devices resolve the family via windowsFonts
-  if (requireNamespace("showtext", quietly = TRUE))
-    try(showtext::showtext_auto(enable = FALSE), silent = TRUE)
+  ## switched off for this figure only; the previous state is put back on
+  ## exit so that a later lc50 or life table figure is unaffected
+  prev_showtext <- pkg_showtext_set(FALSE)          # see comment above
+  on.exit(pkg_showtext_set(prev_showtext), add = TRUE)
   tryCatch(
     grDevices::windowsFonts(`Times New Roman` =
                               grDevices::windowsFont("Times New Roman")),

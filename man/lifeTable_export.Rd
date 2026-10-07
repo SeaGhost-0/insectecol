@@ -10,7 +10,8 @@ lifeTable_export(
   output_path = getwd(),
   plot = NULL,
   keep_tiff = FALSE,
-  dpi = 300
+  dpi = 300,
+  filename = NULL
 )
 }
 \arguments{
@@ -26,11 +27,15 @@ Defaults to the current working directory.}
 \item{plot}{A ggplot object (usually from \code{\link{lifeTable_plot}}); if
 \code{NULL} (default) no image is exported.}
 
-\item{keep_tiff}{Logical; whether to keep the standalone tiff file
-next to the workbook in addition to the copy embedded in it. Default
-\code{FALSE}, i.e. the tiff is deleted after being embedded.}
+\item{keep_tiff}{Keep the standalone tiff file next to the workbook
+when a plot is embedded (default \code{FALSE}, i.e. the tiff is
+deleted after being inserted).}
 
-\item{dpi}{Numeric; resolution of the exported image (default 300).}
+\item{dpi}{Resolution of the embedded plot image.}
+
+\item{filename}{File name of the workbook; \code{NULL} (default)
+means \code{<file_name>_out.xlsx}. A missing \code{.xlsx}
+extension is added automatically.}
 }
 \value{
 The path of the exported xlsx file (invisibly).
@@ -42,12 +47,12 @@ age-stage survival rates, the age-specific rates and, optionally, the
 survival curve plot.
 }
 \details{
-The tiff is written through the internal \code{lt_ggsave()},
-  which enables 'showtext' for the export device and pins the 'showtext'
-  internal dpi to the value the text sizes of \code{\link{lifeTable_plot}}
-  are calibrated for. The exported figure therefore looks the same in
-  every R session, no matter what 'showtext' settings are left over in
-  the session. If the reproduction-related parameters were skipped
+The tiff is written through \code{\link{lifeTable_plot}}'s
+  device handling, which writes bitmaps with 'ragg' so that Chinese
+  labels fall back to the system CJK font per glyph while digits and
+  symbols stay in Times New Roman. The figure therefore looks the same
+  in every R session, no matter what 'showtext' settings are left over
+  in the session. If the reproduction-related parameters were skipped
   (\code{fecundity = FALSE} in \code{\link{lifeTable_calculate_all}}),
   the corresponding values in the Summary sheet are \code{NA} and the
   sheets "Female fecundity (F_xj)" and "Age-specific fecundity (m_x)"
@@ -60,10 +65,14 @@ The tiff is written through the internal \code{lt_ggsave()},
   confidence interval) is written.
 }
 \examples{
+\donttest{
+## writes an xlsx workbook plus a tiff; that takes a few seconds, so it
+## is not run by default
 f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lt <- lifeTable_read(f)
 results <- lifeTable_calculate_all(lt)
 lifeTable_export(lt, results, tempdir())
+}
 }
 \seealso{
 \code{\link{lifeTable_calculate}}, \code{\link{lifeTable_plot}}

@@ -12,7 +12,7 @@ two host plants) returned by \code{\link{lifeTable_read}} or
 \code{\link{lifeTable_build}}.}
 
 \item{B}{Integer; number of bootstrap replicates per group
-(default \code{100000}, the TWOSEX-MSChart standard).}
+(default \code{100000}, the 'TWOSEX-MSChart' standard).}
 
 \item{seed}{Integer; seed for the random number generator; the
 session state is restored when the function exits.}
@@ -37,7 +37,7 @@ A data frame with one row per compared parameter:
 }
 \description{
 Compares the life table parameters of two cohorts with the paired
-bootstrap test used by TWOSEX-MSChart: both cohorts are resampled
+bootstrap test used by 'TWOSEX-MSChart': both cohorts are resampled
 independently \code{B} times, the differences
 \code{d = parameter(group 1) - parameter(group 2)} are formed
 replicate by replicate, and the 95 percent percentile interval of

@@ -35,6 +35,9 @@ emergence_analyze(
   plot_height = 6,
   plot_units = c("in", "cm", "px"),
   plot_res = 150,
+  export = FALSE,
+  export_path = NULL,
+  export_file = NULL,
   ...
 )
 }
@@ -108,6 +111,21 @@ and resolution of the exported png (only used when
 \code{\link{gdd_analyze}}: the composition is identical at
 every resolution, \code{plot_res} only adds pixels.}
 
+\item{export}{Logical; write the results document to disk?
+Default \code{FALSE}.}
+
+\item{export_path}{Output directory for the results document;
+created when missing. \code{NULL} (default) means
+\code{\link{getwd}}.}
+
+\item{export_file}{File name of the results document
+(\code{.xlsx} or \code{.csv}); \code{NULL} (default) means
+\code{emergence_results.xlsx}. Relative paths are resolved
+against \code{export_path}; absolute paths are used as-is. The
+parent directory is created when it does not exist. The
+written path is returned
+invisibly in the \code{export_file} component of the result.}
+
 \item{...}{Further arguments passed to \code{\link{emergence_calc}}
 (reserved for future options; keeps user code forward
 compatible).}
@@ -123,6 +141,8 @@ A list with components:
     methods are available}
   \item{plot_file}{the png path when \code{plot_file} was
     supplied, otherwise \code{NULL}}
+  \item{export_file}{the results-document path when
+    \code{export = TRUE}, otherwise \code{NULL}}
 }
 \description{
 Non-interactive, fully parameter-driven entry point for the
@@ -162,15 +182,24 @@ out2 <- emergence_analyze(data = d, survey_date = "2026-03-20")
 ## --- way 3: let the function read the file ---
 out3 <- emergence_analyze(path = f, survey_date = "2026-03-20")
 
-## --- hatch projection + png export + custom labels ---
+## --- hatch projection + png export + results workbook ---
+## plot_file writes the projection png; export = TRUE writes the
+## results workbook (quantile dates + cumulative development table).
+## export_file accepts an absolute path (the parent directory is
+## created when missing), so export_path is not needed here.
 ## plot_title / plot_xlab / plot_ylab accept custom labels; Chinese
 ## labels are rendered through the device's font fallback (SimSun
 ## on Chinese Windows)
 out4 <- emergence_analyze(path = f, survey_date = "2026-03-20",
                           pre_ovip = 3, egg_days = 10,
                           plot = TRUE,
-                          plot_file = tempfile(fileext = ".png"))
+                          plot_file = file.path(tempdir(), "emergence.png"),
+                          export = TRUE,
+                          export_file = file.path(tempdir(),
+                                                  "emergence_results.xlsx"))
 out4$fit$predictions
+out4$plot_file            # path of the written png
+out4$export_file          # path of the written workbook
 }
 \seealso{
 \code{\link{emergence_read}},

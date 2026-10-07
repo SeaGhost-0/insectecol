@@ -101,3 +101,10 @@ check_data <- function(df, n) {
     oviposition = oviposition[!is.na(oviposition)]) # rows with oviposition errors, NA entries dropped
   return(result_list)                    # return the list
 }
+
+# TRUE when p is an absolute path (Windows drive letter, UNC share,
+# or a POSIX / Windows rooted path). Used to decide whether a
+# user-supplied export_file should be joined to export_path.
+.is_abs_path <- function(p) {
+  grepl("^([A-Za-z]:[\\\\/]|\\\\\\\\|/|\\\\)", p)
+}

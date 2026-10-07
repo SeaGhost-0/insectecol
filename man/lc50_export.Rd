@@ -34,8 +34,12 @@ The detail sheet of each file contains the preprocessed data
   which no method succeeded get an empty sheet.
 }
 \examples{
+\donttest{
+## writes an xlsx workbook; that takes a few seconds, so it is not run
+## by default (the example itself is what lc50_export() is for)
 f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 lc50_export(lc50_calculate(lc50_read(f)), output_dir = tempdir())
+}
 }
 \seealso{
 \code{\link{lc50_calculate}}, \code{\link{lc50_plot}}

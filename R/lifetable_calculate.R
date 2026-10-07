@@ -12,12 +12,13 @@
 #'   entirely; no oviposition data are then required.
 #'
 #' @details The intermediate results are passed on internally, so nothing
-#'   is computed twice: s_xj first, then l_x, F_xj and m_x, then r and
-#'   R0, and finally \code{lambda = exp(r)} and \code{T = log(R0) / r}.
+#'   is computed twice: s_xj first, then l_x and the life expectancies
+#'   (e_x and e_xj), then F_xj and m_x, then r and R0, and finally
+#'   \code{lambda = exp(r)} and \code{T = log(R0) / r}.
 #'
 #' @return A named list with elements \code{N}, \code{F}, \code{sxj},
-#'   \code{lx}, \code{fxj}, \code{mx}, \code{ex}, \code{R0}, \code{r},
-#'   \code{lambda} and \code{T}
+#'   \code{lx}, \code{fxj}, \code{mx}, \code{ex}, \code{exj}, \code{R0},
+#'   \code{r}, \code{lambda} and \code{T}
 #'   With \code{fecundity = FALSE} (or when no oviposition data are
 #'   supplied), \code{fxj} and \code{mx} are \code{NULL} and \code{F},
 #'   \code{R0}, \code{r}, \code{lambda}, \code{T} are \code{NA_real_}.
@@ -35,12 +36,13 @@ lifeTable_calculate_all <- function(lt, fecundity = TRUE) {
   sxj <- calc_sxj(lt)
   lx  <- calc_lx(lt, sxj)
   ex  <- calc_ex(lt, lx)
+  exj <- calc_exj(lt)
   has_ovi <- ncol(lt$data) >= lt$n_1            # oviposition columns present?
   if (!fecundity || !has_ovi) {
     if (fecundity && !has_ovi)
       warning("No oviposition data supplied; reproduction-related parameters (F, F_xj, m_x, R0, r, lambda, T) were skipped")
     return(list(N = calc_N(lt), F = NA_real_, sxj = sxj, lx = lx, fxj = NULL,
-                mx = NULL, ex = ex, R0 = NA_real_, r = NA_real_,
+                mx = NULL, ex = ex, exj = exj, R0 = NA_real_, r = NA_real_,
                 lambda = NA_real_, T = NA_real_))
   }
   fxj <- calc_fxj(lt, sxj)
@@ -48,7 +50,8 @@ lifeTable_calculate_all <- function(lt, fecundity = TRUE) {
   r   <- calc_r(lt, lx, mx)
   R0  <- calc_R0(lt, sxj, fxj)
   list(N = calc_N(lt), F = calc_F(lt), sxj = sxj, lx = lx, fxj = fxj,
-       mx = mx, ex = ex, R0 = R0, r = r, lambda = exp(r), T = log(R0) / r)
+       mx = mx, ex = ex, exj = exj, R0 = R0, r = r, lambda = exp(r),
+       T = log(R0) / r)
 }
 #' Batch Analysis of Life Table Data
 #'
@@ -77,7 +80,7 @@ lifeTable_calculate_all <- function(lt, fecundity = TRUE) {
 #'   with the bootstrap results and the summary workbook \code{all.xlsx}
 #'   gains one \code{_SE} column per population parameter.
 #' @param B Integer; number of bootstrap replicates per file (only
-#'   used when \code{bootstrap = TRUE}). The TWOSEX-MSChart standard
+#'   used when \code{bootstrap = TRUE}). The 'TWOSEX-MSChart' standard
 #'   is \code{100000} (the default).
 #' @param seed Integer; base seed of the bootstrap random number
 #'   generator (only used when \code{bootstrap = TRUE}); file
@@ -95,8 +98,13 @@ lifeTable_calculate_all <- function(lt, fecundity = TRUE) {
 #'   \code{\link{lifeTable_export}}
 #' @export
 #' @examples
+#' \donttest{
+#' ## reads the example file, bootstraps it and writes an xlsx workbook
+#' ## plus a figure; that takes well over 5 seconds, so it is not run by
+#' ## default
 #' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lifeTable_calculate(f, output_path = file.path(tempdir(), "insectecol-demo"))
+#' }
 lifeTable_calculate <- function(path, output_path = NULL, plot = TRUE,
                                 keep_tiff = FALSE, dpi = 300,
                                 bootstrap = FALSE, B = 100000, seed = NULL) {

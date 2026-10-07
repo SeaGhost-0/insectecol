@@ -44,10 +44,14 @@ Each csv file is processed completely on its own (read,
   \code{LB_48_probit.xlsx}.
 }
 \examples{
+\donttest{
+## writes an xlsx workbook; that takes a few seconds, so it is not run
+## by default
 f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 tmp <- file.path(tempdir(), "lc50_example.csv")
 file.copy(f, tmp, overwrite = TRUE)
 lc50_export_auto(tmp)                    # -> <tempdir>/bioassay.xlsx
+}
 }
 \seealso{
 \code{\link{lc50_export_plot_auto}} for the matching figure

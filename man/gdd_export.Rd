@@ -39,9 +39,7 @@ used), per-group coefficient tables with confidence intervals, and
 the cleaned data can be included optionally.
 }
 \examples{
-\donttest{
 f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
 fit <- gdd_calc(gdd_read(f), by = "stage")
 gdd_export(fit, tempfile(fileext = ".csv"))
-}
 }

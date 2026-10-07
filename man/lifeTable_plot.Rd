@@ -9,7 +9,7 @@ lifeTable_plot(
   sxj = NULL,
   title = NULL,
   x_title = "Age(days)",
-  y_title = "Age-Stage Survival Rate(Sxj)",
+  y_title = expression("Age-Stage Survival Rate (" * italic(S)[italic(xj)] * ")"),
   legend_labels = NULL,
   dpi = 300
 )
@@ -26,8 +26,9 @@ file.}
 
 \item{x_title}{Character; x axis title (default \code{"Age(days)"}).}
 
-\item{y_title}{Character; y axis title (default
-\code{"Age-Stage Survival Rate(Sxj)"}).}
+\item{y_title}{Character or plotmath expression; y axis title
+(default \code{expression("Age-Stage Survival Rate ("*italic(S)[italic(xj)]*")")},
+i.e. S with an italic xj subscript).}
 
 \item{legend_labels}{Character vector; legend labels, one per stage
 (immature stages plus \code{Female} and \code{Male}), e.g.
@@ -45,7 +46,7 @@ A ggplot object that can be customised further or saved with
 \description{
 Draws the age-stage survival rate s(x,j) of every developmental stage
 (including the female and male adults) against age in days, in the
-style of the classical TWOSEX-MSChart plots.
+style of the classical 'TWOSEX-MSChart' plots.
 }
 \details{
 To keep the figure clean, each stage is drawn only over the
@@ -55,11 +56,13 @@ To keep the figure clean, each stage is drawn only over the
   points. By default all text of the figure is in English; title,
   axis titles and legend labels can be customised.
 
-  The text sizes are calibrated for being drawn while 'showtext' is
-  active at its default internal dpi (96); \code{\link{lifeTable_export}}
-  takes care of this when exporting. If you save the plot yourself,
-  switch 'showtext' on around the \code{\link[ggplot2]{ggsave}} call,
-  otherwise the text comes out about 300/96 times too large.
+  Text sizes are true typographic points and do not depend on the
+  resolution, so the figure can be saved with
+  \code{\link[ggplot2]{ggsave}} as it is. In a label that mixes the
+  two scripts, the Chinese characters are set in the system CJK font
+  (SimSun on Windows, Songti on macOS) while the digits, symbols and
+  Latin words next to them stay in Times New Roman; a label that is
+  entirely Chinese uses the CJK font for all of it.
 }
 \examples{
 f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")

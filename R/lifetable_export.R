@@ -18,12 +18,12 @@
 #'   \code{FALSE}, i.e. the tiff is deleted after being embedded.
 #' @param dpi Numeric; resolution of the exported image (default 300).
 #'
-#' @details The tiff is written through the internal \code{lt_ggsave()},
-#'   which enables 'showtext' for the export device and pins the 'showtext'
-#'   internal dpi to the value the text sizes of \code{\link{lifeTable_plot}}
-#'   are calibrated for. The exported figure therefore looks the same in
-#'   every R session, no matter what 'showtext' settings are left over in
-#'   the session. If the reproduction-related parameters were skipped
+#' @details The tiff is written through \code{\link{lifeTable_plot}}'s
+#'   device handling, which writes bitmaps with 'ragg' so that Chinese
+#'   labels fall back to the system CJK font per glyph while digits and
+#'   symbols stay in Times New Roman. The figure therefore looks the same
+#'   in every R session, no matter what 'showtext' settings are left over
+#'   in the session. If the reproduction-related parameters were skipped
 #'   (\code{fecundity = FALSE} in \code{\link{lifeTable_calculate_all}}),
 #'   the corresponding values in the Summary sheet are \code{NA} and the
 #'   sheets "Female fecundity (F_xj)" and "Age-specific fecundity (m_x)"
@@ -35,19 +35,36 @@
 #'   (original estimate, bootstrap mean, standard error, percentile
 #'   confidence interval) is written.
 #'
+#' @param keep_tiff Keep the standalone tiff file next to the workbook
+#'   when a plot is embedded (default \code{FALSE}, i.e. the tiff is
+#'   deleted after being inserted).
+#' @param dpi Resolution of the embedded plot image.
+#' @param filename File name of the workbook; \code{NULL} (default)
+#'   means \code{<file_name>_out.xlsx}. A missing \code{.xlsx}
+#'   extension is added automatically.
 #' @return The path of the exported xlsx file (invisibly).
 #'
 #' @seealso \code{\link{lifeTable_calculate}}, \code{\link{lifeTable_plot}}
 #' @export
 #' @examples
+#' \donttest{
+#' ## writes an xlsx workbook plus a tiff; that takes a few seconds, so it
+#' ## is not run by default
 #' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 #' lt <- lifeTable_read(f)
 #' results <- lifeTable_calculate_all(lt)
 #' lifeTable_export(lt, results, tempdir())
+#' }
 lifeTable_export <- function(lt, results, output_path = getwd(), plot = NULL,
-                         keep_tiff = FALSE, dpi = 300) {
+                         keep_tiff = FALSE, dpi = 300, filename = NULL) {
   if (!dir.exists(output_path)) dir.create(output_path, recursive = TRUE)
-  output_xlsx_path <- sprintf("%s/%s_out.xlsx", output_path, lt$file_name)
+  if (is.null(filename)) filename <- sprintf("%s_out.xlsx", lt$file_name)
+  else if (!grepl("\\.xlsx$", filename, ignore.case = TRUE))
+    filename <- paste0(filename, ".xlsx")
+  output_xlsx_path <- if (!is.null(filename) && .is_abs_path(filename))
+    filename else file.path(output_path, filename)
+  if (!dir.exists(dirname(output_xlsx_path)))
+    dir.create(dirname(output_xlsx_path), recursive = TRUE, showWarnings = FALSE)
   has_fec <- !is.null(results$fxj)              # reproduction parameters computed?
   num <- function(x) if (has_fec) x else NA_real_
   result_df <- data.frame(
@@ -62,6 +79,8 @@ lifeTable_export <- function(lt, results, output_path = getwd(), plot = NULL,
   addWorksheet(wb, sheetName = "Age-stage survival rate (S_xj)")
   addWorksheet(wb, sheetName = "Age-specific survival (l_x)")
   addWorksheet(wb, sheetName = "Life expectancy (e_x)")
+  if (!is.null(results$exj))
+    addWorksheet(wb, sheetName = "Life expectancy (e_xj)")
   sxj_export <- rbind(results$sxj, 0)
   colnames(sxj_export) <- colnames(results$sxj)
   writeData(wb, sheet = "Summary", x = result_df, startRow = 1)
@@ -71,6 +90,9 @@ lifeTable_export <- function(lt, results, output_path = getwd(), plot = NULL,
             startRow = 1, startCol = 1)
   writeData(wb, sheet = "Life expectancy (e_x)", x = results$ex,
             startRow = 1, startCol = 1)
+  if (!is.null(results$exj))
+    writeData(wb, sheet = "Life expectancy (e_xj)",
+              x = results$exj, startRow = 1, startCol = 1)
   if (has_fec) {                                # only written when computed
     addWorksheet(wb, sheetName = "Female fecundity (F_xj)")
     addWorksheet(wb, sheetName = "Age-specific fecundity (m_x)")
@@ -99,45 +121,14 @@ lifeTable_export <- function(lt, results, output_path = getwd(), plot = NULL,
   invisible(output_xlsx_path)
 }
 
-# Current internal dpi of showtext (default 96)
-lt_showtext_dpi <- function() {
-  opts <- tryCatch(showtext::showtext_opts(), error = function(e) NULL)
-  if (is.list(opts) && is.numeric(opts$dpi) &&
-      length(opts$dpi) == 1 && is.finite(opts$dpi)) opts$dpi else 96
-}
-
 # Save a life table plot, like ggsave(path, plot, device = "tiff",
 # width = 12, height = 8, dpi = 300, units = "cm", bg = "white") but with
-# showtext enabled for the export device.
-#
-# showtext renders/measures text only at its own fixed internal resolution
-# (default 96), ignoring the device dpi. lifeTable_plot() is calibrated for this:
-# its text sizes grow with dpi/300, and the showtext shrink factor of
-# 96/dpi cancels that growth, so the exported text keeps the physical size
-# it has at 300 dpi - at every dpi and for every device type (vector
-# devices have no pixels and are converted at 72 pt/in).
-#
-# The internal dpi is therefore pinned to 96 * eff / dpi rather than to
-# whatever value happens to be active in the session, so the export is
-# identical in every new R session (this differs from lc50_ggsave(),
-# whose formula is ref * eff / 300, because lc50 plots use fixed font
-# sizes while lifeTable_plot() already scales its fonts with dpi/300; for a
-# 300 dpi tiff both formulas give 96). The previous session setting is
-# restored on exit (also when ggsave() fails), and showtext is switched
-# on only while the file is being written.
+# the font handling of pkg_ggsave(): bitmaps are written by 'ragg', which
+# falls back per glyph so that Chinese labels are drawn with the system
+# CJK font while digits and symbols keep Times New Roman, and text sizes,
+# which are true typographic points, come out the same at every dpi.
 lt_ggsave <- function(filename, plot, width, height, dpi,
                       device = "tiff", units = "cm", bg = "white", ...) {
-  ref <- lt_showtext_dpi()   # session setting, restored on exit
-  eff <- if (is.character(device) &&
-               tolower(device) %in% c("pdf", "cairo_pdf", "eps", "ps",
-                                      "postscript", "cairo_ps")) 72 else dpi
-  showtext::showtext_auto(enable = TRUE)
-  on.exit({
-    showtext::showtext_auto(enable = FALSE)
-    showtext::showtext_opts(dpi = ref)
-  }, add = TRUE)
-  showtext::showtext_opts(dpi = 96 * eff / dpi)
-  ggplot2::ggsave(filename, plot = plot, device = device,
-                  width = width, height = height, dpi = dpi,
-                  units = units, bg = bg, ...)
+  pkg_ggsave(filename, plot, device = device, width = width, height = height,
+             units = units, dpi = dpi, bg = bg, ...)
 }

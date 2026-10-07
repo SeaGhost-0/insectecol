@@ -18,10 +18,10 @@ A data frame with the columns \code{Age} and \code{e_x}; one
   row per age class.
 }
 \description{
-The life expectancy of the individuals that have reached age x,
-calculated as the cumulative sum of the age-specific survival rates
-from age x to the end of the life table,
-\code{e_x = sum over y >= x of l_y}.
+The life expectancy of the individuals that have reached age x:
+the expected number of further days lived by an individual of age
+x, \code{e_x = (sum over y >= x of l_y) / l_x}. Ages with
+\code{l_x = 0} (and the padding row after the last age) return 0.
 }
 \examples{
 f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
@@ -34,6 +34,6 @@ Chi, H. and Liu, H. (1985) Two new methods for the study
   Zoology, Academia Sinica} 24(2), 225-240.
 }
 \seealso{
-\code{\link{calc_lx}}
+\code{\link{calc_lx}}, \code{\link{calc_exj}}
 }
 \keyword{internal}

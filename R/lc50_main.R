@@ -46,6 +46,21 @@
 #'   Plot settings, passed to the internal plot engine exactly as in
 #'   \code{\link{lc50_plot}} (\code{unit = NULL} means \code{"mg/L"},
 #'   \code{unit = ""} shows no unit).
+#' @param export Logical; write the results workbook to disk?
+#'   Default \code{FALSE}.
+#' @param export_path Output directory for the results workbook;
+#'   created when missing. \code{NULL} (default) means
+#'   \code{\link{getwd}}.
+#' @param export_file File name of the results workbook;
+#'   \code{NULL} (default) means \code{<name>_results.xlsx}.
+#'   Relative paths are resolved against \code{export_path}; absolute
+#'   paths are used as-is. The parent directory is created when it
+#'   does not exist. The
+#'   written path is returned invisibly in the \code{export_file}
+#'   component of the result.
+#' @param path Path to a csv file (or a folder with a single csv) in
+#'   the LC50 input format; read with \code{\link{lc50_read}} and used
+#'   instead of \code{d}/\code{concentration}.
 #'
 #' @return A list with elements \code{data} (the standardised data
 #'   list, one data frame per data set), \code{results} (the list
@@ -53,7 +68,9 @@
 #'   \code{summary_df}, \code{lc}), \code{plot} (a named list of
 #'   ggplot objects when \code{plot = TRUE}, otherwise \code{NULL})
 #'   and \code{plot_file} (the written path(s) when \code{plot_file}
-#'   was supplied, otherwise \code{NULL}).
+#'   was supplied, otherwise \code{NULL}) and \code{export_file} (the
+#'   workbook path when \code{export = TRUE}, otherwise
+#'   \code{NULL}).
 #'
 #' @seealso \code{\link{lc50_read}}, \code{\link{lc50_calculate}},
 #'   \code{\link{lc50_plot}}, \code{\link{lc50_export}},
@@ -79,8 +96,27 @@
 #'                      plot = TRUE, plot_method = "improved",
 #'                      shape = "linear")
 #' out3$plot$trial1        # ggplot object: print(), customise or export
+#'
+#' ## --- export: figure (png) and results workbook (xlsx) to disk ---
+#' ## plot_file writes the regression png; export = TRUE writes the
+#' ## workbook with the LC values, CI and the per-group details.
+#' ## export_file accepts an absolute path (the parent directory is
+#' ## created when missing); a relative path would be resolved against
+#' ## export_path (default getwd()). Writing the workbook takes a few
+#' ## seconds, so this last part is not run by default.
+#' \donttest{
+#' out4 <- lc50_analyze(concentration = conc, tested = n, dead = dead,
+#'                      name = "trial1", method = "all",
+#'                      plot = TRUE, plot_method = "probit",
+#'                      plot_file = file.path(tempdir(), "trial1.png"),
+#'                      export = TRUE,
+#'                      export_file = file.path(tempdir(),
+#'                                              "trial1_results.xlsx"))
+#' out4$plot_file        # path of the written png
+#' out4$export_file      # path of the written workbook (LC table + details)
+#' }
 lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
-                         dead = NULL, name = "bioassay", lc = 0.5,
+                         dead = NULL, name = "bioassay", path = NULL, lc = 0.5,
                          method = "traditional", plot = FALSE,
                          plot_file = NULL, plot_width = 12,
                          plot_height = 8, plot_units = "cm",
@@ -90,8 +126,11 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
                          ci_level = 0.95, error_bar = TRUE,
                          move_thres = 0.5, lc_ci = TRUE, lc_p = TRUE,
                          lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
-                         lc_lab_dy = 0.1, lc_lab_lh = 1.05) {
+                         lc_lab_dy = 0.1, lc_lab_lh = 1.05,
+                         export = FALSE, export_path = NULL,
+                         export_file = NULL) {
   ## ---- 1) assemble the standardised data list ----
+  if (!is.null(path)) d <- lc50_read(path)
   lcd <- lc50_build(d, concentration, tested, dead, name = name)
 
   ## ---- 2) compute the LC estimates ----
@@ -142,7 +181,22 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
                   collapse = ", "))
   }
 
-  list(data = lcd, results = results, plot = plots, plot_file = plot_file_out)
+  export_file_out <- NULL
+  if (export) {
+    ep <- if (is.null(export_path)) getwd() else export_path
+    if (grepl("\\.(csv|xlsx)$", ep, ignore.case = TRUE))
+      warning("export_path looks like a file name (ends in .csv or .xlsx); ",
+              "it is used as the output FOLDER and the file is written inside ",
+              "it - did you mean export_file?", call. = FALSE)
+    if (!dir.exists(ep)) dir.create(ep, recursive = TRUE)
+    fn <- if (is.null(export_file)) sprintf("%s_results.xlsx", name)
+          else export_file
+    if (!grepl("\\.[A-Za-z0-9]+$", fn)) fn <- paste0(fn, ".xlsx")
+    export_file_out <- lc50_export(results, output_dir = ep, filename = fn)
+  }
+
+  list(data = lcd, results = results, plot = plots, plot_file = plot_file_out,
+       export_file = export_file_out)
 }
 
 # Internal: assemble the standardised LC data list from a data frame,

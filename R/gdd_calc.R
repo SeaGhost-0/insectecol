@@ -17,8 +17,18 @@
 #'
 #' @details Available models:
 #' \itemize{
-#'   \item \code{"linear"} (default): \eqn{V = (T - C)/K}. Analytic OLS;
-#'         the only model providing \eqn{K}.
+#'   \item \code{"linear"} (default): \eqn{V = (T - C)/K}. Fitted by
+#'         ordinary least squares in the direction
+#'         \eqn{T = C + K \cdot V}{T = C + K * V}, i.e. temperature
+#'         regressed on the developmental rate: \eqn{K} is the slope,
+#'         \eqn{C} the intercept, and the reported standard errors are
+#'         the OLS standard errors of that slope and intercept. This is
+#'         the classical effective-temperature-sum formulation
+#'         (\eqn{K = N (T - C)} with the duration \eqn{N = 1/V}). The
+#'         opposite direction (\eqn{V} regressed on \eqn{T}, then
+#'         \eqn{C = -a/b}, \eqn{K = 1/b}) gives slightly different
+#'         values whenever the points do not lie exactly on a line.
+#'         Only \code{"linear"} provides \eqn{K}.
 #'   \item \code{"logan"}: Logan-6 (Logan et al. 1976). Does NOT define
 #'         a lower threshold; gives \eqn{T_m} and \eqn{T_{opt}}.
 #'   \item \code{"lactin"}: Lactin et al. (1995). \eqn{\lambda < 0} lets

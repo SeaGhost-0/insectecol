@@ -103,27 +103,58 @@
 }
 
 # Solve the Euler-Lotka equation by bisection (originally
-# Intrinsicrate_of_increase)
+# Intrinsicrate_of_increase); the bracket is halved 60 times, which
+# locates the root to machine precision. The equation is
+# sum_a exp(-r * a) * l_a * m_a = 1 with the day index a running from 1
+# (equivalently exp(-r * (x + 1)) on the 0-based age x). This is the
+# same convention as 'TWOSEX-MSChart': its Euler-Lotka working table
+# f(-r,lx,mx) = l(x)*m(x)*exp(-r*(x+1)) was verified against the
+# bundled PtW example (Support/Example_0A output). The search interval
+# is widened automatically so that declining cohorts (R0 < 1, i.e.
+# r < 0) are handled as well; the exponent is capped to keep the
+# bisection free of Inf/NaN at the bracket ends. Returns NA (with a
+# warning) when the cohort produces no offspring or when reproduction
+# is confined to the first day (r not identifiable).
 .intrinsic_rate <- function(l_x, m_x) {
-  obj_fun <- function(r) {
-    sum_val <- 0
-    for (x in 0:(length(l_x) - 1)) {
-      sum_val <- sum_val + exp(-r * (x + 1)) * l_x[x + 1] * m_x[x + 1]
-    }
-    sum_val - 1
+  lm <- l_x * m_x
+  act <- lm > 0
+  if (!any(act)) {
+    warning("No offspring in the life table; r cannot be solved and NA is returned")
+    return(NA_real_)
   }
-  bisection_method <- function(func, a, b, tol = 1e-6, max_iter = 100) {
-    if (func(a) * func(b) >= 0) stop("The function values at both ends of the interval [a, b] must have opposite signs")
+  lm_a <- lm[act]
+  ages <- which(act)  # day index a, running from 1 (TWOSEX convention)
+  if (all(ages == 1)) {
+    warning("Reproduction occurs only on the first day; r is not identifiable and NA is returned")
+    return(NA_real_)
+  }
+  obj_fun <- function(r) {
+    sum(lm_a * exp(pmin(-r * ages, 700))) - 1
+  }
+  # Bisection on the interval width (not on |f|): the derivative of the
+  # Euler-Lotka left-hand side is of the order of the mean generation
+  # time, so a tolerance on |f| of 1e-6 leaves an error of about 1e-8 in
+  # r and ~1e-6 in T = log(R0)/r - enough to make T disagree with the
+  # reference value in its 6th decimal. Halving the bracket a fixed
+  # number of times locates the root to machine precision and keeps the
+  # result identical to the vectorised solver used by the bootstrap
+  # (.boot_solve_r), so the point estimate and the bootstrap "Original"
+  # column cannot drift apart.
+  bisection_method <- function(func, a, b, max_iter = 60L, ftol = 1e-6) {
+    fa <- func(a); fb <- func(b)
+    if (fa * fb >= 0) stop("The function values at both ends of the interval [a, b] must have opposite signs")
     for (i in 1:max_iter) {
       c <- (a + b) / 2
       fc <- func(c)
-      if (abs(fc) < tol) return(c)
-      if (func(a) * fc < 0) b <- c else a <- c
+      if (fa * fc < 0) { b <- c; fb <- fc } else { a <- c; fa <- fc }
     }
-    warning("Maximum number of iterations reached; a solution within the tolerance may not have been found")
-    (a + b) / 2
+    c <- (a + b) / 2
+    if (abs(func(c)) > ftol)
+      warning("Maximum number of iterations reached; a solution within the tolerance may not have been found")
+    c
   }
-  bisection_method(obj_fun, 0, 1)
+  bound <- abs(log(sum(lm_a))) + 3
+  bisection_method(obj_fun, -bound, bound)
 }
 
 # ==================== Indicator functions (one per indicator) ====================
@@ -378,11 +409,16 @@ calc_R0 <- function(lt, sxj = NULL, fxj = NULL) {
 #' Intrinsic Rate of Increase r
 #'
 #' The intrinsic rate of increase (instantaneous rate of natural
-#' increase): the positive root of the Euler-Lotka equation
-#' \code{sum over x of l_x * m_x * exp(-r * x) = 1}, where x runs over
-#' the age classes (days) starting at 1. The root is located with the
-#' bisection method on the interval [0, 1] (tolerance 1e-6, at most 100
-#' iterations).
+#' increase): the root of the Euler-Lotka equation
+#' \code{sum over a of l_a * m_a * exp(-r * a) = 1}, where the day
+#' index a runs from 1 (the same age-from-1 discounting as
+#' 'TWOSEX-MSChart'; on the 0-based age x displayed by 'TWOSEX-MSChart' the
+#' exponent is \code{r * (x + 1)}). The root is located with the
+#' bisection method on a bracket widened around the cohort,
+#' \code{[-(abs(log(R0)) + 3), abs(log(R0)) + 3]}; the bracket is
+#' halved 60 times, so the root is located to machine precision and
+#' declining cohorts (R0 < 1, i.e. r < 0) are handled as well. If the
+#' cohort produces no offspring, NA is returned with a warning.
 #'
 #' @param lt A \code{life_table} object returned by
 #'   \code{\link{lifeTable_read}}.
@@ -473,10 +509,10 @@ calc_T <- function(lt, R0 = NULL, r = NULL) {
 
 #' Life Expectancy e_x
 #'
-#' The life expectancy of the individuals that have reached age x,
-#' calculated as the cumulative sum of the age-specific survival rates
-#' from age x to the end of the life table,
-#' \code{e_x = sum over y >= x of l_y}.
+#' The life expectancy of the individuals that have reached age x:
+#' the expected number of further days lived by an individual of age
+#' x, \code{e_x = (sum over y >= x of l_y) / l_x}. Ages with
+#' \code{l_x = 0} (and the padding row after the last age) return 0.
 #'
 #' @param lt A \code{life_table} object returned by
 #'   \code{\link{lifeTable_read}}.
@@ -490,7 +526,7 @@ calc_T <- function(lt, R0 = NULL, r = NULL) {
 #'   of insect population ecology. \emph{Bulletin of the Institute of
 #'   Zoology, Academia Sinica} 24(2), 225-240.
 #'
-#' @seealso \code{\link{calc_lx}}
+#' @seealso \code{\link{calc_lx}}, \code{\link{calc_exj}}
 #' @keywords internal
 #' @export
 #' @examples
@@ -503,8 +539,121 @@ calc_ex <- function(lt, lx = NULL) {
   e_x <- data.frame("Age" = NA, "e_x" = NA)
   for (e in 1:(length(l_x) + 1)) {
     e_x[e, 1] <- e
-    e_x[e, 2] <- sum(replace(l_x[e:(length(l_x) + 1)],
-                             is.na(l_x[e:(length(l_x) + 1)]), 0))
+    vals <- replace(l_x[e:(length(l_x) + 1)],
+                    is.na(l_x[e:(length(l_x) + 1)]), 0)
+    denom <- l_x[e]
+    e_x[e, 2] <- if (!is.na(denom) && denom > 0) sum(vals) / denom else 0
   }
   e_x
+}
+
+#' Age-Stage Life Expectancy e_xj
+#'
+#' The life expectancy of an individual that has reached age \code{x}
+#' and is in stage \code{j}: the expected total number of further days
+#' lived by such an individual, computed exactly as the mean remaining
+#' lifespan of the cohort members that occupy age-stage cell (x, j).
+#' This is the exact value of the age-stage life expectancy defined by
+#' Chi and Su (2006) as
+#' \eqn{e_{xj} = \sum_{i \ge x} \sum_{y \ge j} s^{\prime}_{iy}}, where
+#' \eqn{s^{\prime}_{iy}} is the probability that an individual of age
+#' x and stage j survives to age i and stage y. Cells that no
+#' individual can occupy return 0.
+#'
+#' The raw individual records are used, so the result is exact. Note
+#' that when the s_xj matrix alone is used to evaluate the double sum
+#' (as done by matrix-based programs), small deviations can appear at
+#' ages where several stages are occupied simultaneously, because the
+#' within-cell flows cannot be recovered from s_xj; the values returned
+#' here do not have that ambiguity. In all other cells the two
+#' approaches coincide.
+#'
+#' @param lt A \code{life_table} object returned by
+#'   \code{\link{lifeTable_read}}.
+#'
+#' @return A data frame with the column \code{Age} followed by one
+#'   \code{e_xj} column per stage; one row per age class.
+#'
+#' @references Chi, H. and Su, J. Y. (2006) Age-stage, two-sex life
+#'   tables of \emph{Aphidius gifuensis} (Ashmead) (Hymenoptera:
+#'   Braconidae) and its host \emph{Myzus persicae} (Sulzer)
+#'   (Homoptera: Aphididae). \emph{Environmental Entomology} 35(1),
+#'   10-21.
+#'
+#' @seealso \code{\link{calc_ex}}, \code{\link{calc_sxj}}
+#' @export
+#' @examples
+#' f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
+#' lt <- lifeTable_read(f)
+#' head(calc_exj(lt))
+calc_exj <- function(lt) {
+  sc <- .calc_remaining_sums(lt$data, lt$n)
+  e_xj <- ifelse(sc$occ > 0, sc$rem / sc$occ, 0)
+  gp <- get_stage_names(lt)
+  if (length(gp) == ncol(e_xj)) {
+    colnames(e_xj) <- gp
+  } else {
+    warning("The number of stage names does not match the number of data columns; default column names are kept")
+  }
+  data.frame(Age = seq_len(nrow(e_xj)), e_xj, check.names = FALSE)
+}
+
+# Accumulate, for every age-stage cell, (a) the number of individuals
+# occupying it and (b) the sum of their remaining lifespans (total
+# lifespan minus current age). The per-individual layout is identical
+# to .calc_survival_counts so that occupancy matches the s_xj matrix.
+.calc_remaining_sums <- function(data, n) {
+  max_wide <- 1; max_length <- 1
+
+  for (i in 1:nrow(data)) {
+    row_char <- as.character(unlist(data[i, ]))
+    n_pos <- which(row_char == "F" | row_char == "M" | row_char == "N")
+    if (length(n_pos) == 0) next
+    n_pos <- n_pos[1]
+    sub_char <- row_char[1:n_pos]
+    te <- which(!is.na(sub_char) & sub_char != "" &
+                  sub_char != "F" & sub_char != "M" & sub_char != "N")
+    wide <- length(te)
+    if (max_wide < wide) max_wide = wide
+    num_values <- as.numeric(row_char[te[2:length(te)]])
+    length_val <- sum(num_values, na.rm = TRUE)
+    if (max_length < length_val) max_length = length_val
+  }
+
+  occ <- matrix(0, nrow = max_length, ncol = max_wide)
+  rem <- matrix(0, nrow = max_length, ncol = max_wide)
+
+  i <- 1
+  while (i <= nrow(data)) {
+    row_char <- as.character(unlist(data[i, ]))
+    n_pos <- which(row_char == "F" | row_char == "M" | row_char == "N")
+    if (length(n_pos) == 0) { i <- i + 1; next }
+    n_pos <- n_pos[1]
+    num_cols <- which(!is.na(data[i, 1:(n_pos - 1)]))
+    num_values <- as.numeric(row_char[num_cols[2:length(num_cols)]])
+    last_char <- row_char[n_pos]
+    life_len <- sum(num_values, na.rm = TRUE)
+
+    start_row <- 1; x <- 1
+    while (x <= length(num_values)) {
+      if (!is.na(num_values[x]) && num_values[x] != 0) {
+        end_row <- start_row + abs(num_values[x]) - 1
+        if (x == length(num_values)) {            # last column: assign by sex
+          if (last_char == "F")      col <- ncol(occ) - 1
+          else if (last_char == "M") col <- ncol(occ)
+          else                       col <- x
+        } else col <- x
+        if (end_row <= nrow(occ)) {
+          for (rr in start_row:end_row) {
+            occ[rr, col] <- occ[rr, col] + 1
+            rem[rr, col] <- rem[rr, col] + (life_len - rr + 1)
+          }
+        }
+        start_row <- end_row + 1
+      }
+      x <- x + 1
+    }
+    i <- i + 1
+  }
+  list(occ = occ, rem = rem)
 }

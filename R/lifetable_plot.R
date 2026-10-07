@@ -2,7 +2,7 @@
 #'
 #' Draws the age-stage survival rate s(x,j) of every developmental stage
 #' (including the female and male adults) against age in days, in the
-#' style of the classical TWOSEX-MSChart plots.
+#' style of the classical 'TWOSEX-MSChart' plots.
 #'
 #' @param lt A \code{life_table} object returned by
 #'   \code{\link{lifeTable_read}}.
@@ -14,8 +14,9 @@
 #'   scaling of the graphical elements (title, axis labels, legend), so
 #'   that the plot looks identical at 300 and 600 dpi.
 #' @param x_title Character; x axis title (default \code{"Age(days)"}).
-#' @param y_title Character; y axis title (default
-#'   \code{"Age-Stage Survival Rate(Sxj)"}).
+#' @param y_title Character or plotmath expression; y axis title
+#'   (default \code{expression("Age-Stage Survival Rate ("*italic(S)[italic(xj)]*")")},
+#'   i.e. S with an italic xj subscript).
 #' @param legend_labels Character vector; legend labels, one per stage
 #'   (immature stages plus \code{Female} and \code{Male}), e.g.
 #'   \code{c("Egg", "1st instar", "Pupa", "Female", "Male")}.
@@ -28,11 +29,13 @@
 #'   points. By default all text of the figure is in English; title,
 #'   axis titles and legend labels can be customised.
 #'
-#'   The text sizes are calibrated for being drawn while 'showtext' is
-#'   active at its default internal dpi (96); \code{\link{lifeTable_export}}
-#'   takes care of this when exporting. If you save the plot yourself,
-#'   switch 'showtext' on around the \code{\link[ggplot2]{ggsave}} call,
-#'   otherwise the text comes out about 300/96 times too large.
+#'   Text sizes are true typographic points and do not depend on the
+#'   resolution, so the figure can be saved with
+#'   \code{\link[ggplot2]{ggsave}} as it is. In a label that mixes the
+#'   two scripts, the Chinese characters are set in the system CJK font
+#'   (SimSun on Windows, Songti on macOS) while the digits, symbols and
+#'   Latin words next to them stay in Times New Roman; a label that is
+#'   entirely Chinese uses the CJK font for all of it.
 #'
 #' @return A ggplot object that can be customised further or saved with
 #'   \code{\link[ggplot2]{ggsave}}.
@@ -44,7 +47,7 @@
 #' p <- lifeTable_plot(lifeTable_read(f))
 lifeTable_plot <- function(lt, sxj = NULL, title = NULL,
                      x_title = "Age(days)",
-                     y_title = "Age-Stage Survival Rate(Sxj)",
+                     y_title = expression("Age-Stage Survival Rate ("*italic(S)[italic(xj)]*")"),
                      legend_labels = NULL, dpi = 300) {
   if (is.null(sxj)) sxj <- calc_sxj(lt)
   stage_names <- get_stage_names(lt)
@@ -99,11 +102,24 @@ lifeTable_plot <- function(lt, sxj = NULL, title = NULL,
   # showtext is deliberately NOT toggled here: building a ggplot neither
   # opens nor draws on a device, so it would have no effect at this point,
   # and disabling it on exit would silently switch off showtext state that
-  # is still needed when the plot is drawn later. showtext is enabled
-  # where the drawing actually happens, in lt_ggsave() (see
-  # lifetable_save.R) - as in the lc50 module, whose plot code contains
-  # no showtext calls either.
+  # is still needed when the plot is drawn later. The font state is set
+  # where the drawing happens, in pkg_ggsave().
+  ##
+  ## Two families: the serif font (Times New Roman) for everything, and a
+  ## CJK font for the labels that really contain Chinese. Only those
+  ## labels switch - the whole figure used to switch as soon as one
+  ## Chinese label appeared, which turned the tick labels, numbers and
+  ## symbols into the CJK font as well.
+  ##
+  ## Text sizes are true typographic points: they used to be nominal
+  ## sizes for 'showtext', which rendered them at 96/300 of their value,
+  ## hence the 96/300 below.
   font <- pkg_resolve_font("TNM")
+  cjk  <- pkg_resolve_cjk()
+  font_title  <- pkg_label_family(title, font, cjk)
+  font_x      <- pkg_label_family(x_title, font, cjk)
+  font_y      <- pkg_label_family(y_title, font, cjk)
+  font_legend <- pkg_label_family(legend_labels, font, cjk)
 
   # ===== Plot =====
   ggplot(filtered_data, aes(x = row_id, y = value, color = variable, shape = variable)) +
@@ -127,18 +143,22 @@ lifeTable_plot <- function(lt, sxj = NULL, title = NULL,
     theme(
       text = element_text(family = font),
       plot.title.position = "panel",
-      plot.title = element_text(hjust = 0.5, vjust = 2, size = 48 * (dpi / 300),
-                                face = "bold", margin = margin(b = 5)),
+      plot.title = element_text(hjust = 0.5, vjust = 2, size = 48 * (96 / 300),
+                                face = "bold", margin = margin(b = 5),
+                                family = font_title),
       plot.margin = margin(0.35, 2.5, 0.2, 0.2, "cm"),
       panel.background = element_rect(fill = "white"),
       panel.grid = element_blank(),
       axis.title.y = element_text(margin = margin(r = 10, l = 5),
-                                  lineheight = 0.45 * (300 / dpi)),
-      axis.title.x = element_text(margin = margin(t = 5), hjust = 0.5),
-      axis.title = element_text(size = 45 * (dpi / 300)),
+                                  lineheight = 0.45 * (300 / dpi),
+                                  family = font_y),
+      axis.title.x = element_text(margin = margin(t = 5), hjust = 0.5,
+                                  family = font_x),
+      axis.title = element_text(size = 45 * (96 / 300)),
       axis.text.x = element_text(margin = margin(t = 5)),
       axis.text.y = element_text(margin = margin(r = 5)),
-      axis.text = element_text(size = 38 * (dpi / 300), color = "black"),
+      axis.text = element_text(family = font,
+                               size = 38 * (96 / 300), color = "black"),
       axis.line = element_line(color = "black", linewidth = 0.65),
       axis.ticks = element_line(color = "black", linewidth = 0.65),
       axis.ticks.length = unit(0.2, "cm"),
@@ -146,7 +166,7 @@ lifeTable_plot <- function(lt, sxj = NULL, title = NULL,
       legend.key = element_rect(fill = "white"),
       legend.key.height = unit(0.5, "cm"),
       legend.key.width = unit(0.5, "cm"),
-      legend.text = element_text(size = 35 * (dpi / 300),
+      legend.text = element_text(size = 35 * (96 / 300), family = font_legend,
                                  margin = margin(l = 2.5), hjust = 0)
     )
 

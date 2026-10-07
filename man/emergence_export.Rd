@@ -24,10 +24,8 @@ when present) as CSV (UTF-8) or xlsx. The cumulative-development
 table behind the projection is written alongside by default.
 }
 \examples{
-\donttest{
 f <- system.file("extdata", "emergence_example.csv",
                  package = "insectecol")
 fit <- emergence_calc(emergence_read(f), survey_date = "2026-03-20")
 emergence_export(fit, tempfile(fileext = ".csv"))
-}
 }

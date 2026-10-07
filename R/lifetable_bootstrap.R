@@ -2,7 +2,7 @@
 # Bootstrap standard errors and paired bootstrap tests for the
 # age-stage, two-sex life table.
 #
-# The resampling scheme follows TWOSEX-MSChart (Chi & Liu 1985;
+# The resampling scheme follows 'TWOSEX-MSChart' (Chi & Liu 1985;
 # Chi 1988; see also Meyer et al. 1986 and Huang & Chi 2012):
 #   * the bootstrap unit is the COMPLETE RECORD of one individual
 #     (stage durations + adult days + sex + daily oviposition),
@@ -81,10 +81,12 @@
 # replicate); the equation is sum_a exp(-r * a) * B_a = N with age a
 # indexed from 1, which is algebraically identical to the
 # sum(exp(-r * (x + 1)) * l_x * m_x) = 1 solved by calc_r() because
-# l_x * m_x = B_x / N. The search interval is widened automatically
-# so that declining cohorts (R0 < 1, i.e. r < 0) are handled as well;
-# the exponent is capped to keep the bisection free of Inf/NaN at the
-# probe points. Replicates without any offspring return NA.
+# l_x * m_x = B_x / N (the same age-from-1 discounting as
+# 'TWOSEX-MSChart'). The search interval is widened automatically
+# so that declining cohorts (R0 < 1, i.e. r < 0) are
+# handled as well; the exponent is capped to keep the bisection free
+# of Inf/NaN at the probe points. Replicates without any offspring
+# return NA.
 .boot_solve_r <- function(Bx, N) {
   out <- rep(NA_real_, nrow(Bx))
   if (nrow(Bx) == 0L || ncol(Bx) == 0L) return(out)
@@ -96,7 +98,7 @@
   act <- colSums(Bxa) > 0
   if (!any(act)) return(out)
   Bxa <- Bxa[, act, drop = FALSE]
-  ages <- seq_len(ncol(Bx))[act]
+  ages <- seq_len(ncol(Bx))[act]  # day index a, running from 1
 
   bound <- abs(log(tot[pos] / N)) + 3
   lo <- -bound
@@ -254,7 +256,7 @@
 #'
 #' Estimates the standard errors and percentile confidence intervals
 #' of all scalar life table parameters with the bootstrap technique
-#' used by TWOSEX-MSChart: complete individual records (stage
+#' used by 'TWOSEX-MSChart': complete individual records (stage
 #' durations, adult days, sex and daily oviposition) are resampled
 #' with replacement \code{B} times, and every parameter is recomputed
 #' from each resampled cohort. Individuals that died before the adult
@@ -264,7 +266,7 @@
 #' @param lt A \code{life_table} object returned by
 #'   \code{\link{lifeTable_read}} or \code{\link{lifeTable_build}}.
 #' @param B Integer; number of bootstrap replicates. The published
-#'   TWOSEX-MSChart standard is \code{100000} (the default); smaller
+#'   'TWOSEX-MSChart' standard is \code{100000} (the default); smaller
 #'   values run faster but give rougher standard errors.
 #' @param seed Integer; seed for the random number generator. Set it
 #'   to make the results exactly reproducible; \code{NULL} (default)
@@ -360,7 +362,7 @@ lifeTable_bootstrap <- function(lt, B = 100000, seed = NULL,
 #' Paired Bootstrap Test Between Two Life Tables
 #'
 #' Compares the life table parameters of two cohorts with the paired
-#' bootstrap test used by TWOSEX-MSChart: both cohorts are resampled
+#' bootstrap test used by 'TWOSEX-MSChart': both cohorts are resampled
 #' independently \code{B} times, the differences
 #' \code{d = parameter(group 1) - parameter(group 2)} are formed
 #' replicate by replicate, and the 95 percent percentile interval of
@@ -373,7 +375,7 @@ lifeTable_bootstrap <- function(lt, B = 100000, seed = NULL,
 #'   two host plants) returned by \code{\link{lifeTable_read}} or
 #'   \code{\link{lifeTable_build}}.
 #' @param B Integer; number of bootstrap replicates per group
-#'   (default \code{100000}, the TWOSEX-MSChart standard).
+#'   (default \code{100000}, the 'TWOSEX-MSChart' standard).
 #' @param seed Integer; seed for the random number generator; the
 #'   session state is restored when the function exits.
 #' @param conf.level Numeric; confidence level of the intervals of

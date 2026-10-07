@@ -141,17 +141,29 @@ gdd_fit_nl <- function(T_, V_, model, start = NULL,
                    control = stats::nls.control(maxiter = maxiter,
                                                tol = 1e-8, warnOnly = TRUE)),
         ## nls convergence warnings are expected here: the attempt is
-        ## judged by its convergence flag below, so they are muffled
+        ## judged by its deviance below, so they are muffled
         warning = function(w) {
           if (grepl("Convergence failure", conditionMessage(w)))
             invokeRestart("muffleWarning")
         }),
       error = function(e) NULL)
-    if (!is.null(fit) && isTRUE(fit$convInfo$isConv))
-      ok[[length(ok) + 1L]] <- fit
+    if (is.null(fit)) next
+    dev <- tryCatch(stats::deviance(fit), error = function(e) Inf)
+    if (is.finite(dev)) ok[[length(ok) + 1L]] <- fit
   }
   if (!length(ok)) return(NULL)
+  ## Judge attempts by deviance, not by the formal convergence flag:
+  ## some models (e.g. Wang-7 on narrow temperature ranges) stop with
+  ## 'singular convergence' although the optimum is already reached,
+  ## and discarding such fits would make the model unusable. The
+  ## deviance-minimising attempt is returned; if it did not converge
+  ## formally the user is warned (standard errors may be unreliable).
   fit <- ok[[which.min(vapply(ok, stats::deviance, numeric(1)))]]
+  if (!isTRUE(fit$convInfo$isConv)) {
+    warning("The best nls attempt did not converge formally; the ",
+            "lowest-deviance solution is returned and its standard ",
+            "errors may be unreliable")
+  }
 
   n <- length(V_); k <- length(stats::coef(fit)); df <- n - k
   if (df < 1) return(NULL)
@@ -180,6 +192,24 @@ gdd_fit_nl <- function(T_, V_, model, start = NULL,
     lower = p_hat - tc * se_hat, upper = p_hat + tc * se_hat,
     row.names = NULL)
 
+  ## Parameters that ended up on the boundary of their search box: the
+  ## data do not identify them (typically the upper part of the curve,
+  ## which the observed temperatures never reach), so the corresponding
+  ## derived quantities are extrapolations rather than estimates.
+  ## The test is relative to the parameter's own magnitude: several
+  ## boxes are very wide (e.g. psi in [1e-8, 1e6]), and a tolerance
+  ## derived from the box width would flag every small parameter.
+  atb <- names(p_hat)
+  tol_b <- 1e-6 * pmax(1, abs(p_hat))
+  at_bound <- atb[abs(p_hat - sb$lower[atb]) <= tol_b |
+                  abs(p_hat - sb$upper[atb]) <= tol_b]
+  if (length(at_bound))
+    warning("Model '", model, "': parameter(s) ",
+            paste(at_bound, collapse = ", "),
+            " lie on the boundary of their search box; the data do not ",
+            "identify them and the derived optimum/threshold values are ",
+            "extrapolations.", call. = FALSE)
+
   der <- gdd_derive(model, p_hat, range(T_))
   ## C has a direct SE only when it is a model parameter itself
   se_C <- switch(model,
@@ -188,6 +218,7 @@ gdd_fit_nl <- function(T_, V_, model, start = NULL,
 
   list(model = model, label = gdd_model_label[[model]],
        n = n, k = k, df = df, params = p_hat, se = se_hat,
+       at_bound = if (length(at_bound)) at_bound else character(0),
        coef_table = ctab,
        C = der$C, se_C = se_C, ci_C = c(NA_real_, NA_real_),
        K = NA_real_, se_K = NA_real_, ci_K = c(NA_real_, NA_real_),
@@ -213,7 +244,16 @@ gdd_fit_all <- function(g, gname,
       f <- tryCatch(
         if (m == "linear")
           gdd_fit_linear(g$temp, g$rate, conf_level)
-        else gdd_fit_nl(g$temp, g$rate, m, start, conf_level, maxiter),
+        else withCallingHandlers(
+          gdd_fit_nl(g$temp, g$rate, m, start, conf_level, maxiter),
+          ## in model-comparison mode the convergence caveat and the
+          ## bound caveat are recorded in the table, not surfaced as
+          ## warnings
+          warning = function(w) {
+            if (grepl("did not converge formally", conditionMessage(w)) ||
+                grepl("boundary of their search box", conditionMessage(w)))
+              invokeRestart("muffleWarning")
+          }),
         error = function(e) NULL)
     }
     if (is.null(f)) {
@@ -224,10 +264,12 @@ gdd_fit_all <- function(g, gname,
         note = if (nrow(g) < need) "insufficient n" else "fit failed")
     } else {
       fits[[m]] <- f
+      note <- if (length(f$at_bound))
+        paste0("at bound: ", paste(f$at_bound, collapse = ", ")) else ""
       rows[[m]] <- data.frame(
         group = gname, model = m, n = f$n, converged = TRUE, k = f$k,
         R2 = f$r_squared, RMSE = f$rmse,
-        AIC = f$aic, AICc = f$aicc, BIC = f$bic, note = "")
+        AIC = f$aic, AICc = f$aicc, BIC = f$bic, note = note)
     }
   }
   tab <- do.call(rbind, rows)

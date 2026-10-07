@@ -24,8 +24,12 @@
 #' @seealso \code{\link{lc50_calculate}}, \code{\link{lc50_plot}}
 #' @export
 #' @examples
+#' \donttest{
+#' ## writes an xlsx workbook; that takes a few seconds, so it is not run
+#' ## by default (the example itself is what lc50_export() is for)
 #' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 #' lc50_export(lc50_calculate(lc50_read(f)), output_dir = tempdir())
+#' }
 lc50_export <- function(results, output_dir = NULL, filename = "LC50_results.xlsx") {
   if (is.null(output_dir)) {
     output_dir <- utils::choose.dir()
@@ -53,7 +57,10 @@ lc50_export <- function(results, output_dir = NULL, filename = "LC50_results.xls
     )))
     openxlsx::writeData(wb, sheet, param, startRow = nrow(ok[[1]]$prep) + 3)
   }
-  out <- file.path(output_dir, filename)
+  out <- if (.is_abs_path(filename)) filename
+         else file.path(output_dir, filename)
+  if (!dir.exists(dirname(out)))
+    dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
   openxlsx::saveWorkbook(wb, out, overwrite = TRUE)
   invisible(out)
 }

@@ -33,10 +33,13 @@ gdd_analyze(
   plot_xlab = NULL,
   plot_ylab = NULL,
   plot_family = NULL,
-  plot_width = 10.67,
-  plot_height = 6,
-  plot_units = c("in", "cm", "px"),
-  plot_res = 150,
+  plot_width = NULL,
+  plot_height = NULL,
+  plot_units = c("cm", "in", "px"),
+  plot_res = 300,
+  export = FALSE,
+  export_path = NULL,
+  export_file = NULL,
   ...
 )
 }
@@ -115,23 +118,39 @@ font fallback, i.e. SimSun on Chinese 'Windows').}
 
 \item{plot_width, plot_height}{Physical size of the exported figure
 in \code{plot_units} (only used when \code{plot_file} is
-supplied). Defaults \code{10.67} x \code{6} in reproduce the
-former 1600 x 900 px canvas at 150 dpi. Because the size is
-physical, the composition is identical at every resolution ---
-\code{plot_res} only adds pixels.}
+supplied). \code{NULL} (default, for both) picks a canvas that
+gives the axes a panel with a height:width ratio of about 3:4:
+12 x 10 cm for a single-panel figure, 15 x 12.2 cm when several
+groups are drawn. Because the size is physical, the composition is
+identical at every resolution --- \code{plot_res} only adds pixels.}
 
 \item{plot_units}{Unit of \code{plot_width} / \code{plot_height}:
-\code{"in"} (default), \code{"cm"} or \code{"px"}. Use
-\code{"in"} / \code{"cm"} for publication figures. With
+\code{"cm"} (default), \code{"in"} or \code{"px"}. Use
+\code{"cm"} / \code{"in"} for publication figures. With
 \code{"px"} the canvas is a fixed pixel count; the text size is
 compensated internally so that changing \code{plot_res} keeps the
-150-dpi composition (only the recorded dpi metadata changes).}
+300-dpi composition (only the recorded dpi metadata changes).}
 
-\item{plot_res}{Resolution (dpi) of the exported png, default 150.
+\item{plot_res}{Resolution (dpi) of the exported png, default 300.
 Higher values add pixels (sharper print) without changing the
-layout or the physical size. E.g. a journal requiring 300 dpi at
-8 cm width: \code{plot_units = "cm", plot_width = 8,
+layout or the physical size. E.g. an 8 cm-wide figure at journal
+quality: \code{plot_units = "cm", plot_width = 8,
 plot_res = 300}.}
+
+\item{export}{Logical; write the results document to disk?
+Default \code{FALSE}.}
+
+\item{export_path}{Output directory for the results document;
+created when missing. \code{NULL} (default) means
+\code{\link{getwd}}.}
+
+\item{export_file}{File name of the results document
+(\code{.xlsx} or \code{.csv}); \code{NULL} (default) means
+\code{gdd_results.xlsx}. Relative paths are resolved
+against \code{export_path}; absolute paths are used as-is. The
+parent directory is created when it does not exist. The written
+path is returned invisibly
+in the \code{export_file} component of the result.}
 
 \item{...}{Further arguments passed to \code{\link{gdd_calc}}
 (reserved for future model options; keeps user code forward
@@ -149,6 +168,8 @@ A list with components:
     print/summary/plot/predict S3 methods are available}
   \item{plot_file}{the png path when \code{plot_file} was supplied,
     otherwise \code{NULL}}
+  \item{export_file}{the results-document path when
+    \code{export = TRUE}, otherwise \code{NULL}}
 }
 \description{
 Non-interactive, fully parameter-driven entry point for the
@@ -191,11 +212,19 @@ out3 <- gdd_analyze(path = f, by = "stage")
 ## --- AICc model selection + png export + custom labels ---
 ## plot_title / plot_xlab / plot_ylab accept custom labels; Chinese
 ## labels are rendered through the device's font fallback
+## export = TRUE additionally writes the results workbook
+## (C, K, SE, CI and the model comparison table) as xlsx/csv;
+## export_file accepts an absolute path (the parent directory is
+## created when missing), so export_path is not needed here
 \donttest{
 out4 <- gdd_analyze(temp = d$temp, duration = d$duration, group = d$stage,
                     model = "auto", plot = TRUE,
-                    plot_file = tempfile(fileext = ".png"))
+                    plot_file = file.path(tempdir(), "gdd.png"),
+                    export = TRUE,
+                    export_file = file.path(tempdir(), "gdd_results.xlsx"))
 out4$fit$comparison       # full comparison table, best flag included
+out4$plot_file            # path of the written png
+out4$export_file          # path of the written workbook
 }
 }
 \seealso{

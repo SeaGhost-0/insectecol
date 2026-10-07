@@ -24,11 +24,9 @@
 #'   Default TRUE.
 #' @param ... Further arguments passed to \code{write.csv} (CSV mode).
 #' @examples
-#' \donttest{
 #' f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
 #' fit <- gdd_calc(gdd_read(f), by = "stage")
 #' gdd_export(fit, tempfile(fileext = ".csv"))
-#' }
 #' @export
 gdd_export <- function(x, file = "gdd_results.csv",
                        include_data = FALSE, include_coefs = FALSE,
@@ -92,36 +90,53 @@ gdd_export <- function(x, file = "gdd_results.csv",
 #'   options, see \code{\link{gdd_plot}}; \code{NULL} (default) keeps
 #'   the function defaults.
 #' @param width,height,units,res Physical size and resolution of the
-#'   png; the composition is identical at every resolution,
-#'   \code{res} only adds pixels (same semantics as in
-#'   \code{\link{gdd_analyze}}).
+#'   png. \code{NULL} (default, for both) picks a canvas that gives the
+#'   axes a panel with a height:width ratio of about 3:4: 12 x 10 cm for
+#'   a single-panel figure, 15 x 12.2 cm when several groups are drawn
+#'   (wider so that the statistics caption fits at a larger font). The
+#'   composition is identical at every resolution, \code{res} only adds
+#'   pixels (same semantics as in \code{\link{gdd_analyze}}).
 #' @param ... Further arguments passed to \code{\link{gdd_plot}}.
 #' @return Invisibly, \code{file}.
 #' @examples
-#' \donttest{
 #' f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
 #' fit <- gdd_calc(gdd_read(f), by = "stage")
 #' gdd_export_plot(fit, tempfile(fileext = ".png"),
 #'                 title = "Developmental rate vs temperature")
-#' }
 #' @export
 gdd_export_plot <- function(x, file = "gdd_plot.png", group = NULL,
                             show_C = TRUE, show_Topt = TRUE,
                             title = NULL, sub = NULL,
                             xlab = NULL, ylab = NULL, family = NULL,
-                            width = 10.67, height = 6,
-                            units = c("in", "cm", "px"), res = 150, ...) {
+                            width = NULL, height = NULL,
+                            units = c("cm", "in", "px"), res = 300, ...) {
   if (!inherits(x, "gdd"))
     stop("x must be a 'gdd' object returned by gdd_calc().", call. = FALSE)
   units <- match.arg(units)
+  ## default canvas: the panels (the axes region) come out at a
+  ## height:width ratio of about 3:4 --- 12 x 10 cm for a single-panel
+  ## figure, 15 x 12.2 cm when several groups are drawn (wider panels let
+  ## the statistics caption fit at a larger font)
+  if (is.null(width) || is.null(height)) {
+    ng_ <- length(if (is.null(group)) unique(as.character(x$data$group))
+                  else as.character(group))
+    wcm <- if (ng_ > 1) 15 else 12
+    hcm <- if (ng_ > 1) 12.2 else 10
+    if (is.null(width))
+      width <- switch(units, cm = wcm, `in` = wcm / 2.54,
+                      px = wcm / 2.54 * res)
+    if (is.null(height))
+      height <- switch(units, cm = hcm, `in` = hcm / 2.54,
+                       px = hcm / 2.54 * res)
+  }
   pargs <- list(x = x, group = group, show_C = show_C,
                 show_Topt = show_Topt, title = title, sub = sub, ...)
   if (!is.null(xlab))   pargs$xlab   <- xlab
   if (!is.null(ylab))   pargs$ylab   <- ylab
   if (!is.null(family)) pargs$family <- family
   ## text sizes scale with res on a fixed-pixel canvas; compensate for
-  ## units = "px" so that res keeps the 150-dpi composition
-  pps <- if (units == "px") 12 * 150 / res else 12
+  ## units = "px" so that res keeps the 300-dpi composition
+  pps <- if (units == "px") 12 * 300 / res else 12
   if (requireNamespace("ragg", quietly = TRUE))
     ragg::agg_png(file, width = width, height = height, units = units,
                   res = res, pointsize = pps)

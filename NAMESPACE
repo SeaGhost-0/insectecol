@@ -14,6 +14,7 @@ export(calc_N)
 export(calc_R0)
 export(calc_T)
 export(calc_ex)
+export(calc_exj)
 export(calc_fxj)
 export(calc_lambda)
 export(calc_lx)
@@ -64,36 +65,30 @@ import(scales)
 import(showtext)
 import(sysfonts)
 import(tidyr)
-importFrom(graphics,
-  abline,
-  arrows,
-  axis,
-  box,
-  grconvertX,
-  legend,
-  lines,
-  mtext,
-  par,
-  plot,
-  points,
-  rect,
-  strwidth,
-  text
-)
+importFrom(graphics,abline)
+importFrom(graphics,arrows)
+importFrom(graphics,axis)
+importFrom(graphics,box)
+importFrom(graphics,grconvertX)
+importFrom(graphics,legend)
+importFrom(graphics,lines)
+importFrom(graphics,mtext)
+importFrom(graphics,par)
+importFrom(graphics,plot)
+importFrom(graphics,points)
+importFrom(graphics,rect)
+importFrom(graphics,strwidth)
+importFrom(graphics,text)
 importFrom(grid,unit)
 importFrom(magrittr,"%>%")
-importFrom(openxlsx,
-  addWorksheet,
-  createWorkbook,
-  insertImage,
-  saveWorkbook,
-  writeData
-)
+importFrom(openxlsx,addWorksheet)
+importFrom(openxlsx,createWorkbook)
+importFrom(openxlsx,insertImage)
+importFrom(openxlsx,saveWorkbook)
+importFrom(openxlsx,writeData)
 importFrom(ragg,agg_tiff)
 importFrom(readr,guess_encoding)
 importFrom(showtext,showtext_auto)
-importFrom(stats,
-  quantile,
-  sd
-)
+importFrom(stats,quantile)
+importFrom(stats,sd)
 importFrom(utils,read.csv)

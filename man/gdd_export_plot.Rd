@@ -15,10 +15,10 @@ gdd_export_plot(
   xlab = NULL,
   ylab = NULL,
   family = NULL,
-  width = 10.67,
-  height = 6,
-  units = c("in", "cm", "px"),
-  res = 150,
+  width = NULL,
+  height = NULL,
+  units = c("cm", "in", "px"),
+  res = 300,
   ...
 )
 }
@@ -33,9 +33,12 @@ options, see \code{\link{gdd_plot}}; \code{NULL} (default) keeps
 the function defaults.}
 
 \item{width, height, units, res}{Physical size and resolution of the
-png; the composition is identical at every resolution,
-\code{res} only adds pixels (same semantics as in
-\code{\link{gdd_analyze}}).}
+png. \code{NULL} (default, for both) picks a canvas that gives the
+axes a panel with a height:width ratio of about 3:4: 12 x 10 cm for
+a single-panel figure, 15 x 12.2 cm when several groups are drawn
+(wider so that the statistics caption fits at a larger font). The
+composition is identical at every resolution, \code{res} only adds
+pixels (same semantics as in \code{\link{gdd_analyze}}).}
 
 \item{...}{Further arguments passed to \code{\link{gdd_plot}}.}
 }
@@ -51,10 +54,8 @@ existing fit at any time. All plot options of \code{\link{gdd_plot}}
 are supported.
 }
 \examples{
-\donttest{
 f <- system.file("extdata", "gdd_example.csv", package = "insectecol")
 fit <- gdd_calc(gdd_read(f), by = "stage")
 gdd_export_plot(fit, tempfile(fileext = ".png"),
                 title = "Developmental rate vs temperature")
-}
 }

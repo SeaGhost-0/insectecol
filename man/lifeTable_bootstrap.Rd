@@ -11,7 +11,7 @@ lifeTable_bootstrap(lt, B = 1e+05, seed = NULL, conf.level = 0.95)
 \code{\link{lifeTable_read}} or \code{\link{lifeTable_build}}.}
 
 \item{B}{Integer; number of bootstrap replicates. The published
-TWOSEX-MSChart standard is \code{100000} (the default); smaller
+'TWOSEX-MSChart' standard is \code{100000} (the default); smaller
 values run faster but give rougher standard errors.}
 
 \item{seed}{Integer; seed for the random number generator. Set it
@@ -33,7 +33,7 @@ An object of class \code{life_table_boot}: a list with
 \description{
 Estimates the standard errors and percentile confidence intervals
 of all scalar life table parameters with the bootstrap technique
-used by TWOSEX-MSChart: complete individual records (stage
+used by 'TWOSEX-MSChart': complete individual records (stage
 durations, adult days, sex and daily oviposition) are resampled
 with replacement \code{B} times, and every parameter is recomputed
 from each resampled cohort. Individuals that died before the adult

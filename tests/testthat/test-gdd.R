@@ -84,6 +84,36 @@ test_that("'auto' selects the generating model and skips over-parameterized ones
   expect_true(all(cmp$delta_AICc[cmp$best] == 0))
 })
 
+test_that("parameters stuck on the search-box boundary are reported", {
+  df <- gdd_read(system.file("extdata", "gdd_example.csv", package = "insectecol"))
+  expect_warning(fit <- gdd_calc(df, by = "stage", model = "lactin"),
+                 "boundary of their search box")
+  expect_true(all(fit$fits$Larva$at_bound %in% c("rho", "Tm")))
+  # 同一组数据上 Briere-1 的解在搜索盒内部：不应报边界
+  fb <- gdd_calc(df, by = "stage", model = "briere1")
+  expect_length(fb$fits$Egg$at_bound, 0)
+  # 模型比较模式把提示记进 note 列，不再抛警告
+  fa <- suppressWarnings(gdd_calc(df, by = "stage", model = "auto"))
+  expect_true(any(grepl("at bound", fa$comparison$note)))
+})
+
+test_that("gdd_daily: 三角法等于三角形几何面积，均值法等于 max(0, Tmean - C)", {
+  Tmin <- c(8, 10, 12); Tmax <- c(20, 22, 25); C <- 11
+  a <- gdd_daily(Tmin, Tmax, C = C, method = "avg")
+  expect_equal(a$daily, pmax(0, (Tmin + Tmax) / 2 - C))
+  t <- gdd_daily(Tmin, Tmax, C = C, method = "triangle")
+  expect_equal(t$daily,
+               ifelse(Tmin >= C, (Tmin + Tmax) / 2 - C,
+                      ifelse(Tmax <= C, 0, (Tmax - C)^2 / (2 * (Tmax - Tmin)))))
+  expect_equal(t$cumulative, cumsum(t$daily))
+  expect_equal(t$total, sum(t$daily))
+  # Tmin >= C 时三角法退化为均值法；Tmax <= C 时为 0
+  expect_equal(gdd_daily(c(12, 13), c(20, 22), C = 11, method = "triangle")$daily,
+               gdd_daily(c(12, 13), c(20, 22), C = 11, method = "avg")$daily)
+  expect_equal(gdd_daily(c(2, 3), c(8, 9), C = 11, method = "triangle")$daily,
+               c(0, 0))
+})
+
 test_that("gdd_compare returns the full comparison table", {
   set.seed(11)
   T <- seq(16, 30, by = 2)
@@ -150,4 +180,32 @@ test_that("gdd_export_plot writes a png", {
 
 test_that("gdd_export_plot validates its input", {
   expect_error(gdd_export_plot(list()), "'gdd'")
+})
+
+test_that("Wang-7 on a narrow temperature range now returns a fit (P3)", {
+  ## Noise-free Wang-7 curve that stops with 'singular convergence (7)'
+  ## although the optimum is reached (audit case, 2026-10-05)
+  Tg <- seq(14, 32, by = 2)
+  Vw <- 0.16 / (1 + exp(-6 + 0.2 * Tg)) *
+    (1 - exp(-0.3 * (Tg - 10))) * (1 - exp(-0.4 * (36 - Tg)))
+  fit <- suppressWarnings(
+    gdd_calc(data.frame(temp = Tg, duration = 1 / Vw), model = "wang"))
+  f <- fit$fits$Overall
+  expect_equal(f$model, "wang")
+  expect_true(is.finite(f$rss) && f$rss < 1e-5)   # optimum essentially reached
+  expect_true(is.finite(f$Topt))
+  ## curve-level recovery: max relative error < 1% (the parameters
+  ## themselves are ill-determined on this narrow range, hence the
+  ## singular convergence)
+  expect_true(max(abs(f$fitted - Vw) / Vw) < 0.01)
+})
+
+test_that("export_file 支持绝对路径（父目录不存在时自动创建）", {
+  d <- read.csv(system.file("extdata", "gdd_example.csv", package = "insectecol"))
+  tgt <- file.path(tempdir(), paste0("abs_gdd_", as.integer(Sys.time())),
+                   "sub", "gdd_out.csv")
+  o <- gdd_analyze(temp = d$temp, duration = d$duration, group = d$stage,
+                   export = TRUE, export_file = tgt)
+  expect_true(file.exists(o$export_file))
+  expect_equal(normalizePath(o$export_file), normalizePath(tgt))
 })

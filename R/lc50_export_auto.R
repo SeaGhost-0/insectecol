@@ -68,10 +68,14 @@ lc50_auto_stem <- function(nm, lc, method, suffix) {
 #'   export, \code{\link{lc50_export}} for a custom output location
 #' @export
 #' @examples
+#' \donttest{
+#' ## writes an xlsx workbook; that takes a few seconds, so it is not run
+#' ## by default
 #' f <- system.file("extdata", "lc50_example.csv", package = "insectecol")
 #' tmp <- file.path(tempdir(), "lc50_example.csv")
 #' file.copy(f, tmp, overwrite = TRUE)
 #' lc50_export_auto(tmp)                    # -> <tempdir>/bioassay.xlsx
+#' }
 lc50_export_auto <- function(path = NULL, lc = 0.5, method = "traditional",
                           suffix = NULL) {
   info <- lc50_auto_files(path)
@@ -206,11 +210,7 @@ lc50_export_plot_auto <- function(path = NULL, lc = 0.5,
                 format(signif(est, 4), trim = TRUE), basename(out)))
     plots[[nm]] <- gp
     written <- c(written, out)
-    if (preview) {
-      showtext::showtext_auto(enable = TRUE)
-      print(gp)
-      showtext::showtext_auto(enable = FALSE)
-    }
+    if (preview) pkg_print(gp)
   }
   message(sprintf("Done: %d figure(s)%s in %s", length(written),
               if (skipped > 0) sprintf(", %d csv skipped", skipped) else "",

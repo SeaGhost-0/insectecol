@@ -40,7 +40,7 @@ with the bootstrap results and the summary workbook \code{all.xlsx}
 gains one \code{_SE} column per population parameter.}
 
 \item{B}{Integer; number of bootstrap replicates per file (only
-used when \code{bootstrap = TRUE}). The TWOSEX-MSChart standard
+used when \code{bootstrap = TRUE}). The 'TWOSEX-MSChart' standard
 is \code{100000} (the default).}
 
 \item{seed}{Integer; base seed of the bootstrap random number
@@ -64,8 +64,13 @@ fail (e.g. because of data errors) are skipped and reported at the end
 without interrupting the remaining files.
 }
 \examples{
+\donttest{
+## reads the example file, bootstraps it and writes an xlsx workbook
+## plus a figure; that takes well over 5 seconds, so it is not run by
+## default
 f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")
 lifeTable_calculate(f, output_path = file.path(tempdir(), "insectecol-demo"))
+}
 }
 \seealso{
 \code{\link{lifeTable_read}}, \code{\link{lifeTable_calculate_all}},

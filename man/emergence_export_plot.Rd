@@ -51,11 +51,9 @@ time. All plot options of \code{\link{plot.emergence}} are
 supported.
 }
 \examples{
-\donttest{
 f <- system.file("extdata", "emergence_example.csv",
                  package = "insectecol")
 fit <- emergence_calc(emergence_read(f), survey_date = "2026-03-20",
                       pre_ovip = 3, egg_days = 10)
 emergence_export_plot(fit, tempfile(fileext = ".png"))
-}
 }

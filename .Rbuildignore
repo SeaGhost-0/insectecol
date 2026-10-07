@@ -6,3 +6,4 @@
 ^\.Rproj\.user$
 ^\.github$
 ^insectecol\.Rproj$
+tests/testthat/Rplots.pdf

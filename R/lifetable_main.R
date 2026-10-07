@@ -216,12 +216,12 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #'   be left \code{NULL}.
 #' @param bootstrap Logical; whether to estimate the standard errors and
 #'   percentile confidence intervals of all scalar parameters with the
-#'   bootstrap technique of TWOSEX-MSChart via
+#'   bootstrap technique of 'TWOSEX-MSChart' via
 #'   \code{\link{lifeTable_bootstrap}} (default \code{FALSE}). The
 #'   result is attached as \code{results$boot} and is exported by
 #'   \code{\link{lifeTable_export}} as an extra worksheet.
 #' @param B Integer; number of bootstrap replicates (only used when
-#'   \code{bootstrap = TRUE}). The TWOSEX-MSChart standard is
+#'   \code{bootstrap = TRUE}). The 'TWOSEX-MSChart' standard is
 #'   \code{100000} (the default).
 #' @param seed Integer; seed of the bootstrap random number generator
 #'   (only used when \code{bootstrap = TRUE}); \code{NULL} uses the
@@ -237,8 +237,10 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #'   resolution of the exported png (only used when \code{plot_file} is
 #'   supplied); defaults 12 x 8 cm at 300 dpi.
 #' @param title Character; plot title. \code{NULL} = \code{file_name}.
-#' @param x_title,y_title Character; axis titles. Defaults
-#'   \code{"Age(days)"} and \code{"Age-Stage Survival Rate(Sxj)"}.
+#' @param x_title,y_title Character or plotmath expression; axis
+#'   titles. Defaults \code{"Age(days)"} and
+#'   \code{expression("Age-Stage Survival Rate ("*italic(S)[italic(xj)]*")")}
+#'   (S with an italic xj subscript).
 #' @param legend_labels Character vector; legend labels, one per stage
 #'   (immature stages + Female + Male), e.g.
 #'   \code{c("Egg", "1st instar", "Pupa", "Female", "Male")}.
@@ -246,15 +248,30 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #'   (\code{Egg, 1st instar, 2nd instar, ..., Female, Male}).
 #' @param dpi Numeric; resolution used for scaling the text of the plot
 #'   (default 300).
+#' @param export Logical; write the results workbook to disk?
+#'   Default \code{FALSE}.
+#' @param export_path Output directory for the results workbook;
+#'   created when missing. \code{NULL} (default) means
+#'   \code{\link{getwd}}.
+#' @param export_file File name of the results workbook;
+#'   \code{NULL} (default) means \code{<file_name>_results.xlsx}.
+#'   Relative paths are resolved against \code{export_path}; absolute
+#'   paths are used as-is. The parent directory is created when it
+#'   does not exist. The
+#'   written path is returned invisibly in the \code{export_file}
+#'   component of the result.
+#' @param path Path to a csv file; read with \code{\link{lifeTable_read}}
+#'   and used instead of \code{lt}/\code{stages}.
 #'
 #' @return A list with components \code{lt} (the \code{life_table}
 #'   object), \code{results} (the list returned by
 #'   \code{\link{lifeTable_calculate_all}}; additionally containing
 #'   \code{boot}, the \code{\link{lifeTable_bootstrap}} result, when
 #'   \code{bootstrap = TRUE}), \code{plot} (the ggplot object when
-#'   \code{plot = TRUE}, otherwise \code{NULL}) and \code{plot_file}
+#'   \code{plot = TRUE}, otherwise \code{NULL}), \code{plot_file}
 #'   (the png path when \code{plot_file} was supplied, otherwise
-#'   \code{NULL}).
+#'   \code{NULL}) and \code{export_file} (the workbook path when
+#'   \code{export = TRUE}, otherwise \code{NULL}).
 #'
 #' @seealso \code{\link{lifeTable_build}},
 #'   \code{\link{lifeTable_calculate_all}}, \code{\link{lifeTable_bootstrap}},
@@ -313,22 +330,48 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #'                                            "Prepupa", "Pupa",
 #'                                            "Female", "Male"))
 #' out3$plot               # print or further customise the ggplot object
-lifeTable_analyze <- function(lt = NULL, stages = NULL, adult_days = NULL,
+#'
+#' ## --- way 4: export the figure (png) and the results workbook (xlsx) ---
+#' ## plot_file writes the survival-curve png; export = TRUE writes the
+#' ## workbook with all result tables (Summary, s_xj, l_x, e_x, e_xj, ...).
+#' ## export_file accepts an absolute path (the parent directory is
+#' ## created when missing); a relative path would be resolved against
+#' ## export_path (default getwd()). Writing the workbook takes well over
+#' ## 5 seconds, so this last part is not run by default.
+#' \donttest{
+#' out4 <- lifeTable_analyze(stages = d[2:8], adult_days = d$Adult,
+#'                           sex = d$gender, oviposition = d[, 11:17],
+#'                           file_name = "Example - export",
+#'                           plot = TRUE,
+#'                           plot_file = file.path(tempdir(), "sxj.png"),
+#'                           export = TRUE,
+#'                           export_file = file.path(tempdir(),
+#'                                                   "life_table_results.xlsx"))
+#' out4$plot_file        # path of the written png
+#' out4$export_file      # path of the written workbook (all result tables)
+#' }
+lifeTable_analyze <- function(lt = NULL, path = NULL, stages = NULL,
+                              adult_days = NULL,
                               sex = NULL, oviposition = NULL, stage_names = NULL,
                               file_name = "life_table", check = TRUE,
                               fecundity = TRUE, bootstrap = FALSE,
                               B = 100000, seed = NULL, plot = FALSE, title = NULL,
                               x_title = "Age(days)",
-                              y_title = "Age-Stage Survival Rate(Sxj)",
+                              y_title = expression("Age-Stage Survival Rate ("*italic(S)[italic(xj)]*")"),
                               legend_labels = NULL, dpi = 300,
                               plot_file = NULL, plot_width = 12,
                               plot_height = 8, plot_units = "cm",
-                              plot_res = 300) {
+                              plot_res = 300,
+                              export = FALSE, export_path = NULL,
+                              export_file = NULL) {
   ## ---- 1) build the life_table object (or use the supplied one) ----
-  if (is.null(lt))
+  if (!is.null(path)) {
+    lt <- lifeTable_read(path)
+  } else if (is.null(lt)) {
     lt <- lifeTable_build(stages, adult_days, sex, oviposition,
                            stage_names = stage_names, file_name = file_name,
                            check = check)
+  }
 
   ## ---- 2) compute all parameters (fecundity-related skippable) ----
   results <- lifeTable_calculate_all(lt, fecundity = fecundity)
@@ -342,12 +385,28 @@ lifeTable_analyze <- function(lt = NULL, stages = NULL, adult_days = NULL,
                           dpi = dpi) else NULL
   plot_file_out <- NULL
   if (plot && !is.null(p) && !is.null(plot_file)) {
-    ggplot2::ggsave(plot_file, plot = p, width = plot_width,
+    ## pkg_plot_grob() splits labels that mix Latin and Chinese, so the
+    ## two scripts keep their own fonts
+    ggplot2::ggsave(plot_file, plot = pkg_plot_grob(p), width = plot_width,
                     height = plot_height, units = plot_units,
                     dpi = plot_res, bg = "white")
     plot_file_out <- plot_file
     message("Plot saved to: ", normalizePath(plot_file))
   }
 
-  list(lt = lt, results = results, plot = p, plot_file = plot_file_out)
+  export_file_out <- NULL
+  if (export) {
+    ep <- if (is.null(export_path)) getwd() else export_path
+    if (grepl("\\.(csv|xlsx)$", ep, ignore.case = TRUE))
+      warning("export_path looks like a file name (ends in .csv or .xlsx); ",
+              "it is used as the output FOLDER and the file is written inside ",
+              "it - did you mean export_file?", call. = FALSE)
+    fn <- if (is.null(export_file)) sprintf("%s_results.xlsx", lt$file_name)
+          else export_file
+    export_file_out <- lifeTable_export(lt, results, output_path = ep,
+                                        filename = fn)
+  }
+
+  list(lt = lt, results = results, plot = p, plot_file = plot_file_out,
+       export_file = export_file_out)
 }

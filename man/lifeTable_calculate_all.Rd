@@ -16,8 +16,8 @@ entirely; no oviposition data are then required.}
 }
 \value{
 A named list with elements \code{N}, \code{F}, \code{sxj},
-  \code{lx}, \code{fxj}, \code{mx}, \code{ex}, \code{R0}, \code{r},
-  \code{lambda} and \code{T}
+  \code{lx}, \code{fxj}, \code{mx}, \code{ex}, \code{exj}, \code{R0},
+  \code{r}, \code{lambda} and \code{T}
   With \code{fecundity = FALSE} (or when no oviposition data are
   supplied), \code{fxj} and \code{mx} are \code{NULL} and \code{F},
   \code{R0}, \code{r}, \code{lambda}, \code{T} are \code{NA_real_}.
@@ -30,8 +30,9 @@ parameters (R0, r, lambda, T).
 }
 \details{
 The intermediate results are passed on internally, so nothing
-  is computed twice: s_xj first, then l_x, F_xj and m_x, then r and
-  R0, and finally \code{lambda = exp(r)} and \code{T = log(R0) / r}.
+  is computed twice: s_xj first, then l_x and the life expectancies
+  (e_x and e_xj), then F_xj and m_x, then r and R0, and finally
+  \code{lambda = exp(r)} and \code{T = log(R0) / r}.
 }
 \examples{
 f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")

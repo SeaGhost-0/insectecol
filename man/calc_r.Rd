@@ -21,11 +21,16 @@ A single numeric value: the intrinsic rate of increase r
 }
 \description{
 The intrinsic rate of increase (instantaneous rate of natural
-increase): the positive root of the Euler-Lotka equation
-\code{sum over x of l_x * m_x * exp(-r * x) = 1}, where x runs over
-the age classes (days) starting at 1. The root is located with the
-bisection method on the interval [0, 1] (tolerance 1e-6, at most 100
-iterations).
+increase): the root of the Euler-Lotka equation
+\code{sum over a of l_a * m_a * exp(-r * a) = 1}, where the day
+index a runs from 1 (the same age-from-1 discounting as
+'TWOSEX-MSChart'; on the 0-based age x displayed by 'TWOSEX-MSChart' the
+exponent is \code{r * (x + 1)}). The root is located with the
+bisection method on a bracket widened around the cohort,
+\code{[-(abs(log(R0)) + 3), abs(log(R0)) + 3]}; the bracket is
+halved 60 times, so the root is located to machine precision and
+declining cohorts (R0 < 1, i.e. r < 0) are handled as well. If the
+cohort produces no offspring, NA is returned with a warning.
 }
 \examples{
 f <- system.file("extdata", "lifetable_example.csv", package = "insectecol")

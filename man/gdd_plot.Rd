@@ -12,8 +12,8 @@ gdd_plot(
   title = NULL,
   sub = NULL,
   family = "serif",
-  xlab = "Temperature T (deg C)",
-  ylab = "Developmental rate V (1/d)",
+  xlab = expression("Temperature " * italic(T) * " (" * degree * "C)"),
+  ylab = expression("Developmental rate " * italic(V) * " (d"^-1 * ")"),
   ...
 )
 }
@@ -55,7 +55,11 @@ English-Chinese titles work without extra settings. Set to
 such as \code{"Times New Roman"} (widely available on 'Windows';
 may be unknown to the \code{pdf()} device on other platforms).}
 
-\item{xlab, ylab}{Axis labels.}
+\item{xlab, ylab}{Axis labels; character or plotmath expression.
+Defaults \code{expression("Temperature " * italic(T) * " (" * degree *
+"C)")} and \code{expression("Developmental rate " * italic(V) *
+" (d"^-1 * ")")} --- the variable letters are italic, as journal
+style requires.}
 
 \item{...}{Further graphical parameters passed to \code{plot}.}
 }
