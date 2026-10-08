@@ -11,3 +11,5 @@ tests/testthat/Rplots.pdf
 ^emergence\.png$
 ^gdd\.png$
 ^lifeTable\.png$
+^cohort_results\.xlsx$
+^cohort_plot\.png$
