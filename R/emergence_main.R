@@ -3,8 +3,7 @@
 # Non-interactive, parameter-driven one-call API, mirroring
 # gdd_analyze() (degree days) and lc50_analyze() (bioassay):
 # obtain data -> cumulative development -> quantile dates ->
-# optional plot. Nothing is written to disk unless plot_file is
-# supplied.
+# optional plot, always written to disk.
 # ============================================================
 
 #' Predict the Emergence Period from a Stage-Structure Survey
@@ -21,11 +20,11 @@
 #' d$days}), a whole data frame, or a csv/xlsx file / folder read
 #' via \code{\link{emergence_read}} ---, (2) computes the
 #' cumulative development and the interpolated quantile dates via
-#' \code{\link{emergence_calc}} and (3) optionally draws the
-#' projection with \code{\link{plot.emergence}}. Larval hatch dates
+#' \code{\link{emergence_calc}} and (3) optionally writes the
+#' projection figure to disk (\code{plot_file}, or the working
+#' directory under a default name). Larval hatch dates
 #' are projected as well when \code{pre_ovip} / \code{egg_days}
-#' are supplied. Nothing is written to disk unless \code{plot_file}
-#' is supplied; tabular export is handled separately by
+#' are supplied. Tabular export is handled separately by
 #' \code{\link{emergence_export}}.
 #'
 #' @param stage,count,days User-supplied column vectors, e.g.
@@ -59,14 +58,19 @@
 #' @param encoding,header,pattern Reading options for
 #'   \code{\link{emergence_read}} (only used when \code{path} is
 #'   supplied).
-#' @param plot Logical; whether to draw the projection (default
-#'   \code{FALSE}).
-#' @param plot_file Optional png path: when supplied together with
-#'   \code{plot = TRUE} the figure is written to this file (same
-#'   machinery as \code{\link{emergence_export_plot}}); when
-#'   \code{NULL} the plot is drawn on the current device (fully
-#'   customisable afterwards by calling \code{plot()} on the
-#'   returned \code{fit}).
+#' @param plot Logical; whether to write the projection figure to
+#'   disk (default \code{FALSE}). With \code{plot = TRUE} the figure
+#'   is always written, to \code{plot_file} when supplied, otherwise
+#'   to the working directory under \code{emergence_plot.png}.
+#' @param plot_file Optional path of the exported figure, used with
+#'   \code{plot = TRUE}: a path with an extension is the file itself
+#'   (the format follows the extension --- png, tiff and jpeg are
+#'   supported), a path without one is a folder, created when
+#'   missing, and the figure is written inside it; \code{NULL}
+#'   (default) means the working directory under
+#'   \code{emergence_plot.png}. The path written is returned as
+#'   \code{plot_file}. The projection can still be drawn on screen
+#'   at any time with \code{plot(fit)} on the returned \code{fit}.
 #' @param show_hatch Plot option, see \code{\link{plot.emergence}}.
 #' @param plot_title,plot_sub,plot_xlab,plot_ylab Plot options
 #'   (title, subtitle, axis labels); \code{NULL} keeps the
@@ -76,8 +80,8 @@
 #'   Roman on 'Windows'; Chinese characters are rendered through the
 #'   device's font fallback, i.e. SimSun on Chinese 'Windows').
 #' @param plot_width,plot_height,plot_units,plot_res Physical size
-#'   and resolution of the exported png (only used when
-#'   \code{plot_file} is supplied), same semantics as in
+#'   and resolution of the exported figure (only used with
+#'   \code{plot = TRUE}), same semantics as in
 #'   \code{\link{gdd_analyze}}: the composition is identical at
 #'   every resolution, \code{plot_res} only adds pixels.
 #' @param ... Further arguments passed to \code{\link{emergence_calc}}
@@ -104,8 +108,8 @@
 #'     development), \code{fit$interpolate} (a closure for
 #'     arbitrary quantiles); print / summary / plot / predict S3
 #'     methods are available}
-#'   \item{plot_file}{the png path when \code{plot_file} was
-#'     supplied, otherwise \code{NULL}}
+#'   \item{plot_file}{the path of the written figure when
+#'     \code{plot = TRUE}, otherwise \code{NULL}}
 #'   \item{export_file}{the results-document path when
 #'     \code{export = TRUE}, otherwise \code{NULL}}
 #' @seealso \code{\link{emergence_read}},
@@ -229,24 +233,23 @@ emergence_analyze <- function(stage = NULL, count = NULL,
                         labels = labels, pre_ovip = pre_ovip,
                         egg_days = egg_days, ...)
 
-  ## ---- 3) optional plot (current device, or exported as png) ----
+  ## ---- 3) optional plot (always written to disk) ----
   plot_file_out <- NULL
   if (plot) {
-    pargs <- list(x = fit, show_hatch = show_hatch,
-                  title = plot_title, sub = plot_sub)
-    if (!is.null(plot_xlab))  pargs$xlab <- plot_xlab
-    if (!is.null(plot_ylab))  pargs$ylab <- plot_ylab
-    if (!is.null(plot_family)) pargs$family <- plot_family
-    if (is.null(plot_file)) {
-      do.call(plot, pargs)
-    } else {
-      plot_file_out <- emergence_export_plot(
-        fit, file = plot_file, show_hatch = show_hatch,
-        title = plot_title, sub = plot_sub, xlab = plot_xlab,
-        ylab = plot_ylab, family = plot_family,
-        width = plot_width, height = plot_height, units = plot_units,
-        res = plot_res)
-    }
+    ## plot = TRUE always writes the figure, the same contract as
+    ## lifeTable_analyze() and lc50_analyze(): to plot_file when
+    ## supplied (a path with an extension is the file itself, one
+    ## without an extension is a folder), otherwise to the working
+    ## directory under emergence_plot.png. The figure is exported by
+    ## emergence_export_plot() --- calling plot() here would hit the
+    ## local logical argument `plot`, which shadows graphics::plot()
+    pf <- pkg_plot_path(plot_file, "emergence_plot.png")
+    plot_file_out <- emergence_export_plot(
+      fit, file = pf, show_hatch = show_hatch,
+      title = plot_title, sub = plot_sub, xlab = plot_xlab,
+      ylab = plot_ylab, family = plot_family,
+      width = plot_width, height = plot_height, units = plot_units,
+      res = plot_res)
   }
 
   export_file_out <- NULL

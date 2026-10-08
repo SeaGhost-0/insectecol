@@ -148,3 +148,24 @@ test_that("emergence_export_plot writes a png", {
   expect_true(file.exists(f))
   expect_true(file.size(f) > 0)
 })
+
+test_that("plot = TRUE 不填 plot_file 时写到工作目录默认名；无扩展名视为文件夹", {
+  f <- system.file("extdata", "emergence_example.csv", package = "insectecol")
+  d <- emergence_read(f)   # handles the UTF-8 BOM
+  owd <- setwd(tempdir()); on.exit(setwd(owd), add = TRUE)
+  ## 默认输出：工作目录 emergence_plot.png
+  o1 <- emergence_analyze(data = d, survey_date = "2026-03-20", plot = TRUE)
+  expect_true(file.exists("emergence_plot.png"))
+  expect_equal(basename(o1$plot_file), "emergence_plot.png")
+  ## 无扩展名的 plot_file 视为文件夹（不存在时创建）
+  o2 <- emergence_analyze(data = d, survey_date = "2026-03-20", plot = TRUE,
+                          plot_file = "em_dir")
+  expect_true(dir.exists("em_dir"))
+  expect_true(file.exists(file.path("em_dir", "emergence_plot.png")))
+  ## tiff 扩展名写出真正的 TIFF（魔数 II/MM）
+  o3 <- emergence_analyze(data = d, survey_date = "2026-03-20", plot = TRUE,
+                          plot_file = "em_plot.tiff")
+  magic <- readBin("em_plot.tiff", "raw", n = 4)
+  expect_true(identical(magic[1:2], charToRaw("II")) ||
+                identical(magic[1:2], charToRaw("MM")))
+})

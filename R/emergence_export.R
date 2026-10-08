@@ -99,15 +99,22 @@ emergence_export_plot <- function(x, file = "emergence_plot.png",
   if (!is.null(xlab))   pargs$xlab   <- xlab
   if (!is.null(ylab))   pargs$ylab   <- ylab
   if (!is.null(family)) pargs$family <- family
+  ## the device follows the file extension: png/tiff/jpeg are written
+  ## by 'ragg' (per-glyph font fallback) when available, otherwise by
+  ## the matching grDevices device; any other extension falls back to
+  ## the png device (previous behaviour)
+  ext <- tolower(tools::file_ext(file))
+  dev <- pkg_fallback_device(ext)
+  if (is.null(dev))
+    dev <- switch(ext,
+                  tiff = , tif  = grDevices::tiff,
+                  jpeg = , jpg  = grDevices::jpeg,
+                  grDevices::png)
   ## text sizes scale with res on a fixed-pixel canvas; compensate for
   ## units = "px" so that res keeps the 150-dpi composition
   pps <- if (units == "px") 12 * 150 / res else 12
-  if (requireNamespace("ragg", quietly = TRUE))
-    ragg::agg_png(file, width = width, height = height, units = units,
-                  res = res, pointsize = pps)
-  else
-    grDevices::png(file, width = width, height = height, units = units,
-                   res = res, pointsize = pps)
+  dev(file, width = width, height = height, units = units,
+      res = res, pointsize = pps)
   tryCatch(do.call(plot, pargs),
            finally = while (!is.null(grDevices::dev.list()))
              grDevices::dev.off())

@@ -462,13 +462,17 @@ and xlsx files are read via `readxl`.
   other label. The percentage is then written `LC50` instead of with a
   subscript, because plotmath can only draw a whole expression with one
   font.
-- `plot = TRUE` in `lifeTable_analyze()` and `lc50_analyze()` now
+- `plot = TRUE` in `lifeTable_analyze()`, `lc50_analyze()` and
+  `emergence_analyze()` now
   always writes the figure: with no `plot_file` it goes to the working
-  directory under a default name (`<file_name>_plot.png`, or
-  `LC50_<name>.png`), and a `plot_file` without an extension is
+  directory under a default name (`<file_name>_plot.png`,
+  `LC50_<name>.png` or `emergence_plot.png`), and a `plot_file`
+  without an extension is
   treated as a folder - created when missing - with the figure written
   inside it. Previously the figure was only returned and `ggsave()`
   stopped on a folder path.
+- The emergence figure device follows the `plot_file` extension
+  (png/tiff/jpeg written by `ragg` when available).
 
 **Examples**
 
