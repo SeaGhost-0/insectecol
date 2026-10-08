@@ -16,7 +16,8 @@
                   sub_char != "F" & sub_char != "M" & sub_char != "N")
     wide <- length(te)
     if (max_wide < wide) max_wide = wide
-    num_values <- as.numeric(row_char[te[2:length(te)]])
+    te2 <- te[te > 1]  # skip the ID column by position
+    num_values <- as.numeric(row_char[te2])
     length_val <- sum(num_values, na.rm = TRUE)
     if (max_length < length_val) max_length = length_val
   }
@@ -28,8 +29,14 @@
     n_pos <- which(row_char == "F" | row_char == "M" | row_char == "N")
     if (length(n_pos) == 0) { i <- i + 1; next }
     n_pos <- n_pos[1]
+    ## the value's own data column decides the stage column: this keeps
+    ## the layout correct when an individual died before the adult stage
+    ## (trailing blanks, sexed F/M) and when a middle stage was skipped
+    ## (a blank cell with data in later columns), both of which
+    ## check_data() declares legal
     num_cols <- which(!is.na(data[i, 1:(n_pos - 1)]))
-    num_values <- as.numeric(row_char[num_cols[2:length(num_cols)]])
+    num_cols <- num_cols[num_cols > 1]        # skip the ID column by position
+    num_values <- as.numeric(row_char[num_cols])
     last_char <- row_char[n_pos]
 
     result_df <- data.frame(matrix(0, nrow = max_length, ncol = max_wide))
@@ -37,11 +44,11 @@
     while (x <= length(num_values)) {
       if (!is.na(num_values[x]) && num_values[x] != 0) {
         end_row <- start_row + abs(num_values[x]) - 1
-        if (x == length(num_values)) {            # last column: assign by sex
+        j <- num_cols[x]                      # the value's own data column
+        if (j == n_pos - 1 && last_char != "N") {   # adult duration: sex column
           if (last_char == "F")      col <- ncol(result_df) - 1
-          else if (last_char == "M") col <- ncol(result_df)
-          else                       col <- x
-        } else col <- x
+          else                       col <- ncol(result_df)
+        } else col <- j - 1                   # data column j -> stage column j-1
         if (end_row <= nrow(result_df)) result_df[start_row:end_row, col] <- 1
         start_row <- end_row + 1
       }
@@ -510,8 +517,9 @@ calc_T <- function(lt, R0 = NULL, r = NULL) {
 #' Life Expectancy e_x
 #'
 #' The life expectancy of the individuals that have reached age x:
-#' the expected number of further days lived by an individual of age
-#' x, \code{e_x = (sum over y >= x of l_y) / l_x}. Ages with
+#' the expected total number of days still to be lived by an individual
+#' of age x, counting the current day (the convention of Chi and Su),
+#' \code{e_x = (sum over y >= x of l_y) / l_x}. Ages with
 #' \code{l_x = 0} (and the padding row after the last age) return 0.
 #'
 #' @param lt A \code{life_table} object returned by
@@ -550,8 +558,9 @@ calc_ex <- function(lt, lx = NULL) {
 #' Age-Stage Life Expectancy e_xj
 #'
 #' The life expectancy of an individual that has reached age \code{x}
-#' and is in stage \code{j}: the expected total number of further days
-#' lived by such an individual, computed exactly as the mean remaining
+#' and is in stage \code{j}: the expected total number of days still to
+#' be lived by such an individual, counting the current day, computed
+#' exactly as the mean remaining
 #' lifespan of the cohort members that occupy age-stage cell (x, j).
 #' This is the exact value of the age-stage life expectancy defined by
 #' Chi and Su (2006) as
@@ -615,7 +624,8 @@ calc_exj <- function(lt) {
                   sub_char != "F" & sub_char != "M" & sub_char != "N")
     wide <- length(te)
     if (max_wide < wide) max_wide = wide
-    num_values <- as.numeric(row_char[te[2:length(te)]])
+    te2 <- te[te > 1]  # skip the ID column by position
+    num_values <- as.numeric(row_char[te2])
     length_val <- sum(num_values, na.rm = TRUE)
     if (max_length < length_val) max_length = length_val
   }
@@ -629,8 +639,11 @@ calc_exj <- function(lt) {
     n_pos <- which(row_char == "F" | row_char == "M" | row_char == "N")
     if (length(n_pos) == 0) { i <- i + 1; next }
     n_pos <- n_pos[1]
+    ## identical column logic to .calc_survival_counts: the value's own
+    ## data column decides the stage column (see the comment there)
     num_cols <- which(!is.na(data[i, 1:(n_pos - 1)]))
-    num_values <- as.numeric(row_char[num_cols[2:length(num_cols)]])
+    num_cols <- num_cols[num_cols > 1]        # skip the ID column by position
+    num_values <- as.numeric(row_char[num_cols])
     last_char <- row_char[n_pos]
     life_len <- sum(num_values, na.rm = TRUE)
 
@@ -638,11 +651,11 @@ calc_exj <- function(lt) {
     while (x <= length(num_values)) {
       if (!is.na(num_values[x]) && num_values[x] != 0) {
         end_row <- start_row + abs(num_values[x]) - 1
-        if (x == length(num_values)) {            # last column: assign by sex
+        j <- num_cols[x]                      # the value's own data column
+        if (j == n_pos - 1 && last_char != "N") {   # adult duration: sex column
           if (last_char == "F")      col <- ncol(occ) - 1
-          else if (last_char == "M") col <- ncol(occ)
-          else                       col <- x
-        } else col <- x
+          else                       col <- ncol(occ)
+        } else col <- j - 1                   # data column j -> stage column j-1
         if (end_row <= nrow(occ)) {
           for (rr in start_row:end_row) {
             occ[rr, col] <- occ[rr, col] + 1

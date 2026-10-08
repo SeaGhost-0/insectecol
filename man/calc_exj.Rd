@@ -16,8 +16,9 @@ A data frame with the column \code{Age} followed by one
 }
 \description{
 The life expectancy of an individual that has reached age \code{x}
-and is in stage \code{j}: the expected total number of further days
-lived by such an individual, computed exactly as the mean remaining
+and is in stage \code{j}: the expected total number of days still to
+be lived by such an individual, counting the current day, computed
+exactly as the mean remaining
 lifespan of the cohort members that occupy age-stage cell (x, j).
 This is the exact value of the age-stage life expectancy defined by
 Chi and Su (2006) as

@@ -207,3 +207,23 @@ test_that("export_file 支持绝对路径（父目录不存在时自动创建）
   expect_true(file.exists(o$export_file))
   expect_equal(normalizePath(o$export_file), normalizePath(tgt))
 })
+
+test_that("幼期死亡（成虫期留空、性别标 F/M）的个体不进入成虫列", {
+  ## check_data 允许"尾部留空"（早期死亡）；此时最后一个非空值是幼期
+  ## 时长，必须留在它自己的阶段列，绝不能按"最后一个值 = 成虫期"被
+  ## 计入 Female/Male 列（TWOSEX-MSChart 按列位置归列）
+  d <- data.frame(
+    ID = 1:3,
+    Egg = c(3, 3, 2), Larva = c(2, 2, 3), Pupa = c(4, 4, 4),
+    Adult = c(10, NA, 8),
+    gender = c("F", "F", "M"))
+  lt <- lifeTable_build(d[2:4], adult_days = d$Adult, sex = d$gender,
+                        stage_names = c("Egg", "Larva", "Pupa"), check = FALSE)
+  sxj <- calc_sxj(lt)
+  ## 第 2 行是蛹期死亡（6-9 日龄）；唯一真正的雌虫 10 日龄才羽化
+  expect_equal(sum(sxj[1:9, "Female"]), 0)
+  expect_equal(sum(sxj[6:9, "Pupa"]), 4)   # 三行在 6-9 日龄都是蛹
+  ## e_xj 与 s_xj 同布局，成虫列同样不得被污染
+  exj <- calc_exj(lt)
+  expect_equal(sum(exj[1:9, "Female"]), 0)
+})

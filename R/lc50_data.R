@@ -126,7 +126,11 @@ lc50_prepare <- function(d) {
   keep <- p > 0 & p < 1
   dropped <- sum(!keep)
   if (dropped > 0) {
-    message(sprintf("Dropped %d concentration group(s) with a corrected mortality of 0%% or 100%%", dropped))
+    if (any(p < 0))
+      message(sprintf("%d concentration group(s) with a corrected mortality below 0%% (raw mortality below the control) were dropped",
+                      sum(p < 0)))
+    message(sprintf("Dropped %d concentration group(s) with a corrected mortality of 0%% or 100%% (or outside (0, 1))",
+                    dropped))
   }
   d1 <- d1[keep, , drop = FALSE]
   p_raw <- p_raw[keep]

@@ -71,12 +71,12 @@ then anchored to the survey date. When \code{pre_ovip} /
 as well (eclosion + pre-oviposition period + egg duration).
 }
 \details{
-The quantiles that fall outside the surveyed cumulative
-  range are linearly extrapolated from the outermost segment and
-  flagged with a warning: a quantile below the share of the most
-  developed stage has partially eclosed before the survey, a
-  quantile above the share of the least developed stage indicates
-  that younger stages were missed. Stages are sorted by days to
+The cumulative shares are renormalised to sum to 1, so a
+  quantile below the share of the most developed stage is the only
+  possible extrapolation: it lies at or below that share, has
+  partially eclosed before the survey, and is linearly extrapolated
+  backwards from the outermost segment with a warning. Stages are
+  sorted by days to
   eclosion, so the row order of the input is irrelevant; a stage
   sharing its days value with another stage is allowed but flagged
   (check the stage durations).

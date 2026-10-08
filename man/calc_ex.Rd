@@ -19,8 +19,9 @@ A data frame with the columns \code{Age} and \code{e_x}; one
 }
 \description{
 The life expectancy of the individuals that have reached age x:
-the expected number of further days lived by an individual of age
-x, \code{e_x = (sum over y >= x of l_y) / l_x}. Ages with
+the expected total number of days still to be lived by an individual
+of age x, counting the current day (the convention of Chi and Su),
+\code{e_x = (sum over y >= x of l_y) / l_x}. Ages with
 \code{l_x = 0} (and the padding row after the last age) return 0.
 }
 \examples{

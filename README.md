@@ -478,6 +478,12 @@ and xlsx files are read via `readxl`.
 
 **Internal changes**
 
+- Column assignment in the age-stage life table now follows the
+  position of each duration in the data row instead of assuming that
+  the last entry is the adult stage: individuals that died before the
+  adult stage and were sexed F/M (trailing blanks) and rows with a
+  skipped stage (blank cell, data in later columns) are no longer
+  misplaced into the Female/Male columns of s_xj and e_xj.
 - Figures exported by `lifeTable_analyze(plot = TRUE)` are now written
   through the same device machinery as the other functions: bitmaps go
   through `ragg` (per-glyph font fallback) and vector formats through
