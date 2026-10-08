@@ -227,3 +227,29 @@ test_that("幼期死亡（成虫期留空、性别标 F/M）的个体不进入�
   exj <- calc_exj(lt)
   expect_equal(sum(exj[1:9, "Female"]), 0)
 })
+
+test_that("e_x / e_xj 的期望寿命恒等式（缺失除以 l_x / s_xj 的回归门禁）", {
+  ## e_x = T_x / l_x，e_xj 由同一 T_x 按虫态格分摊：
+  ## 早期版本输出的是裸 T_x（未除），所有 e_x 严重偏大 —— 这里锁死这个关系
+  lt <- lifeTable_read(example_csv)
+  res <- lifeTable_calculate_all(lt)
+  d <- lt$data
+  dur <- apply(as.matrix(d[, 2:(lt$n - 1)]), c(1, 2), as.numeric)
+  dur[is.na(dur)] <- 0
+  lifespan <- rowSums(dur)                       # 每头活了多少天
+  l_ind <- vapply(seq_len(max(lifespan)), function(x) mean(lifespan >= x), numeric(1))
+  T_ind <- rev(cumsum(rev(l_ind)))               # T_x = sum(l_y, y >= x)
+
+  m <- min(nrow(res$ex), length(l_ind))
+  ex <- res$ex$e_x; lx <- res$lx$l_x
+  expect_equal(unname(ex[seq_len(m)]), T_ind[seq_len(m)] / l_ind[seq_len(m)],
+               tolerance = 1e-9)
+  expect_equal(unname(ex[1] * lx[1]), sum(l_ind), tolerance = 1e-9)
+  expect_equal(unname(ex[1]), mean(lifespan), tolerance = 1e-9)  # e_1 = 平均寿命
+
+  ## 同一 T_x 也等于各虫态格 e_xj * s_xj 之和
+  sxj <- apply(as.matrix(res$sxj), c(1, 2), as.numeric)
+  exj <- apply(as.matrix(res$exj[, -1]), c(1, 2), as.numeric)
+  expect_equal(rowSums(exj * sxj), T_ind[seq_len(nrow(sxj))], tolerance = 1e-9)
+  expect_equal(rowSums(sxj), unname(lx[seq_len(nrow(sxj))]), tolerance = 1e-10)
+})
