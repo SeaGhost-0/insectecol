@@ -127,7 +127,7 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
                          ci_level = 0.95, error_bar = TRUE,
                          move_thres = 0.5, lc_ci = TRUE, lc_p = TRUE,
                          lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
-                         lc_lab_dy = 0.1, lc_lab_lh = 1.05,
+                         lc_lab_dy = 0.1, lc_lab_lh = 1.5,
                          export = FALSE, export_path = NULL,
                          export_file = NULL) {
   ## ---- 1) assemble the standardised data list ----

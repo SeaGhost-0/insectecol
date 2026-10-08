@@ -69,8 +69,11 @@
 #'   grows the block away from the crossing and never onto the dashed
 #'   reference line. Larger moves the whole block further from it.
 #' @param lc_lab_lh Line spacing of the LC label in multiples of its
-#'   font size (1 = single spacing, default 1.05). The lines are spaced
-#'   evenly whichever of them \code{lc_ci} / \code{lc_p} switches on.
+#'   font size (1 = single spacing, default 1.5). The lines are spaced
+#'   evenly whichever of them \code{lc_ci} / \code{lc_p} switches on;
+#'   the plotmath lines carry sub- and superscripts (\code{LC}[50],
+#'   \code{chi^2}) that reach further below and above their baseline
+#'   than plain text, which is why the default is loose.
 #' @param method Character scalar, which methods to plot: a subset of
 #'   \code{c("traditional", "improved", "probit")}, or \code{"all"}
 #'   (default) for every method present in the results object.
@@ -118,7 +121,7 @@ lc50_plot <- function(results, save_path = NULL, font = "TNM",
                       error_bar = TRUE, move_thres = 0.5, method = NULL,
                       lc_ci = TRUE, lc_p = TRUE,
                       lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
-                      lc_lab_dy = 0.1, lc_lab_lh = 1.05) {
+                      lc_lab_dy = 0.1, lc_lab_lh = 1.5) {
   font <- pkg_resolve_font(font)
   ## No CJK switch over the whole figure: it used to be re-labelled with
   ## a Chinese font as soon as one label contained Chinese, which also
@@ -438,7 +441,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
                           error_bar = TRUE, move_thres = 0.5,
                           method = NULL, lc_ci = TRUE, lc_p = TRUE,
                           lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
-                          lc_lab_dy = 0.1, lc_lab_lh = 1.05,
+                          lc_lab_dy = 0.1, lc_lab_lh = 1.5,
                           fig_w = 7, fig_h = 6) {
 
   # Restrict to the requested method(s); NULL keeps everything and the
@@ -802,7 +805,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   tick_len_y <- 0.025 * (x_hi - x_lo)
   tick_len_ratio <- 0.6
   tick_lab_gap <- 0.15
-  axis_text_col <- "grey10"
+  axis_text_col <- "black"
   axis_lab_size <- 0.8 * base_size / ggplot2::.pt
 
   # ggplot2 draws layers in the order they are added (later = on top), so
@@ -987,6 +990,7 @@ lc50_plot_theme <- function(base_size, font, font_x = font, font_y = font) {
       axis.line = element_line(linewidth = 0.65),
       axis.ticks = element_blank(),
       axis.ticks.length = unit(10.2, "cm"),
+      axis.text = element_text(color = "black"),
       axis.title = element_text(size = lc50_pt(48)),
       axis.text.x = element_text(margin = margin(t = 10)),
       axis.text.y = element_text(margin = margin(r = 10)),
