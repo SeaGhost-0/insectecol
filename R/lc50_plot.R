@@ -69,11 +69,13 @@
 #'   grows the block away from the crossing and never onto the dashed
 #'   reference line. Larger moves the whole block further from it.
 #' @param lc_lab_lh Line spacing of the LC label in multiples of its
-#'   font size (1 = single spacing, default 1.5). The lines are spaced
-#'   evenly whichever of them \code{lc_ci} / \code{lc_p} switches on;
-#'   the plotmath lines carry sub- and superscripts (\code{LC}[50],
-#'   \code{chi^2}) that reach further below and above their baseline
-#'   than plain text, which is why the default is loose.
+#'   font size (1 = single spacing, default 1.05). The lines are spaced
+#'   evenly whichever of them \code{lc_ci} / \code{lc_p} switches on.
+#'   The spacing is measured in the nominal size the label was
+#'   calibrated at (25 pt on the 300-dpi reference device), while the
+#'   text itself renders at a third of that, so the default leaves a
+#'   visibly loose line pitch that also clears the sub- and superscripts
+#'   of the plotmath lines (\code{LC}[50], \code{chi^2}).
 #' @param method Character scalar, which methods to plot: a subset of
 #'   \code{c("traditional", "improved", "probit")}, or \code{"all"}
 #'   (default) for every method present in the results object.
@@ -121,7 +123,7 @@ lc50_plot <- function(results, save_path = NULL, font = "TNM",
                       error_bar = TRUE, move_thres = 0.5, method = NULL,
                       lc_ci = TRUE, lc_p = TRUE,
                       lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
-                      lc_lab_dy = 0.1, lc_lab_lh = 1.5) {
+                      lc_lab_dy = 0.1, lc_lab_lh = 1.05) {
   font <- pkg_resolve_font(font)
   ## No CJK switch over the whole figure: it used to be re-labelled with
   ## a Chinese font as soon as one label contained Chinese, which also
@@ -441,7 +443,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
                           error_bar = TRUE, move_thres = 0.5,
                           method = NULL, lc_ci = TRUE, lc_p = TRUE,
                           lc_lab_gap = 0.35, lc_lab_gap_right = 0.1,
-                          lc_lab_dy = 0.1, lc_lab_lh = 1.5,
+                          lc_lab_dy = 0.1, lc_lab_lh = 1.05,
                           fig_w = 7, fig_h = 6) {
 
   # Restrict to the requested method(s); NULL keeps everything and the
@@ -607,14 +609,20 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   x_mid <- (x_lo + x_hi) / 2
   x_lab_w <- x_hi - x_lo
   bar_w <- 0.018 * (x_hi - x_lo)   # cap width of the error bars
-  lc_lab_pt <- lc50_pt(25)           # LC label font, in points on the device
+  lc_lab_nom <- 25                   # LC label font, nominal pt on the
+                                     # 300-dpi reference device
+  lc_lab_pt <- lc50_pt(lc_lab_nom)   # the same font, true points
   lc_lab_size <- lc_lab_pt / ggplot2::.pt
   n_lab <- length(lc_lines)
   # The block is centred on x_lab, so half of the widest line must stay
   # inside the panel; that half width is measured in em from the advance
-  # table and converted to x-axis units with the panel width in inches
+  # table and converted to x-axis units with the panel width in inches.
+  # The geometry (block width, line pitch) keeps working in the nominal
+  # size, as it always has: the text renders at lc50_pt(lc_lab_nom),
+  # so the nominal-based block runs wider and looser than the glyphs -
+  # the generous margins the label block was laid out for
   lab_w_em <- max(lc50_line_width(lc_lines, serif = serif_font))
-  lab_w_panel <- lab_w_em * (lc_lab_pt / 72) / lc50_panel_width(fig_w, fig_h)
+  lab_w_panel <- lab_w_em * (lc_lab_nom / 72) / lc50_panel_width(fig_w, fig_h)
   lab_half <- lab_w_panel * x_lab_w / 2
   x_lab <- if (lc_x < x_mid) {
     min(lc_x + lc_lab_gap_right * 2 * lab_half + lab_half, x_hi - lab_half)
@@ -641,7 +649,7 @@ lc50_plot_one <- function(nm, one, font, unit = NULL,
   # (the crossing sits too close to the panel edge), it falls back to
   # the other side; if it fits nowhere, it is clamped into the panel.
   lab_panel_in <- lc50_panel_height(fig_w, fig_h)
-  lab_pitch <- lc_lab_lh * (lc_lab_pt / 72) / lab_panel_in
+  lab_pitch <- lc_lab_lh * (lc_lab_nom / 72) / lab_panel_in
   lab_h <- (n_lab - 1) * lab_pitch   # top line to bottom line
   lab_gap <- lc_lab_dy               # clearance to the crossing
   lab_right <- lc_x < x_mid          # label sits right of the line
