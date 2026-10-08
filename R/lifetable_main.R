@@ -199,17 +199,23 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #' data frame (e.g. after \code{data <- read.csv("XXX.csv")}, or accepts
 #' a ready \code{life_table} object), (2) computes the life table
 #' parameters and (3) optionally draws the age-stage survival curves
-#' with customisable title, axis titles and legend labels, optionally
-#' written to disk as png when \code{plot_file} is supplied. Tabular
+#' with customisable title, axis titles and legend labels, written to
+#' disk as png (to the working directory when \code{plot_file} is not
+#' given). Tabular
 #' export is handled separately by \code{\link{lifeTable_export}}.
 #'
 #' @param lt Optional; an existing \code{life_table} object (from
 #'   \code{\link{lifeTable_read}} or \code{\link{lifeTable_build}}).
 #'   If \code{NULL} (default), the object is built from \code{stages},
 #'   \code{adult_days}, \code{sex} and \code{oviposition}.
-#' @param stages,adult_days,sex,oviposition,stage_names,file_name,check
+#' @param stages,adult_days,sex,oviposition,stage_names,check
 #'   Passed to \code{\link{lifeTable_build}} (ignored when \code{lt} is
 #'   supplied).
+#' @param file_name Character; data set name, used as the default plot
+#'   title and as the base name of the exported png and xlsx.
+#'   \code{NULL} (default) keeps the name stored in the life table
+#'   object (for a csv input, the file name without extension); an
+#'   explicit value overrides it in every input mode.
 #' @param fecundity Logical; whether to compute the reproduction-related
 #'   parameters (F, F_xj, m_x, R0, r, lambda, T). \code{FALSE} skips them
 #'   entirely - \code{oviposition} is then not required at all and may
@@ -229,10 +235,12 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #' @param plot Logical; whether to draw the age-stage survival curves
 #'   (default \code{FALSE}). The returned ggplot object can be printed,
 #'   customised further or passed to \code{\link{lifeTable_export}}.
-#' @param plot_file Optional png path: when supplied together with
-#'   \code{plot = TRUE} the figure is written to this file (via
-#'   \code{\link[ggplot2]{ggsave}}); when \code{NULL} the plot is only
-#'   returned.
+#' @param plot_file Optional png path, used with \code{plot = TRUE}. A
+#'   path with an extension is the file itself; a path without one is a
+#'   folder, created when missing, and the figure is written inside it;
+#'   \code{NULL} (default) writes the figure to the working directory
+#'   under \code{<file_name>_plot.png}. The path written is returned as
+#'   \code{plot_file}.
 #' @param plot_width,plot_height,plot_units,plot_res Physical size and
 #'   resolution of the exported png (only used when \code{plot_file} is
 #'   supplied); defaults 12 x 8 cm at 300 dpi.
@@ -269,7 +277,7 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #'   \code{boot}, the \code{\link{lifeTable_bootstrap}} result, when
 #'   \code{bootstrap = TRUE}), \code{plot} (the ggplot object when
 #'   \code{plot = TRUE}, otherwise \code{NULL}), \code{plot_file}
-#'   (the png path when \code{plot_file} was supplied, otherwise
+#'   (the png path when \code{plot = TRUE}, otherwise
 #'   \code{NULL}) and \code{export_file} (the workbook path when
 #'   \code{export = TRUE}, otherwise \code{NULL}).
 #'
@@ -326,10 +334,12 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #'                          stage_names = c("Egg", "L1", "L2", "L3", "L4",
 #'                                          "Prepupa", "Pupa"),
 #'                          plot = TRUE,
+#'                          plot_file = file.path(tempdir(), "sxj.png"),
 #'                          legend_labels = c("Egg", "L1", "L2", "L3", "L4",
 #'                                            "Prepupa", "Pupa",
 #'                                            "Female", "Male"))
 #' out3$plot               # print or further customise the ggplot object
+#' out3$plot_file          # the png that was written
 #'
 #' ## --- way 4: export the figure (png) and the results workbook (xlsx) ---
 #' ## plot_file writes the survival-curve png; export = TRUE writes the
@@ -353,7 +363,7 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 lifeTable_analyze <- function(lt = NULL, path = NULL, stages = NULL,
                               adult_days = NULL,
                               sex = NULL, oviposition = NULL, stage_names = NULL,
-                              file_name = "life_table", check = TRUE,
+                              file_name = NULL, check = TRUE,
                               fecundity = TRUE, bootstrap = FALSE,
                               B = 100000, seed = NULL, plot = FALSE, title = NULL,
                               x_title = "Age(days)",
@@ -369,9 +379,14 @@ lifeTable_analyze <- function(lt = NULL, path = NULL, stages = NULL,
     lt <- lifeTable_read(path)
   } else if (is.null(lt)) {
     lt <- lifeTable_build(stages, adult_days, sex, oviposition,
-                           stage_names = stage_names, file_name = file_name,
+                           stage_names = stage_names,
+                           file_name = if (is.null(file_name)) "life_table"
+                                       else file_name,
                            check = check)
   }
+  ## an explicitly given file_name wins over the name derived from the
+  ## input file or stored in a supplied life_table object
+  if (!is.null(file_name)) lt$file_name <- file_name
 
   ## ---- 2) compute all parameters (fecundity-related skippable) ----
   results <- lifeTable_calculate_all(lt, fecundity = fecundity)
@@ -384,14 +399,19 @@ lifeTable_analyze <- function(lt = NULL, path = NULL, stages = NULL,
                           y_title = y_title, legend_labels = legend_labels,
                           dpi = dpi) else NULL
   plot_file_out <- NULL
-  if (plot && !is.null(p) && !is.null(plot_file)) {
+  if (plot && !is.null(p)) {
+    ## no plot_file: the working directory, under <file_name>_plot.png;
+    ## a plot_file without an extension is a folder (created when
+    ## missing), one with an extension is the file itself - ggsave()
+    ## would stop on a folder path
+    pf <- pkg_plot_path(plot_file, sprintf("%s_plot.png", lt$file_name))
     ## pkg_plot_grob() splits labels that mix Latin and Chinese, so the
     ## two scripts keep their own fonts
-    ggplot2::ggsave(plot_file, plot = pkg_plot_grob(p), width = plot_width,
+    ggplot2::ggsave(pf, plot = pkg_plot_grob(p), width = plot_width,
                     height = plot_height, units = plot_units,
                     dpi = plot_res, bg = "white")
-    plot_file_out <- plot_file
-    message("Plot saved to: ", normalizePath(plot_file))
+    plot_file_out <- pf
+    message("Plot saved to: ", normalizePath(pf))
   }
 
   export_file_out <- NULL

@@ -29,13 +29,12 @@
 #'   \code{"improved"}, \code{"probit"} or \code{"all"}, passed to
 #'   \code{\link{lc50_calculate}}.
 #' @param plot Logical; whether to build the regression plot(s)
-#'   (default \code{FALSE}). The ggplot objects are only returned -
-#'   not printed, not saved unless \code{plot_file} is supplied.
-#' @param plot_file Optional png path: when supplied together with
-#'   \code{plot = TRUE} the figure(s) are written as png via
-#'   \code{\link{lc50_export_plot}} - one data set gives exactly this
-#'   file, several data sets write \code{LC50_<name>.png} files into
-#'   this folder. When \code{NULL} nothing is written.
+#'   (default \code{FALSE}). The ggplot objects are also returned.
+#' @param plot_file Optional png path, used with \code{plot = TRUE}. A
+#'   path with an extension is the file itself (one data set); a path
+#'   without one is a folder, created when missing, and the figure(s)
+#'   are written inside it as \code{LC50_<name>.png};
+#'   \code{NULL} (default) writes them to the working directory.
 #' @param plot_width,plot_height,plot_units,plot_res Physical size and
 #'   resolution of the exported png (only used when \code{plot_file} is
 #'   supplied); defaults 12 x 8 cm at 300 dpi.
@@ -67,8 +66,8 @@
 #'   returned by \code{\link{lc50_calculate}}: \code{results},
 #'   \code{summary_df}, \code{lc}), \code{plot} (a named list of
 #'   ggplot objects when \code{plot = TRUE}, otherwise \code{NULL})
-#'   and \code{plot_file} (the written path(s) when \code{plot_file}
-#'   was supplied, otherwise \code{NULL}) and \code{export_file} (the
+#'   and \code{plot_file} (the written path(s) when \code{plot = TRUE},
+#'   otherwise \code{NULL}) and \code{export_file} (the
 #'   workbook path when \code{export = TRUE}, otherwise
 #'   \code{NULL}).
 #'
@@ -94,8 +93,10 @@
 #' out3 <- lc50_analyze(concentration = conc, tested = n, dead = dead,
 #'                      name = "trial1", lc = 0.9, method = "improved",
 #'                      plot = TRUE, plot_method = "improved",
-#'                      shape = "linear")
+#'                      shape = "linear",
+#'                      plot_file = file.path(tempdir(), "LC50_linear.png"))
 #' out3$plot$trial1        # ggplot object: print(), customise or export
+#' out3$plot_file          # the png that was written
 #'
 #' ## --- export: figure (png) and results workbook (xlsx) to disk ---
 #' ## plot_file writes the regression png; export = TRUE writes the
@@ -160,17 +161,21 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
 
   ## ---- 4) optional png export ----
   plot_file_out <- NULL
-  if (plot && !is.null(plot_file) && length(plots)) {
-    if (length(plots) == 1L && grepl("\\.[[:alnum:]]+$", plot_file)) {
-      plot_file_out <- lc50_export_plot(plots[[1]], path = plot_file,
+  ## no plot_file: the working directory (the figures keep their default
+  ## names); a path without an extension is a folder, one with an
+  ## extension is the file itself
+  pf <- if (is.null(plot_file)) getwd() else plot_file
+  if (plot && length(plots)) {
+    if (length(plots) == 1L && grepl("\\.[[:alnum:]]+$", pf)) {
+      plot_file_out <- lc50_export_plot(plots[[1]], path = pf,
                                         device = "png", width = plot_width,
                                         height = plot_height,
                                         dpi = plot_res, units = plot_units,
                                         bg = "white")
     } else {
-      if (!dir.exists(plot_file))
-        dir.create(plot_file, recursive = TRUE, showWarnings = FALSE)
-      plot_file_out <- lc50_export_plot(plots, path = plot_file,
+      if (!dir.exists(pf))
+        dir.create(pf, recursive = TRUE, showWarnings = FALSE)
+      plot_file_out <- lc50_export_plot(plots, path = pf,
                                         device = "png", width = plot_width,
                                         height = plot_height,
                                         dpi = plot_res, units = plot_units,

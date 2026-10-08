@@ -12,7 +12,7 @@ lifeTable_analyze(
   sex = NULL,
   oviposition = NULL,
   stage_names = NULL,
-  file_name = "life_table",
+  file_name = NULL,
   check = TRUE,
   fecundity = TRUE,
   bootstrap = FALSE,
@@ -43,8 +43,14 @@ If \code{NULL} (default), the object is built from \code{stages},
 \item{path}{Path to a csv file; read with \code{\link{lifeTable_read}}
 and used instead of \code{lt}/\code{stages}.}
 
-\item{stages, adult_days, sex, oviposition, stage_names, file_name, check}{Passed to \code{\link{lifeTable_build}} (ignored when \code{lt} is
+\item{stages, adult_days, sex, oviposition, stage_names, check}{Passed to \code{\link{lifeTable_build}} (ignored when \code{lt} is
 supplied).}
+
+\item{file_name}{Character; data set name, used as the default plot
+title and as the base name of the exported png and xlsx.
+\code{NULL} (default) keeps the name stored in the life table
+object (for a csv input, the file name without extension); an
+explicit value overrides it in every input mode.}
 
 \item{fecundity}{Logical; whether to compute the reproduction-related
 parameters (F, F_xj, m_x, R0, r, lambda, T). \code{FALSE} skips them
@@ -86,10 +92,12 @@ titles. Defaults \code{"Age(days)"} and
 \item{dpi}{Numeric; resolution used for scaling the text of the plot
 (default 300).}
 
-\item{plot_file}{Optional png path: when supplied together with
-\code{plot = TRUE} the figure is written to this file (via
-\code{\link[ggplot2]{ggsave}}); when \code{NULL} the plot is only
-returned.}
+\item{plot_file}{Optional png path, used with \code{plot = TRUE}. A
+path with an extension is the file itself; a path without one is a
+folder, created when missing, and the figure is written inside it;
+\code{NULL} (default) writes the figure to the working directory
+under \code{<file_name>_plot.png}. The path written is returned as
+\code{plot_file}.}
 
 \item{plot_width, plot_height, plot_units, plot_res}{Physical size and
 resolution of the exported png (only used when \code{plot_file} is
@@ -117,7 +125,7 @@ A list with components \code{lt} (the \code{life_table}
   \code{boot}, the \code{\link{lifeTable_bootstrap}} result, when
   \code{bootstrap = TRUE}), \code{plot} (the ggplot object when
   \code{plot = TRUE}, otherwise \code{NULL}), \code{plot_file}
-  (the png path when \code{plot_file} was supplied, otherwise
+  (the png path when \code{plot = TRUE}, otherwise
   \code{NULL}) and \code{export_file} (the workbook path when
   \code{export = TRUE}, otherwise \code{NULL}).
 }
@@ -128,8 +136,9 @@ age-stage, two-sex life table analysis. It (1) builds a
 data frame (e.g. after \code{data <- read.csv("XXX.csv")}, or accepts
 a ready \code{life_table} object), (2) computes the life table
 parameters and (3) optionally draws the age-stage survival curves
-with customisable title, axis titles and legend labels, optionally
-written to disk as png when \code{plot_file} is supplied. Tabular
+with customisable title, axis titles and legend labels, written to
+disk as png (to the working directory when \code{plot_file} is not
+given). Tabular
 export is handled separately by \code{\link{lifeTable_export}}.
 }
 \examples{
@@ -181,10 +190,12 @@ out3 <- lifeTable_analyze(stages = d3[, c("Egg", "1st instar", "2nd instar",
                          stage_names = c("Egg", "L1", "L2", "L3", "L4",
                                          "Prepupa", "Pupa"),
                          plot = TRUE,
+                         plot_file = file.path(tempdir(), "sxj.png"),
                          legend_labels = c("Egg", "L1", "L2", "L3", "L4",
                                            "Prepupa", "Pupa",
                                            "Female", "Male"))
 out3$plot               # print or further customise the ggplot object
+out3$plot_file          # the png that was written
 
 ## --- way 4: export the figure (png) and the results workbook (xlsx) ---
 ## plot_file writes the survival-curve png; export = TRUE writes the
