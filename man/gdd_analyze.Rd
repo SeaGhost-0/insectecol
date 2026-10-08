@@ -89,14 +89,20 @@ temperature triggers a targeted warning.}
 \item{encoding, header, temp_from_file, pattern}{Reading options for
 \code{\link{gdd_read}} (only used when \code{path} is supplied).}
 
-\item{plot}{Logical; whether to draw the fitted curves (default
-\code{FALSE}).}
+\item{plot}{Logical; whether to write the fitted-curves figure to
+disk (default \code{FALSE}). With \code{plot = TRUE} the figure
+is always written, to \code{plot_file} when supplied, otherwise
+to the working directory under \code{gdd_plot.png}.}
 
-\item{plot_file}{Optional png path: when supplied together with
-\code{plot = TRUE} the figure is written to this file (same
-machinery as \code{\link{gdd_export_plot}}); when \code{NULL} the
-plot is drawn on the current device (fully customisable afterwards
-by calling \code{\link{gdd_plot}} on the returned \code{fit}).}
+\item{plot_file}{Optional path of the exported figure, used with
+\code{plot = TRUE}: a path with an extension is the file itself
+(the format follows the extension --- png, tiff and jpeg are
+supported), a path without one is a folder, created when
+missing, and the figure is written inside it; \code{NULL}
+(default) means the working directory under \code{gdd_plot.png}.
+The path written is returned as \code{plot_file}. The curves can
+still be drawn on screen at any time with \code{plot(fit)} on
+the returned \code{fit}.}
 
 \item{plot_group, show_C, show_Topt}{Plot options, see
 \code{\link{gdd_plot}}.}
@@ -117,8 +123,7 @@ on 'Windows'; Chinese characters are rendered through the device's
 font fallback, i.e. SimSun on Chinese 'Windows').}
 
 \item{plot_width, plot_height}{Physical size of the exported figure
-in \code{plot_units} (only used when \code{plot_file} is
-supplied). \code{NULL} (default, for both) picks a canvas that
+in \code{plot_units} (only used with \code{plot = TRUE}). \code{NULL} (default, for both) picks a canvas that
 gives the axes a panel with a height:width ratio of about 3:4:
 12 x 10 cm for a single-panel figure, 15 x 12.2 cm when several
 groups are drawn. Because the size is physical, the composition is
@@ -131,7 +136,7 @@ identical at every resolution --- \code{plot_res} only adds pixels.}
 compensated internally so that changing \code{plot_res} keeps the
 300-dpi composition (only the recorded dpi metadata changes).}
 
-\item{plot_res}{Resolution (dpi) of the exported png, default 300.
+\item{plot_res}{Resolution (dpi) of the exported figure, default 300.
 Higher values add pixels (sharper print) without changing the
 layout or the physical size. E.g. an 8 cm-wide figure at journal
 quality: \code{plot_units = "cm", plot_width = 8,
@@ -166,8 +171,8 @@ A list with components:
     \code{fit$fits} (per-group details incl. coefficient tables),
     \code{fit$comparison} (model comparison, \code{"auto"} mode);
     print/summary/plot/predict S3 methods are available}
-  \item{plot_file}{the png path when \code{plot_file} was supplied,
-    otherwise \code{NULL}}
+  \item{plot_file}{the path of the written figure when
+    \code{plot = TRUE}, otherwise \code{NULL}}
   \item{export_file}{the results-document path when
     \code{export = TRUE}, otherwise \code{NULL}}
 }
@@ -185,8 +190,10 @@ by AICc with \code{model = "auto"} --- via \code{\link{gdd_calc}}
 and (4) optionally draws the fitted curves with
 \code{\link{gdd_plot}} --- in the same style as the
 \code{\link{lc50_analyze}} entry point of the bioassay module.
-Nothing is written to disk unless \code{plot_file} is supplied;
-tabular export is handled separately by \code{\link{gdd_export}}.
+With \code{plot = TRUE} the fitted-curves figure is always written
+to disk (\code{plot_file}, or the working directory under a default
+name); tabular export is handled separately by
+\code{\link{gdd_export}}.
 }
 \examples{
 f <- system.file("extdata", "gdd_example.csv", package = "insectecol")

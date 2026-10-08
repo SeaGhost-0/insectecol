@@ -3,7 +3,8 @@
 # Non-interactive, parameter-driven one-call API, mirroring
 # lifeTable_analyze() (life table) and lc50_auto() (bioassay):
 # obtain data -> optional prefit check -> fit -> optional plot.
-# Nothing is written to disk unless plot_file is supplied.
+# With plot = TRUE the figure is always written to disk (working
+# directory default when plot_file is NULL).
 # ============================================================
 
 #' Analyse Temperature-Dependent Development (Main Function)
@@ -21,8 +22,10 @@
 #' and (4) optionally draws the fitted curves with
 #' \code{\link{gdd_plot}} --- in the same style as the
 #' \code{\link{lc50_analyze}} entry point of the bioassay module.
-#' Nothing is written to disk unless \code{plot_file} is supplied;
-#' tabular export is handled separately by \code{\link{gdd_export}}.
+#' With \code{plot = TRUE} the fitted-curves figure is always written
+#' to disk (\code{plot_file}, or the working directory under a default
+#' name); tabular export is handled separately by
+#' \code{\link{gdd_export}}.
 #'
 #' @param temp,duration,group User-supplied column vectors, e.g.
 #'   \code{temp = d$T, duration = d$days, group = d$stage} after
@@ -57,13 +60,19 @@
 #'   temperature triggers a targeted warning.
 #' @param encoding,header,temp_from_file,pattern Reading options for
 #'   \code{\link{gdd_read}} (only used when \code{path} is supplied).
-#' @param plot Logical; whether to draw the fitted curves (default
-#'   \code{FALSE}).
-#' @param plot_file Optional png path: when supplied together with
-#'   \code{plot = TRUE} the figure is written to this file (same
-#'   machinery as \code{\link{gdd_export_plot}}); when \code{NULL} the
-#'   plot is drawn on the current device (fully customisable afterwards
-#'   by calling \code{\link{gdd_plot}} on the returned \code{fit}).
+#' @param plot Logical; whether to write the fitted-curves figure to
+#'   disk (default \code{FALSE}). With \code{plot = TRUE} the figure
+#'   is always written, to \code{plot_file} when supplied, otherwise
+#'   to the working directory under \code{gdd_plot.png}.
+#' @param plot_file Optional path of the exported figure, used with
+#'   \code{plot = TRUE}: a path with an extension is the file itself
+#'   (the format follows the extension --- png, tiff and jpeg are
+#'   supported), a path without one is a folder, created when
+#'   missing, and the figure is written inside it; \code{NULL}
+#'   (default) means the working directory under \code{gdd_plot.png}.
+#'   The path written is returned as \code{plot_file}. The curves can
+#'   still be drawn on screen at any time with \code{plot(fit)} on
+#'   the returned \code{fit}.
 #' @param plot_group,show_C,show_Topt Plot options, see
 #'   \code{\link{gdd_plot}}.
 #' @param plot_title Custom plot title; \code{NULL} = the automatic
@@ -78,8 +87,7 @@
 #'   on 'Windows'; Chinese characters are rendered through the device's
 #'   font fallback, i.e. SimSun on Chinese 'Windows').
 #' @param plot_width,plot_height Physical size of the exported figure
-#'   in \code{plot_units} (only used when \code{plot_file} is
-#'   supplied). \code{NULL} (default, for both) picks a canvas that
+#'   in \code{plot_units} (only used with \code{plot = TRUE}). \code{NULL} (default, for both) picks a canvas that
 #'   gives the axes a panel with a height:width ratio of about 3:4:
 #'   12 x 10 cm for a single-panel figure, 15 x 12.2 cm when several
 #'   groups are drawn. Because the size is physical, the composition is
@@ -90,7 +98,7 @@
 #'   \code{"px"} the canvas is a fixed pixel count; the text size is
 #'   compensated internally so that changing \code{plot_res} keeps the
 #'   300-dpi composition (only the recorded dpi metadata changes).
-#' @param plot_res Resolution (dpi) of the exported png, default 300.
+#' @param plot_res Resolution (dpi) of the exported figure, default 300.
 #'   Higher values add pixels (sharper print) without changing the
 #'   layout or the physical size. E.g. an 8 cm-wide figure at journal
 #'   quality: \code{plot_units = "cm", plot_width = 8,
@@ -120,8 +128,8 @@
 #'     \code{fit$fits} (per-group details incl. coefficient tables),
 #'     \code{fit$comparison} (model comparison, \code{"auto"} mode);
 #'     print/summary/plot/predict S3 methods are available}
-#'   \item{plot_file}{the png path when \code{plot_file} was supplied,
-#'     otherwise \code{NULL}}
+#'   \item{plot_file}{the path of the written figure when
+#'     \code{plot = TRUE}, otherwise \code{NULL}}
 #'   \item{export_file}{the results-document path when
 #'     \code{export = TRUE}, otherwise \code{NULL}}
 #' @seealso \code{\link{gdd_read}}, \code{\link{gdd_check}},
@@ -269,24 +277,17 @@ gdd_analyze <- function(temp = NULL, duration = NULL, group = NULL,
                   conf_level = conf_level, min_n = min_n,
                   maxiter = maxiter, ...)
 
-  ## ---- 4) optional plot (current device, or exported as png) ----
+  ## ---- 4) optional plot (plot = TRUE always writes the figure, ----
+  ## ---- the same contract as the other _analyze entry points)   ----
   plot_file_out <- NULL
   if (plot) {
-    pargs <- list(x = fit, group = plot_group, show_C = show_C,
-                  show_Topt = show_Topt, title = plot_title, sub = plot_sub)
-    if (!is.null(plot_xlab)) pargs$xlab <- plot_xlab
-    if (!is.null(plot_ylab)) pargs$ylab <- plot_ylab
-    if (!is.null(plot_family)) pargs$family <- plot_family
-    if (is.null(plot_file)) {
-      do.call(gdd_plot, pargs)
-    } else {
-      plot_file_out <- gdd_export_plot(
-        fit, file = plot_file, group = plot_group, show_C = show_C,
-        show_Topt = show_Topt, title = plot_title, sub = plot_sub,
-        xlab = plot_xlab, ylab = plot_ylab, family = plot_family,
-        width = plot_width, height = plot_height, units = plot_units,
-        res = plot_res)
-    }
+    pf <- pkg_plot_path(plot_file, "gdd_plot.png")
+    plot_file_out <- gdd_export_plot(
+      fit, file = pf, group = plot_group, show_C = show_C,
+      show_Topt = show_Topt, title = plot_title, sub = plot_sub,
+      xlab = plot_xlab, ylab = plot_ylab, family = plot_family,
+      width = plot_width, height = plot_height, units = plot_units,
+      res = plot_res)
   }
 
   export_file_out <- NULL

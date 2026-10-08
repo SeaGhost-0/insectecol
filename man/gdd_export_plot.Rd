@@ -2,7 +2,7 @@
 % Please edit documentation in R/gdd_export.R
 \name{gdd_export_plot}
 \alias{gdd_export_plot}
-\title{Export the Degree-Day Plot as PNG}
+\title{Export the Degree-Day Plot}
 \usage{
 gdd_export_plot(
   x,
@@ -26,14 +26,16 @@ gdd_export_plot(
 \item{x}{A \code{"gdd"} object returned by [gdd_calc()] or
 [gdd_analyze()].}
 
-\item{file}{Output png path.}
+\item{file}{Output path; the format follows the file extension
+(png, tiff and jpeg are supported; any other extension is
+written as png).}
 
 \item{group, show_C, show_Topt, title, sub, xlab, ylab, family}{Plot
 options, see \code{\link{gdd_plot}}; \code{NULL} (default) keeps
 the function defaults.}
 
 \item{width, height, units, res}{Physical size and resolution of the
-png. \code{NULL} (default, for both) picks a canvas that gives the
+figure. \code{NULL} (default, for both) picks a canvas that gives the
 axes a panel with a height:width ratio of about 3:4: 12 x 10 cm for
 a single-panel figure, 15 x 12.2 cm when several groups are drawn
 (wider so that the statistics caption fits at a larger font). The
@@ -46,12 +48,12 @@ pixels (same semantics as in \code{\link{gdd_analyze}}).}
 Invisibly, \code{file}.
 }
 \description{
-Draws the degree-day figure of a \code{"gdd"} object on a png
-device ('ragg' when available, otherwise \code{\link[grDevices]{png}})
-and writes it to disk - the standalone counterpart of
-\code{plot_file =} in \code{\link{gdd_analyze}}, usable on an
-existing fit at any time. All plot options of \code{\link{gdd_plot}}
-are supported.
+Draws the degree-day figure of a \code{"gdd"} object on a file
+device ('ragg' when available, otherwise the matching
+\code{\link[grDevices]{grDevices}} device) and writes it to disk -
+the standalone counterpart of \code{plot_file =} in
+\code{\link{gdd_analyze}}, usable on an existing fit at any
+time. All plot options of \code{\link{gdd_plot}} are supported.
 }
 \examples{
 f <- system.file("extdata", "gdd_example.csv", package = "insectecol")

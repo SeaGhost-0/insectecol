@@ -209,3 +209,24 @@ test_that("export_file 支持绝对路径（父目录不存在时自动创建）
   expect_true(file.exists(o$export_file))
   expect_equal(normalizePath(o$export_file), normalizePath(tgt))
 })
+
+test_that("plot = TRUE 不填 plot_file 时写到工作目录默认名；无扩展名视为文件夹", {
+  d <- read.csv(system.file("extdata", "gdd_example.csv", package = "insectecol"))
+  owd <- setwd(tempdir()); on.exit(setwd(owd), add = TRUE)
+  ## 默认输出：工作目录 gdd_plot.png
+  o1 <- gdd_analyze(temp = d$temp, duration = d$duration, group = d$stage,
+                    plot = TRUE)
+  expect_true(file.exists("gdd_plot.png"))
+  expect_equal(basename(o1$plot_file), "gdd_plot.png")
+  ## 无扩展名的 plot_file 视为文件夹（不存在时创建）
+  o2 <- gdd_analyze(temp = d$temp, duration = d$duration, group = d$stage,
+                    plot = TRUE, plot_file = "gdd_dir")
+  expect_true(dir.exists("gdd_dir"))
+  expect_true(file.exists(file.path("gdd_dir", "gdd_plot.png")))
+  ## tiff 扩展名写出真正的 TIFF（魔数 II/MM）
+  o3 <- gdd_analyze(temp = d$temp, duration = d$duration, group = d$stage,
+                    plot = TRUE, plot_file = "gdd_plot.tiff")
+  magic <- readBin("gdd_plot.tiff", "raw", n = 4)
+  expect_true(identical(magic[1:2], charToRaw("II")) ||
+                identical(magic[1:2], charToRaw("MM")))
+})

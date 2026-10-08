@@ -74,23 +74,25 @@ gdd_export <- function(x, file = "gdd_results.csv",
   invisible(file)
 }
 
-#' Export the Degree-Day Plot as PNG
+#' Export the Degree-Day Plot
 #'
-#' Draws the degree-day figure of a \code{"gdd"} object on a png
-#' device ('ragg' when available, otherwise \code{\link[grDevices]{png}})
-#' and writes it to disk - the standalone counterpart of
-#' \code{plot_file =} in \code{\link{gdd_analyze}}, usable on an
-#' existing fit at any time. All plot options of \code{\link{gdd_plot}}
-#' are supported.
+#' Draws the degree-day figure of a \code{"gdd"} object on a file
+#' device ('ragg' when available, otherwise the matching
+#' \code{\link[grDevices]{grDevices}} device) and writes it to disk -
+#' the standalone counterpart of \code{plot_file =} in
+#' \code{\link{gdd_analyze}}, usable on an existing fit at any
+#' time. All plot options of \code{\link{gdd_plot}} are supported.
 #'
 #' @param x A \code{"gdd"} object returned by [gdd_calc()] or
 #'   [gdd_analyze()].
-#' @param file Output png path.
+#' @param file Output path; the format follows the file extension
+#'   (png, tiff and jpeg are supported; any other extension is
+#'   written as png).
 #' @param group,show_C,show_Topt,title,sub,xlab,ylab,family Plot
 #'   options, see \code{\link{gdd_plot}}; \code{NULL} (default) keeps
 #'   the function defaults.
 #' @param width,height,units,res Physical size and resolution of the
-#'   png. \code{NULL} (default, for both) picks a canvas that gives the
+#'   figure. \code{NULL} (default, for both) picks a canvas that gives the
 #'   axes a panel with a height:width ratio of about 3:4: 12 x 10 cm for
 #'   a single-panel figure, 15 x 12.2 cm when several groups are drawn
 #'   (wider so that the statistics caption fits at a larger font). The
@@ -137,12 +139,19 @@ gdd_export_plot <- function(x, file = "gdd_plot.png", group = NULL,
   ## text sizes scale with res on a fixed-pixel canvas; compensate for
   ## units = "px" so that res keeps the 300-dpi composition
   pps <- if (units == "px") 12 * 300 / res else 12
-  if (requireNamespace("ragg", quietly = TRUE))
-    ragg::agg_png(file, width = width, height = height, units = units,
-                  res = res, pointsize = pps)
-  else
-    grDevices::png(file, width = width, height = height, units = units,
-                   res = res, pointsize = pps)
+  ## the device follows the file extension: png/tiff/jpeg are written
+  ## by 'ragg' (per-glyph font fallback) when available, otherwise by
+  ## the matching grDevices device; any other extension falls back to
+  ## the png device (previous behaviour)
+  ext <- tolower(tools::file_ext(file))
+  dev <- pkg_fallback_device(ext)
+  if (is.null(dev))
+    dev <- switch(ext,
+                  tiff = , tif  = grDevices::tiff,
+                  jpeg = , jpg  = grDevices::jpeg,
+                  grDevices::png)
+  dev(file, width = width, height = height, units = units,
+      res = res, pointsize = pps)
   tryCatch(do.call(gdd_plot, pargs),
            finally = while (!is.null(grDevices::dev.list()))
              grDevices::dev.off())
