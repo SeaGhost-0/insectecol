@@ -338,7 +338,7 @@ lifeTable_build <- function(stages, adult_days, sex, oviposition = NULL,
 #'                          legend_labels = c("Egg", "L1", "L2", "L3", "L4",
 #'                                            "Prepupa", "Pupa",
 #'                                            "Female", "Male"))
-#' out3$plot               # print or further customise the ggplot object
+#' invisible(out3$plot)     # print or further customise the ggplot object
 #' out3$plot_file          # the png that was written
 #'
 #' ## --- way 4: export the figure (png) and the results workbook (xlsx) ---
@@ -405,11 +405,18 @@ lifeTable_analyze <- function(lt = NULL, path = NULL, stages = NULL,
     ## missing), one with an extension is the file itself - ggsave()
     ## would stop on a folder path
     pf <- pkg_plot_path(plot_file, sprintf("%s_plot.png", lt$file_name))
-    ## pkg_plot_grob() splits labels that mix Latin and Chinese, so the
-    ## two scripts keep their own fonts
-    ggplot2::ggsave(pf, plot = pkg_plot_grob(p), width = plot_width,
-                    height = plot_height, units = plot_units,
-                    dpi = plot_res, bg = "white")
+    ## the device follows the file extension: bitmaps are written by
+    ## 'ragg' (per-glyph fallback for the mixed Latin/Chinese labels),
+    ## vector formats by the classic device with 'showtext' switched on;
+    ## a plain ggsave() would land on the platform png device and look
+    ## the families up in its PostScript font database, which fails on
+    ## systems without Times New Roman (Linux servers)
+    ext <- tolower(tools::file_ext(pf))
+    if (!ext %in% c("png", "tiff", "tif", "jpeg", "jpg",
+                    "pdf", "eps", "ps", "svg")) ext <- "png"
+    pkg_ggsave(pf, p, device = ext, width = plot_width,
+               height = plot_height, units = plot_units,
+               dpi = plot_res, bg = "white")
     plot_file_out <- pf
     message("Plot saved to: ", normalizePath(pf))
   }

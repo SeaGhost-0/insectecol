@@ -95,7 +95,7 @@
 #'                      plot = TRUE, plot_method = "improved",
 #'                      shape = "linear",
 #'                      plot_file = file.path(tempdir(), "LC50_linear.png"))
-#' out3$plot$trial1        # ggplot object: print(), customise or export
+#' invisible(out3$plot$trial1)  # ggplot object: print(), customise, export
 #' out3$plot_file          # the png that was written
 #'
 #' ## --- export: figure (png) and results workbook (xlsx) to disk ---
@@ -167,8 +167,11 @@ lc50_analyze <- function(d = NULL, concentration = NULL, tested = NULL,
   pf <- if (is.null(plot_file)) getwd() else plot_file
   if (plot && length(plots)) {
     if (length(plots) == 1L && grepl("\\.[[:alnum:]]+$", pf)) {
+      ext <- tolower(tools::file_ext(pf))
+      if (!ext %in% c("png", "tiff", "tif", "jpeg", "jpg",
+                      "pdf", "eps", "ps", "svg")) ext <- "png"
       plot_file_out <- lc50_export_plot(plots[[1]], path = pf,
-                                        device = "png", width = plot_width,
+                                        device = ext, width = plot_width,
                                         height = plot_height,
                                         dpi = plot_res, units = plot_units,
                                         bg = "white")

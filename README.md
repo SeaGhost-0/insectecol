@@ -478,6 +478,14 @@ and xlsx files are read via `readxl`.
 
 **Internal changes**
 
+- Figures exported by `lifeTable_analyze(plot = TRUE)` are now written
+  through the same device machinery as the other functions: bitmaps go
+  through `ragg` (per-glyph font fallback) and vector formats through
+  `showtext`, so a `plot_file` pointing at a pdf or svg works as well.
+- Device font registration no longer calls the Windows-only
+  `windowsFonts()`, and the bundled-font fallback registers its metrics
+  with the vector devices too - the package builds and checks cleanly on
+  Linux and macOS.
 - `systemfonts` added to Imports (the package `ragg` draws and measures
   text with); it supplies the per-character widths used to split a
   mixed label into runs.

@@ -144,7 +144,7 @@ out3 <- lc50_analyze(concentration = conc, tested = n, dead = dead,
                      plot = TRUE, plot_method = "improved",
                      shape = "linear",
                      plot_file = file.path(tempdir(), "LC50_linear.png"))
-out3$plot$trial1        # ggplot object: print(), customise or export
+invisible(out3$plot$trial1)  # ggplot object: print(), customise, export
 out3$plot_file          # the png that was written
 
 ## --- export: figure (png) and results workbook (xlsx) to disk ---

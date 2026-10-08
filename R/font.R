@@ -224,11 +224,14 @@ pkg_add_family <- function(family, regular, bold = "", italic = "",
 pkg_register_device_font <- function(family, alias = NULL) {
   aliases <- unique(c(family, alias))
   aliases <- aliases[nzchar(aliases)]
-  ## GDI devices keep their own database as well
-  for (nm in aliases) {
-    args <- list(grDevices::windowsFont(family))
-    names(args) <- nm
-    tryCatch(do.call(grDevices::windowsFonts, args), error = function(e) NULL)
+  ## GDI devices keep their own database as well - Windows only, the
+  ## windowsFonts()/windowsFont() functions do not exist on unix
+  if (.Platform$OS.type == "windows") {
+    for (nm in aliases) {
+      args <- list(grDevices::windowsFont(family))
+      names(args) <- nm
+      tryCatch(do.call(grDevices::windowsFonts, args), error = function(e) NULL)
+    }
   }
   for (db in c("pdf", "postscript")) {
     setter <- tryCatch(match.fun(paste0(db, "Fonts")),
@@ -326,7 +329,12 @@ pkg_resolve_font <- function(font = "TNM") {
     message("Times New Roman not found on this system; using the bundled ",
             "Liberation Serif (", regular, ")")
   }
-  if (family %in% sysfonts::font_families()) return(pkg_set_latin(family))
+  if (family %in% sysfonts::font_families()) {
+    ## also register the vector-device font databases, so measuring a
+    ## label while no device is open does not warn once per label
+    pkg_register_device_font(family, "TNM")
+    return(pkg_set_latin(family))
+  }
 
   ## 3) Last resort
   message("No Times New Roman and no bundled font available; ",

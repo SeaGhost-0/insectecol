@@ -194,7 +194,7 @@ out3 <- lifeTable_analyze(stages = d3[, c("Egg", "1st instar", "2nd instar",
                          legend_labels = c("Egg", "L1", "L2", "L3", "L4",
                                            "Prepupa", "Pupa",
                                            "Female", "Male"))
-out3$plot               # print or further customise the ggplot object
+invisible(out3$plot)     # print or further customise the ggplot object
 out3$plot_file          # the png that was written
 
 ## --- way 4: export the figure (png) and the results workbook (xlsx) ---
