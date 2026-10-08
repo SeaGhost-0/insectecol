@@ -7,3 +7,7 @@
 ^\.github$
 ^insectecol\.Rproj$
 tests/testthat/Rplots.pdf
+^bioassay\.png$
+^emergence\.png$
+^gdd\.png$
+^lifeTable\.png$
